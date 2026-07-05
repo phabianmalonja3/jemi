@@ -26,7 +26,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
+import { useAuth } from "@/context/AuthContext";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080/api/v0.1';
 
@@ -39,6 +39,8 @@ interface User {
 }
 
 const NavBar = () => {
+
+   const { isAuthenticated } = useAuth(); 
     const pathname = usePathname();
 
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -130,7 +132,7 @@ const paymentPartners = [
                         </div>
                         <div className="h-8 w-[1px] bg-slate-200 mx-1" />
                         <div className="flex items-center gap-4">
-                            {isLoggedIn ? (
+                            {isAuthenticated ? (
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="ghost" className="relative h-12 w-12 rounded-full p-0 border-2 border-emerald-500/20 hover:border-emerald-500 transition-all">

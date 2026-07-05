@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { UserCheck, Eye, ChevronRight, Loader2 } from "lucide-react";
+import { toast, Toaster } from "sonner";
+import Swal from 'sweetalert2';
 
 interface User {
   id: string;
@@ -33,18 +35,39 @@ export default function PendingApprovalsTable() {
     }
   };
 
-  const handleVerify = async (userId: string) => {
+const handleVerify = async (userId: string) => {
+  // 1. Onyesha Dialog ya Confirmation
+  const result = await Swal.fire({
+    title: 'Do you want to verify this photographer?',
+    text: "You are about to verify this photographer!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Yes, verify!',
+    cancelButtonText: 'Cancel'
+  });
+
+  // 2. Kama mtumiaji amebonyeza "Ndiyo"
+  if (result.isConfirmed) {
     try {
       const token = localStorage.getItem("token");
+      const loadingToast = toast.loading("Is currently verifying...");
+
       await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/admin/verify-photographer/${userId}`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      // Refresh list after successful verification
+      
+      toast.dismiss(loadingToast);
+      toast.success("Photographer verified successfully!");
+      
       setApprovals(approvals.filter(user => user.id !== userId));
     } catch (error) {
       console.error("Verification failed:", error);
+      toast.error("Imeshindikana kuthibitisha, jaribu tena.");
     }
-  };
+  }
+};
 
   if (loading) {
     return (

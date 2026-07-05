@@ -9,6 +9,8 @@ interface Photographer {
     specialty?: string;
     location?: string;
     profileImage?: string;
+    averageRating?: null | number;
+    totalReviews?: null | number;
     bio?: string;
     quote?: string;
     experience?: string;

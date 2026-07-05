@@ -45,17 +45,16 @@ const getDisplayName = (photographer: Photographer): string => {
 };
 
 const getDisplayRating = (photographer: Photographer): number => {
-    if (photographer.rating && photographer.rating > 0) {
-        return photographer.rating;
+    if (photographer.averageRating && photographer.averageRating > 0) {
+        return photographer.averageRating;
     }
-    const hash = photographer.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    return 3 + (hash % 20) / 10;
+    return 0;
 };
 
-// Generate consistent session count
+
 const getSessionCount = (photographer: Photographer): number => {
-    const hash = photographer.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    return 20 + (hash % 180);
+    const hash = photographer.totalReviews || 0;
+    return hash;
 };
 
 
@@ -91,7 +90,7 @@ const getPhotographerDetails = (photographer: Photographer): Photographer => {
         specialty: "Professional Photographer",
         location: locations[hash % locations.length],
         profileImage: photographer.profileImage,
-        bio: bioTemplates[hash % bioTemplates.length],
+        bio: photographer.bio || "",
         quote: quotes[hash % quotes.length],
         experience: `${experienceYears}+ Years`,
         sessions: sessions,
@@ -129,11 +128,6 @@ export default function PhotographersPage() {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/photographers?page=${page}&size=12`);
             if (!response.ok) throw new Error("Could not load photographers.");
             const data: PageableResponse = await response.json();
-
-
-
-            console.log("Fetched photographers data:", data); // Debugging line
-
 
             const enhancedPhotographers = data.content.map(getPhotographerDetails);
             setPhotographersData(data);
@@ -223,7 +217,7 @@ export default function PhotographersPage() {
     };
 
     const handleBookNow = (photographerId: string) => {
-        window.location.href = `/photographer/${photographerId}`;
+        window.location.href = `/photographers/${photographerId}`;
     };
 
     const clearSearch = () => {
@@ -460,7 +454,7 @@ export default function PhotographersPage() {
                                                 <div className="absolute bottom-4 left-4 z-10 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1">
                                                     <FaStar className="text-yellow-400 text-sm" />
                                                     <span className="text-white text-sm font-semibold">{photographer.rating?.toFixed(1)}</span>
-                                                    <span className="text-white/70 text-xs">({photographer.sessions}+ sessions)</span>
+                                                    <span className="text-white/70 text-xs">({photographer.totalReviews}+ sessions)</span>
                                                 </div>
 
                                                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-10">
@@ -619,9 +613,10 @@ export default function PhotographersPage() {
                                         <FaCamera className="text-6xl text-emerald-400" />
                                     </div>
                                     <Image
-                                        src={selectedPhotographer.profileImage || `/api/placeholder/500/600?seed=${selectedPhotographer.id}`}
+                                        src={selectedPhotographer.profileImage ? `${process.env.NEXT_PUBLIC_API_URL}${selectedPhotographer.profileImage}` : `/default_user.svg`}
                                         alt={selectedPhotographer.name || "Photographer"}
                                         fill
+                                        unoptimized
                                         className="object-cover"
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />

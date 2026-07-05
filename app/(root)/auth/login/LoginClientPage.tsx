@@ -85,7 +85,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080/a
     setError(status === 401 ? 'Invalid email or password' : message);
     
     toast.error('Login failed', {
-      description: error || 'Please check your credentials.',
+      description: error || 'Please check your credentials.'+message,
     });
   } finally {
     setIsLoading(false);
