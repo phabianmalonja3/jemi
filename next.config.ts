@@ -1,21 +1,14 @@
 
 module.exports = {
-  allowedDevOrigins: ['http://192.168.100.161:3000',"127.0.0.1"],
+  allowedDevOrigins: ['jemigraph.co.tz',"jemigraph.co.tz"],
 
    images: {
     remotePatterns: [
       {
-        protocol: 'http',
-        hostname: '192.168.100.161',
-        port: '8080',
-        pathname: '/api/v0.1/uploads/**',
-      },
-      // Ikiwa utatumia IP address ya server yako baadaye, ongeza hii pia:
-      {
-        protocol: 'http',
-        hostname: '192.168.100.161',
-        port: '8080',
-        pathname: '/api/v0.1/uploads/**',
+        protocol: 'https', // Badilisha kuwa https kwa sababu sasa unatumia SSL (Certbot)
+        hostname: 'api.jemigraph.co.tz', // Badilisha IP kuwa subdomain ya API
+        port: '', // Ikiwa ni https, haihitaji port (inatumia 443 default)
+        pathname: '/uploads/**', // Ondoa '/api/v0.1' kama nginx yako ina-handle path hii
       },
     ],
   },
