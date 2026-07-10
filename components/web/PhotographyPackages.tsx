@@ -26,10 +26,7 @@ export default function PhotographyPackages() {
       try {
 
         const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/packages`);
-        console.log(response.data)
-
-
-        
+    
         setPackages(response.data);
       } catch (error) {
         console.error("Error fetching packages:", error);

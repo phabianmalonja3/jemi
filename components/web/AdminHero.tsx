@@ -9,6 +9,7 @@ import {
 import { useEffect, useState } from 'react';
 import RecentTransactionsTable from './RecentTransactionsTable';
 import PendingApprovalsTable from './PendingApprovalsTable';
+import { da } from 'date-fns/locale';
 
 export function AdminHero() {
   const [photographerCount, setPhotographerCount] = useState(0);
@@ -38,11 +39,10 @@ export function AdminHero() {
 
       const data = await res.json();
 
-
-      // console.log("Fetched data:", );
+    
       
       setTotalUser(data.length);
-      const filtered =  data.content.filter((user: any) => user.role === 'PHOTOGRAPHER');
+      const filtered =  data;
       setPhotographerCount(data.totalElements);
     } catch (err: any) {
       console.error("Error:", err);

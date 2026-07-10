@@ -80,12 +80,7 @@ export default function AboutPage() {
         return () => ctx.revert();
     }, []);
 
-    const stats = [
-        { number: 5000, label: "Happy Travelers", icon: FaUsers, suffix: "+" },
-        { number: 120, label: "Destinations", icon: FaGlobe, suffix: "+" },
-        { number: 50, label: "Expert Photographers", icon: FaCamera, suffix: "+" },
-        { number: 98, label: "Satisfaction Rate", icon: FaStar, suffix: "%" }
-    ];
+  
 
     const values = [
         {
@@ -116,41 +111,36 @@ export default function AboutPage() {
 
     const team = [
         {
-            name: "Alex Morgan",
+            name: "Jeremiah ",
             role: "Founder & Lead Photographer",
             bio: "Former National Geographic photographer with over 15 years of experience capturing the world's most breathtaking locations.",
-            image: "/photographer-1.jpg",
+             image: "/default_user.svg",
             social: { instagram: "#", twitter: "#" }
         },
         {
             name: "Sofia Rodriguez",
             role: "Creative Director",
             bio: "Award-winning portrait and cultural photographer who has documented traditions in over 40 countries.",
-            image: "/photographer-2.jpg",
+            image: "/default_user.svg",
             social: { instagram: "#", twitter: "#" }
         },
         {
             name: "David Kim",
             role: "Workshop Director",
             bio: "Passionate educator and landscape photographer dedicated to helping others master their craft.",
-            image: "/photographer-3.jpg",
+          image: "/default_user.svg",
             social: { instagram: "#", twitter: "#" }
         },
         {
             name: "Emma Watson",
             role: "Wildlife Specialist",
             bio: "Marine biologist turned wildlife photographer, specializing in conservation storytelling.",
-            image: "/photographer-4.jpg",
+             image: "/default_user.svg",
             social: { instagram: "#", twitter: "#" }
         }
     ];
 
-    const milestones = [
-        { year: "2018", title: "Company Founded", description: "Started with a vision to transform travel photography" },
-        { year: "2019", title: "First International Workshop", description: "Launched our first workshop in Bali, Indonesia" },
-        { year: "2021", title: "50 Photographers Team", description: "Expanded to a global network of experts" },
-        { year: "2023", title: "5000+ Happy Travelers", description: "Reached milestone of serving travelers worldwide" }
-    ];
+  
 
     return (
         <>
@@ -159,7 +149,7 @@ export default function AboutPage() {
             <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden">
                 <div className="absolute inset-0 z-0">
                     <Image
-                        src="/about-hero.jpg"
+                        src="/banners/about_us.jpg"
                         alt="About us hero"
                         fill
                         className="object-cover"
@@ -275,32 +265,6 @@ export default function AboutPage() {
                                 </div>
                             </div>
                         </motion.div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Stats Section */}
-            <section ref={statsRef} className="py-16 px-6 bg-emerald-50 dark:bg-emerald-950/20">
-                <div className="max-w-6xl mx-auto">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                        {stats.map((stat, index) => {
-                            const Icon = stat.icon;
-                            return (
-                                <motion.div
-                                    key={index}
-                                    className="text-center"
-                                    initial={{ opacity: 0, y: 20 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: index * 0.1 }}
-                                >
-                                    <Icon className="text-4xl text-emerald-600 dark:text-emerald-400 mx-auto mb-3" />
-                                    <h3 className="stat-number text-3xl md:text-4xl font-bold text-zinc-900 dark:text-white mb-2">
-                                        {stat.number}{stat.suffix}
-                                    </h3>
-                                    <p className="text-zinc-600 dark:text-zinc-400">{stat.label}</p>
-                                </motion.div>
-                            );
-                        })}
                     </div>
                 </div>
             </section>

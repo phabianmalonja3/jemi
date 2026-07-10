@@ -1,10 +1,24 @@
-"use client"
+"use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+} from "react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import {
+  getAuthSession,
+  setAuthSession,
+  clearAuthSession,
+  apiClient,
+} from "../lib/actions";
+import axios from "axios";
 
-import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
-import { getAuthSession, setAuthSession, clearAuthSession, apiClient } from '../lib/actions';
+
 
 
 // --- Types ---
@@ -12,46 +26,41 @@ export interface User {
   id: number;
   name: string;
   email: string;
-  role: 'ADMIN' | 'PHOTOGRAPHER';
+  role: "ADMIN" | "PHOTOGRAPHER";
   avatar?: string;
   phone?: string;
 }
 
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
 interface AuthContextType {
   user: User | null;
-  isAdmin: boolean;
   isPhotographer: boolean;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (credentials: LoginCredentials) => Promise<void>;
+login: (email: string, password: string) => Promise<{ 
+    success: boolean; 
+    user?: User;      // user sasa ni optional (?)
+    message?: string; // ongeza message kwa ajili ya error
+  }>;
   logout: () => void;
-  register: (userData: any) => Promise<void>;
-  updateUser: (userData: Partial<User>) => Promise<void>;
 }
-
-// const API_BASE_URL = ';
-
-// Production Ready Axios Instance
-
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  // Restore session from cookies on mount
   useEffect(() => {
     const initAuth = async () => {
       try {
         const savedUser = await getAuthSession();
         if (savedUser) setUser(savedUser);
+      } catch (error) {
+        console.error("Failed to restore session:", error);
       } finally {
         setIsLoading(false);
       }
@@ -59,90 +68,65 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initAuth();
   }, []);
 
-  const login = useCallback(async (credentials: LoginCredentials) => {
-    setIsLoading(true);
-    try {
-      const response = await apiClient.post('/auth/login', credentials);
-      const { token, user: userData } = response.data;
+ const login = useCallback(async (email: string, password: string) => {
+  setIsLoading(true);
+  try {
+    const response = await axios.post(`${BASE_URL}/auth/login`, { email, password });
 
-      if (token) {
-        await setAuthSession(token, userData);
-        setUser(userData);
-        toast.success(`Welcome back, ${userData.name}`);
-        router.refresh();
-        router.push('/dashboard');
-      }
-    } catch (error: any) {
-      const msg = error.response?.data?.message || 'Login failed';
-      toast.error(msg);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [router]);
-
-  const register = useCallback(async (userData: any) => {
-    setIsLoading(true);
-    try {
-      const response = await apiClient.post('/auth/register', userData);
-      const { token, user: newUser } = response.data;
-      if (token) {
-        await setAuthSession(token, newUser);
-        setUser(newUser);
-        toast.success('Registration successful!');
-        router.refresh();
-        router.push('/dashboard');
-      }
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Registration failed');
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [router]);
+    const { accessToken, user } = response.data;
+    
+    // Hizi zinawekwa tu kama login imefanikiwa
+    localStorage.setItem("is_login", "true");
+    localStorage.setItem("token", accessToken);
+    
+    await setAuthSession(accessToken, user);
+    setUser(user);
+    
+    return { success: true, user };
+  } catch (error: any) {
+    // 1. Usiweke "is_login" kuwa true kwenye catch
+    // 2. Ondoa "throw error" kama unataka kushughulikia error hapo hapo
+    // au iruhusu error ionekane kwenye UI component yako.
+    
+    console.error("Login failed:", error.response?.data?.message || error.message);
+    
+    // Rudisha status ya kosa ili UI iweze kuisoma
+    return { 
+      success: false, 
+      message: error.response?.data?.message || "Invalid email or password" 
+    };
+  } finally {
+    setIsLoading(false);
+  }
+}, []);
 
   const logout = useCallback(async () => {
     await clearAuthSession();
     setUser(null);
-    router.push('/auth/login');
-    router.refresh();
-    toast.info('Signed out successfully');
+    router.push("/auth/login");
+    toast.info("Signed out successfully");
   }, [router]);
 
-  const updateUser = useCallback(async (updatedData: Partial<User>) => {
-    if (user) {
-      const newUser = { ...user, ...updatedData };
-      setUser(newUser);
-   
-      await setAuthSession("", newUser); 
-    }
-  }, [user]);
+  const isPhotographer = user?.role === "PHOTOGRAPHER";
+  const isAuthenticated = !!user;
 
-  
-const isAdmin = useMemo(() => user?.role?.toUpperCase() === 'ADMIN', [user]);
-const isPhotographer = useMemo(() => user?.role?.toUpperCase() === 'PHOTOGRAPHER', [user]);
-const isAuthenticated = useMemo(() => !!user, [user]);
-
-
-
-
-  const value = {
-    user,
-    isAdmin,
-    isPhotographer,
-    isAuthenticated,
-    isLoading,
-    login,
-    logout,
-    register,
-    updateUser,
-  };
+  const value = useMemo(
+    () => ({
+      user,
+      isPhotographer,
+      isAuthenticated,
+      isLoading,
+      login,
+      logout,
+    }),
+    [user, isPhotographer, isAuthenticated, isLoading, login, logout]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth must be used within AuthProvider');
+  if (!context) throw new Error("useAuth must be used within AuthProvider");
   return context;
 };

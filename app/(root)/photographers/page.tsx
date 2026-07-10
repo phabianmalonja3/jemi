@@ -474,10 +474,7 @@ export default function PhotographersPage() {
                                                         <FaEnvelope className="text-emerald-500 text-xs shrink-0" />
                                                         <span className="truncate">{photographer.email}</span>
                                                     </div>
-                                                    <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
-                                                        <FaMapMarkerAlt className="text-emerald-500 text-xs shrink-0" />
-                                                        <span>{photographer.location}</span>
-                                                    </div>
+                                                    
                                                 </div>
 
                                                 <p className="text-zinc-600 dark:text-zinc-400 text-sm mb-4 line-clamp-2">

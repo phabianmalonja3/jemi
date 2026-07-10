@@ -122,19 +122,19 @@ export default function SettingsPage() {
             label="Profile Information"
           />
 
-          <TabButton
+          {/* <TabButton
             active={activeTab === "security"}
             onClick={() => setActiveTab("security")}
             icon={<FaShieldAlt size={16} />}
             label="Security & 2af"
-          />
+          /> */}
 
-          <TabButton
+          {/* <TabButton
             active={activeTab === "billing"}
             onClick={() => setActiveTab("billing")}
             icon={<FaRegCreditCard size={16} />}
             label="Billing & Payouts"
-          />
+          /> */}
 
           <div className="pt-6 mt-4 border-t border-gray-200">
             <button
@@ -881,7 +881,7 @@ function SecuritySettings({
           </div>
         </div>
 
-        <div className="border rounded-xl p-4">
+        {/* <div className="border rounded-xl p-4">
           <div className="flex items-start justify-between mb-4">
             <div>
               <div className="flex items-center gap-2">
@@ -961,7 +961,7 @@ function SecuritySettings({
               </p>
             </div>
           )}
-        </div>
+        </div> */}
       </div>
 
       {/* Password Change Modal */}

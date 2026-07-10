@@ -25,6 +25,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { heroSlides } from "@/lib/constants/heros";
 import PhotographyPackages from "@/components/web/PhotographyPackages";
 import Footer from "@/components/web/Footer";
+import TestMonies from "@/components/web/TestMonies";
 
 // Register GSAP plugin
 if (typeof window !== "undefined") {
@@ -379,31 +380,9 @@ export default function Home() {
       <PhotographyPackages />
 
   
-      {/* Testimonials Section */}
-      <section ref={testimonialsRef} className="py-16 md:py-24 px-4 bg-zinc-50 dark:bg-zinc-950">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials.map((t, i) => (
-              <div key={i} className="testimonial-card bg-white dark:bg-zinc-900 p-8 rounded-2xl border border-emerald-100 dark:border-emerald-900/30">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 relative rounded-full overflow-hidden ring-2 ring-[#25632D]">
-                    <Image src={t.image} alt={t.name} fill className="object-cover" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold">{t.name}</h4>
-                    <div className="flex text-yellow-400 text-xs"><FaStar /><FaStar /><FaStar /><FaStar /><FaStar /></div>
-                  </div>
-                </div>
-                <p className="text-sm italic text-zinc-600 dark:text-zinc-400">"{t.text}"</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
+    <TestMonies />
      
 
-      {/* Footer */}
       <Footer />
     </div>
     </>

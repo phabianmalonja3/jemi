@@ -28,8 +28,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/context/AuthContext";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080/api/v0.1';
-
 interface User {
     id: number;
     name: string;
@@ -40,21 +38,20 @@ interface User {
 
 const NavBar = () => {
 
-   const { isAuthenticated } = useAuth(); 
+   const { isAuthenticated,logout } = useAuth(); 
     const pathname = usePathname();
 
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [user, setUser] = useState<User | null>(null);
 
 
 
+    
+
+
     const handleLogout = async () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setUser(null);
-        setIsLoggedIn(false);
-        toast.success("Logged out successfully");
+        logout();
+    
         setTimeout(() => {
             window.location.href = "/auth/login";
         }, 1000);
@@ -161,8 +158,8 @@ const paymentPartners = [
                                             </Link>
                                         </DropdownMenuItem>
                                         <DropdownMenuItem asChild>
-                                            <Link href="/billing" className="cursor-pointer py-2">
-                                                <FaCreditCard className="mr-2 h-4 w-4" /> Payments
+                                            <Link href="/dashboard/admin/wallet" className="cursor-pointer py-2">
+                                                <FaCreditCard className="mr-2 h-4 w-4" /> Wallet
                                             </Link>
                                         </DropdownMenuItem>
                                         <DropdownMenuSeparator />
@@ -216,7 +213,7 @@ const paymentPartners = [
                             <FaCamera /> Find Photographer
                         </Link>
 
-                        {isLoggedIn ? (
+                        {isAuthenticated ? (
                             <>
                                 <div className="flex items-center gap-3 pt-2">
                                     <Avatar className="h-12 w-12">

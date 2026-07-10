@@ -13,7 +13,7 @@ function Footer() {
         
         <div>
           <h4 className="font-bold mb-4">Contact</h4>
-          <p className="text-zinc-400 text-sm mb-4">info@jemigraph.com</p>
+          <p className="text-zinc-400 text-sm mb-4">info@jemigraph.co.tz</p>
           
        
           <h4 className="font-bold mb-2">Get our App</h4>

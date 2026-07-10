@@ -11,8 +11,11 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { setAuthSession } from '@/lib/actions';
 import Image from 'next/image';
+import { useAuth } from '@/context/AuthContext';
 
 function LoginClientPage() {
+
+  
 
      const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
@@ -23,8 +26,9 @@ function LoginClientPage() {
   const [mounted] = useState(false);
 
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080/api/v0.1';
-  
+  const{login} = useAuth();
+
+
  const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
   setIsLoading(true);
@@ -44,53 +48,31 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080/a
     return;
   }
 
-  try {
-    // 2. Fetch token from backend
-    const response = await axios.post(`${API_BASE_URL}/auth/login`, {
-      email: loginEmail,
-      password: password,
-    });
 
-    const {refreshToken, accessToken, user } = response.data;
-
-          console.log(response.data)
+try {
+  const res = await login(loginEmail, password);
+setIsLoading(true)
+  if (res.success) {
+    toast.success("Login successful!"); // Toast ya mafanikio
+    console.log(res.user?.name);
     
-    if (accessToken) {
-
-      localStorage.setItem("token",accessToken);
-     localStorage.setItem("refreshToken",refreshToken)
-      localStorage.setItem("user",JSON.stringify(user));
-      
-      await setAuthSession(accessToken, user);
-
-    
-
-
-      toast.success('Login successful!', {
-        description: `Welcome back, ${user.name || user.email}!`,
-        duration: 3000,
-      });
-
-      router.refresh();
-      setTimeout(() => {
-        router.push('/dashboard');
-      }, 1000);
-    }
-  } catch (err: any) {
-    console.error('Login error:', err);
-  
-    const status = err.response?.status;
-    const message = err.response?.data?.message || 'Login failed. Please try again.';
-    
-    setError(status === 401 ? 'Invalid email or password' : message);
-    
-    toast.error('Login failed', {
-      description: error || 'Please check your credentials.'+message,
-    });
-  } finally {
-    setIsLoading(false);
+    router.refresh();
+    setTimeout(() => {
+      router.push('/dashboard');
+    }, 1000);
+  } else {
+    setIsLoading(true)
+    toast.error(res.message || "Invalid email or password");
   }
-};
+} catch (error: any) {
+  // Hii itatekelezwa kama kuna "Network Error" au Server Crash (System error)
+  console.error("System error:", error);
+  toast.error("An unexpected error occurred. Please try again later.");
+}finally{
+  setIsLoading(false)
+}
+ 
+ }
   return (
      <div className="relative min-h-screen py-3 overflow-hidden bg-linear-to-br from-slate-50 via-white to-emerald-50/30 flex items-center justify-center px-4">
       

@@ -30,6 +30,8 @@ export async function getToken() {
   return cookieStore.get("token")?.value ;
 }
 
+
+
 export async function clearAuthSession() {
   const cookieStore = await cookies();
   cookieStore.delete("token");
@@ -37,6 +39,6 @@ export async function clearAuthSession() {
 }
 
 export  const apiClient = axios.create({
-  baseURL: `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080/api/v0.1' }`,
+  baseURL: `${process.env.NEXT_PUBLIC_API_URL }`,
   withCredentials: true, // Required to send HTTP-only cookies automatically
 });
