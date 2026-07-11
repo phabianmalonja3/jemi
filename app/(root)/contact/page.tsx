@@ -71,19 +71,19 @@ export default function ContactPage() {
         {
             icon: FaEnvelope,
             title: "Email Us",
-            details: ["hello@phototours.com", "support@phototours.com"],
-            link: "mailto:hello@phototours.com"
+            details: ["info@jemigraph.co.tz", "support@jemigraph.co.tz"],
+            link: "mailto:info@jemigraph.co.tz"
         },
         {
             icon: FaPhone,
             title: "Call Us",
-            details: ["+1 (555) 123-4567", "+1 (555) 987-6543"],
-            link: "tel:+15551234567"
+            details: ["+255 713 132 128", "+255 628 000 347"],
+            link: "tel:+255628000347"
         },
         {
             icon: FaMapMarkerAlt,
             title: "Visit Us",
-            details: ["123 Photography Lane", "New York, NY 10001", "United States"],
+            details: ["123 Photography Lane", "Tanzania", "Kigambon Dar es salaam"],
             link: "https://maps.google.com"
         },
         {
@@ -236,7 +236,7 @@ export default function ContactPage() {
                                         <Input
                                             id="name"
                                             required
-                                            placeholder="John Doe"
+                                            placeholder="client "
                                             value={formData.name}
                                             onChange={(e) => setFormData({...formData, name: e.target.value})}
                                         />
@@ -247,7 +247,7 @@ export default function ContactPage() {
                                             id="email"
                                             type="email"
                                             required
-                                            placeholder="john@example.com"
+                                            placeholder="hello@example.com"
                                             value={formData.email}
                                             onChange={(e) => setFormData({...formData, email: e.target.value})}
                                         />
