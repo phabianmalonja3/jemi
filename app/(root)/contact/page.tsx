@@ -83,7 +83,7 @@ export default function ContactPage() {
         {
             icon: FaMapMarkerAlt,
             title: "Visit Us",
-            details: ["123 Photography Lane", "Tanzania", "Kigambon Dar es salaam"],
+            details: ["Geza", "Tanzania", "Kigambon Dar es salaam"],
             link: "https://maps.google.com"
         },
         {
@@ -108,6 +108,8 @@ export default function ContactPage() {
             answer: "Absolutely! Contact us with your requirements, and we'll create a personalized photography experience tailored to your needs and skill level."
         },
         {
+
+
             question: "What's your cancellation policy?",
             answer: "Free cancellation up to 14 days before the event. 50% refund up to 7 days before. No refunds within 7 days, but you can transfer to another date."
         },
@@ -319,19 +321,24 @@ export default function ContactPage() {
                             className="space-y-6"
                         >
                             <Card>
-                                <CardHeader>
-                                    <CardTitle>Find Us</CardTitle>
-                                    <CardDescription>Our headquarters in New York City</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="relative h-64 rounded-lg overflow-hidden bg-zinc-200 dark:bg-zinc-800">
-                                        {/* Replace with actual Google Maps embed */}
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            <p className="text-zinc-500">Map integration would go here</p>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
+    <CardHeader>
+        <CardTitle>Find Us</CardTitle>
+        <CardDescription>Our office in Gezaulole</CardDescription>
+    </CardHeader>
+    <CardContent>
+        <div className="relative w-full h-64 rounded-lg overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+            <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3961.210643298583!2d39.41159817317805!3d-6.865342467166217!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x185dc9928f39a6a9%3A0xe023acf1eb609ebc!2sGezaulole!5e0!3m2!1sen!2stz!4v1783752671016!5m2!1sen!2stz"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen={true}
+                loading="lazy"
+                referrerPolicy="strict-origin-when-cross-origin"
+            />
+        </div>
+    </CardContent>
+</Card>
 
                             <Card>
                                 <CardHeader>
