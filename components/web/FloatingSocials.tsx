@@ -6,25 +6,25 @@ import Link from "next/link";
 const socials = [
   { 
     icon: FaInstagram, 
-    href: "https://instagram.com/your-handle", 
+    href: "https://instagram.com/jemigraph", 
     label: "Instagram", 
     color: "hover:text-pink-500" 
   },
   { 
     icon: FaTwitter, 
-    href: "https://twitter.com/your-handle", 
+    href: "https://twitter.com/jemigraph", 
     label: "Twitter", 
     color: "hover:text-blue-400" 
   },
   { 
     icon: FaLinkedin, 
-    href: "https://linkedin.com/in/your-handle", 
+    href: "https://linkedin.com/in/jemigraph", 
     label: "LinkedIn", 
     color: "hover:text-blue-700" 
   },
   { 
     icon: FaWhatsapp, 
-    href: "https://wa.me/your-phone-number", 
+    href: "https://wa.me/+255 628 000 347", 
     label: "WhatsApp", 
     color: "hover:text-green-500" 
   },
