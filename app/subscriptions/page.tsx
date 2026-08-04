@@ -106,7 +106,7 @@ export default function SubscriptionsPage() {
 
         {fetchingPlans ? (
           <div className="flex justify-center items-center py-20">
-            <Loader2 className="animate-spin h-8 w-8 text-indigo-600" />
+            <Loader2 className="animate-spin h-8 w-8 text-[#357738]" />
             <span className="ml-2 text-slate-600">Loading packages...</span>
           </div>
         ) : plans.length === 0 ? (
@@ -126,12 +126,12 @@ export default function SubscriptionsPage() {
                 <div
                   key={plan.id}
                   className={`relative bg-white rounded-2xl shadow-xl border ${
-                    isPopular ? "border-indigo-600 ring-2 ring-indigo-600" : "border-slate-200"
+                    isPopular ? "border-[#357738] ring-2 ring-[#357738] " : "border-slate-200"
                   } p-8 flex flex-col justify-between`}
                 >
                   {isPopular && (
                     <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                      <span className="inline-flex items-center px-4 py-1 rounded-full text-xs font-semibold uppercase tracking-wide bg-indigo-600 text-white shadow-md">
+                      <span className="inline-flex items-center px-4 py-1 rounded-full text-xs font-semibold uppercase tracking-wide bg-[#357738] text-white shadow-md">
                         <Sparkles className="w-3 h-3 mr-1" /> Most Popular
                       </span>
                     </div>
