@@ -3,15 +3,6 @@
 import React, { useState, useEffect } from "react";
 import { Check, Loader2, Sparkles, AlertCircle } from "lucide-react";
 
-interface SubscriptionPlan {
-  id: string;
-  name: string;
-  price: number;
-  durationInDays: number;
-  description: string;
-  active: boolean;
-  createdAt: string;
-}
 
 export default function SubscriptionsPage() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);

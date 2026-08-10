@@ -11,7 +11,8 @@ import {
   Bell,
   Globe,
   Settings2,
-  Cog
+  Cog,
+  Smartphone
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -29,6 +30,7 @@ const ADMIN_LINKS = [
   { icon: ArrowLeftRight, label: "Transactions", href: "/dashboard/admin/transactions" },
   { icon: Bell, label: "Notifications", href: "/dashboard/admin/notifications" },
   { icon: Cog, label: "Settings", href: "/dashboard/admin/profile" },
+  { icon: Smartphone, label: "App Updates", href: "/dashboard/admin/applications/versions" }
 
   // <Bell size={20} />
 ];

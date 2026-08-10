@@ -230,7 +230,7 @@ export default function AboutPage() {
                                 <div className="space-y-4">
                                     <div className="relative h-64 rounded-lg overflow-hidden">
                                         <Image
-                                            src="/story-1.jpg"
+                                            src="/images/avatar.png"
                                             alt="Story 1"
                                             fill
                                             className="object-cover"
@@ -238,7 +238,7 @@ export default function AboutPage() {
                                     </div>
                                     <div className="relative h-48 rounded-lg overflow-hidden">
                                         <Image
-                                            src="/story-2.jpg"
+                                            src="/images/avatar.png"
                                             alt="Story 2"
                                             fill
                                             className="object-cover"
@@ -248,7 +248,7 @@ export default function AboutPage() {
                                 <div className="space-y-4 pt-8">
                                     <div className="relative h-48 rounded-lg overflow-hidden">
                                         <Image
-                                            src="/story-3.jpg"
+                                            src="/images/avatar.png"
                                             alt="Story 3"
                                             fill
                                             className="object-cover"
@@ -256,7 +256,7 @@ export default function AboutPage() {
                                     </div>
                                     <div className="relative h-64 rounded-lg overflow-hidden">
                                         <Image
-                                            src="/story-4.jpg"
+                                               src="/images/avatar.png"
                                             alt="Story 4"
                                             fill
                                             className="object-cover"
