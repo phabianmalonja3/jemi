@@ -30,7 +30,9 @@ const ADMIN_LINKS = [
   { icon: ArrowLeftRight, label: "Transactions", href: "/dashboard/admin/transactions" },
   { icon: Bell, label: "Notifications", href: "/dashboard/admin/notifications" },
   { icon: Cog, label: "Settings", href: "/dashboard/admin/profile" },
-  { icon: Smartphone, label: "App Updates", href: "/dashboard/admin/applications/versions" }
+  { icon: Smartphone, label: "App Updates", href: "/dashboard/admin/applications/versions" },
+  { icon: Calendar, label: "Bookings", href: "/dashboard/admin/bookings" }
+ 
 
   // <Bell size={20} />
 ];
