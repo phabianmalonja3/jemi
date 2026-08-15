@@ -252,11 +252,9 @@ export default function AppVersionManager() {
   const getAppName = (appId: string) => {
     switch (appId) {
       case "com.jemi.app":
-        return "Jemi App";
-      case "com.jemigraph.app":
-        return "Jemigrapher";
-      case "com.jemigraph.jemigraph":
         return "Jemigraph";
+      case "com.jemigrapher.app":
+        return "Jemigrapher";
       default:
         return appId;
     }

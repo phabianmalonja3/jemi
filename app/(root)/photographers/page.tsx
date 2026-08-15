@@ -17,7 +17,9 @@ import {
     FaWifi,
     FaUser,
     FaAt,
-    FaChevronDown
+    FaChevronDown,
+    FaCheckCircle,
+    FaPhone
 } from "react-icons/fa";
 import { useEffect, useRef, useState, useCallback } from "react";
 import gsap from "gsap";
@@ -94,6 +96,7 @@ const getPhotographerDetails = (photographer: Photographer): Photographer => {
         quote: quotes[hash % quotes.length],
         experience: `${experienceYears}+ Years`,
         sessions: sessions,
+        phone: photographer.phone || "Not provided",
         achievements: [
             "International Photography Award Winner",
             `${Math.floor(rating * 20)}+ Satisfied Clients`,
@@ -115,7 +118,8 @@ export default function PhotographersPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
-    const [searchField, setSearchField] = useState<"all" | "name" | "email" | "location">("all");
+    const [searchField, setSearchField] = useState<"all" | "name" | "email" | "phone" | "location">("all");
+    const [showVerifiedOnly, setShowVerifiedOnly] = useState(true); // Default to show verified only
 
     const heroRef = useRef(null);
     const teamRef = useRef(null);
@@ -129,10 +133,19 @@ export default function PhotographersPage() {
             if (!response.ok) throw new Error("Could not load photographers.");
             const data: PageableResponse = await response.json();
 
-            const enhancedPhotographers = data.content.map(getPhotographerDetails);
-            setPhotographersData(data);
+            // Filter to only show verified photographers
+            let filteredContent = data.content;
+            if (showVerifiedOnly) {
+                filteredContent = data.content.filter(photographer => photographer.isVerified === true);
+            }
+
+            const enhancedPhotographers = filteredContent.map(getPhotographerDetails);
+            setPhotographersData({
+                ...data,
+                content: filteredContent
+            });
             setPhotographers(enhancedPhotographers);
-            setTotalPages(data.totalPages);
+            setTotalPages(Math.ceil(filteredContent.length / data.size) || 1);
         } catch (err: any) {
             setError(err.message);
         } finally {
@@ -142,9 +155,9 @@ export default function PhotographersPage() {
 
     useEffect(() => {
         fetchPhotographers(currentPage);
-    }, [currentPage]);
+    }, [currentPage, showVerifiedOnly]);
 
-    // Filter logic with search by name, email, location
+    // Filter logic with search by name, email, phone, location
     const filteredPhotographers = useCallback(() => {
         let filtered = [...photographers];
 
@@ -157,13 +170,14 @@ export default function PhotographersPage() {
                         return photographer.name?.toLowerCase().includes(query) || false;
                     case "email":
                         return photographer.email.toLowerCase().includes(query);
-
+                    case "phone":
+                        return photographer.phone?.toLowerCase().includes(query) || false;
                     case "all":
                     default:
                         return (
                             photographer.name?.toLowerCase().includes(query) ||
                             photographer.email.toLowerCase().includes(query) ||
-
+                            photographer.phone?.toLowerCase().includes(query) ||
                             false
                         );
                 }
@@ -229,9 +243,21 @@ export default function PhotographersPage() {
         switch (searchField) {
             case "name": return "Search by photographer name...";
             case "email": return "Search by email address...";
-            // case "location": return "Search by location...";
-            default: return "Search by name, email, or location...";
+            case "phone": return "Search by phone number...";
+            default: return "Search by name, email, or phone...";
         }
+    };
+
+    // Format phone number for display
+    const formatPhoneNumber = (phone: string) => {
+        if (!phone || phone === "Not provided") return phone;
+        // Remove all non-numeric characters
+        const cleaned = phone.replace(/\D/g, '');
+        // Format as (XXX) XXX-XXXX if 10 digits
+        if (cleaned.length === 10) {
+            return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6, 10)}`;
+        }
+        return phone;
     };
 
     if (error) {
@@ -321,23 +347,37 @@ export default function PhotographersPage() {
                                     { id: "all", label: "All Fields", icon: FaSearch },
                                     { id: "name", label: "Name", icon: FaUser },
                                     { id: "email", label: "Email", icon: FaAt },
-
+                                    { id: "phone", label: "Phone", icon: FaPhone },
                                 ].map((filter) => {
                                     const Icon = filter.icon;
                                     return (
                                         <button
                                             key={filter.id}
                                             onClick={() => setSearchField(filter.id as typeof searchField)}
-                                            className={`px-4 py-2 rounded-full text-sm transition-all flex items-center gap-2 backdrop-blur-sm ${searchField === filter.id
-                                                ? "bg-emerald-500 text-white shadow-lg"
-                                                : "bg-white/10 text-emerald-100 hover:bg-white/20"
-                                                }`}
+                                            className={`px-4 py-2 rounded-full text-sm transition-all flex items-center gap-2 backdrop-blur-sm ${
+                                                searchField === filter.id
+                                                    ? "bg-emerald-500 text-white shadow-lg"
+                                                    : "bg-white/10 text-emerald-100 hover:bg-white/20"
+                                            }`}
                                         >
                                             <Icon className="text-xs" />
                                             {filter.label}
                                         </button>
                                     );
                                 })}
+                                
+                                {/* Verified Only Toggle */}
+                                <button
+                                    onClick={() => setShowVerifiedOnly(!showVerifiedOnly)}
+                                    className={`px-4 py-2 rounded-full text-sm transition-all flex items-center gap-2 backdrop-blur-sm ${
+                                        showVerifiedOnly
+                                            ? "bg-blue-500 text-white shadow-lg"
+                                            : "bg-white/10 text-emerald-100 hover:bg-white/20"
+                                    }`}
+                                >
+                                    <FaCheckCircle className="text-xs" />
+                                    Verified Only
+                                </button>
                             </div>
                         </div>
 
@@ -360,6 +400,12 @@ export default function PhotographersPage() {
                         <div className="text-sm text-zinc-600 dark:text-zinc-400">
                             <span className="font-semibold text-emerald-600 dark:text-emerald-400">{displayedPhotographers.length}</span>
                             <span> photographer{displayedPhotographers.length !== 1 ? 's' : ''} available</span>
+                            {showVerifiedOnly && (
+                                <span className="ml-2 text-blue-600 dark:text-blue-400">
+                                    <FaCheckCircle className="inline mr-1 text-xs" />
+                                    Verified only
+                                </span>
+                            )}
                             {searchQuery && (
                                 <span className="ml-2">
                                     matching <span className="font-medium">"{searchQuery}"</span>
@@ -403,42 +449,34 @@ export default function PhotographersPage() {
                                     >
                                         <div className="bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
                                             {/* Photographer Image */}
-                                            <div className="relative h-80 overflow-hidden  py-8">
+                                            <div className="relative h-80 overflow-hidden py-8">
                                                 <div className="absolute inset-0 bg-gradient-to-br py-8 bg-gray-200 flex items-center justify-center">
                                                     {/* <FaCamera className="text-5xl text-emerald-400" /> */}
-
-
                                                 </div>
-
-
-
-
 
                                                 <div className="p-8">
                                                     <div className="p-8">
-
-                                                       
                                                         <Image
                                                             src={photographer.profileImage ? `${process.env.NEXT_PUBLIC_API_URL}${photographer.profileImage}` : `/default_user.svg`}
                                                             fill
                                                             className="object-cover w-full h-full rounded-t-2xl"
                                                             alt={photographer.name?.toString() || "Photographer"}
-
                                                             unoptimized
                                                         />
                                                     </div>
                                                 </div>
 
-
                                                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                                                <div className="absolute top-4 right-4 z-10">
-                                                    <span className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 backdrop-blur-sm ${!photographer.isBusy && photographer.isOnline
-                                                        ? "bg-green-500 text-white"
-                                                        : photographer.isBusy
-                                                            ? "bg-red-500 text-white"
-                                                            : "bg-gray-500/90 text-white"
-                                                        }`}>
+                                                {/* Status Badge - Top Right */}
+                                                <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
+                                                    <span className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 backdrop-blur-sm ${
+                                                        !photographer.isBusy && photographer.isOnline
+                                                            ? "bg-green-500 text-white"
+                                                            : photographer.isBusy
+                                                                ? "bg-red-500 text-white"
+                                                                : "bg-gray-500/90 text-white"
+                                                    }`}>
                                                         {!photographer.isBusy && photographer.isOnline ? (
                                                             <>
                                                                 <FaWifi className="text-xs" /> Available
@@ -449,8 +487,16 @@ export default function PhotographersPage() {
                                                             "Offline"
                                                         )}
                                                     </span>
+                                                    
+                                                    {/* Verified Badge */}
+                                                    {photographer.isVerified && (
+                                                        <span className="px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 bg-blue-500/90 backdrop-blur-sm text-white">
+                                                            <FaCheckCircle className="text-xs" /> Verified
+                                                        </span>
+                                                    )}
                                                 </div>
 
+                                                {/* Rating - Bottom Left */}
                                                 <div className="absolute bottom-4 left-4 z-10 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1">
                                                     <FaStar className="text-yellow-400 text-sm" />
                                                     <span className="text-white text-sm font-semibold">{photographer.rating?.toFixed(1)}</span>
@@ -465,16 +511,26 @@ export default function PhotographersPage() {
                                             </div>
 
                                             <div className="p-6">
-                                                <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">
-                                                    {photographer.name}
-                                                </h3>
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <h3 className="text-xl font-bold text-zinc-900 dark:text-white">
+                                                        {photographer.name}
+                                                    </h3>
+                                                    {photographer.isVerified && (
+                                                        <FaCheckCircle className="text-blue-500 text-lg" title="Verified Photographer" />
+                                                    )}
+                                                </div>
 
                                                 <div className="space-y-1.5 mb-4">
                                                     <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
                                                         <FaEnvelope className="text-emerald-500 text-xs shrink-0" />
                                                         <span className="truncate">{photographer.email}</span>
                                                     </div>
-                                                    
+                                                    {photographer.phone && photographer.phone !== "Not provided" && (
+                                                        <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
+                                                            <FaPhone className="text-emerald-500 text-xs shrink-0" />
+                                                            <span className="truncate">{formatPhoneNumber(photographer.phone)}</span>
+                                                        </div>
+                                                    )}
                                                 </div>
 
                                                 <p className="text-zinc-600 dark:text-zinc-400 text-sm mb-4 line-clamp-2">
@@ -496,6 +552,11 @@ export default function PhotographersPage() {
                                                     <a href={`mailto:${photographer.email}`} className="flex-1 text-center px-3 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-600 transition text-sm">
                                                         Email
                                                     </a>
+                                                    {photographer.phone && photographer.phone !== "Not provided" && (
+                                                        <a href={`tel:${photographer.phone.replace(/\D/g, '')}`} className="flex-1 text-center px-3 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 transition text-sm">
+                                                            Call
+                                                        </a>
+                                                    )}
                                                     <Button
                                                         size="sm"
                                                         className="flex-1 bg-emerald-600 hover:bg-emerald-700"
@@ -504,8 +565,6 @@ export default function PhotographersPage() {
                                                         View Profile
                                                     </Button>
                                                 </div>
-
-
                                             </div>
                                         </div>
                                     </div>
@@ -522,7 +581,9 @@ export default function PhotographersPage() {
                                     <p className="text-zinc-500 max-w-md mx-auto">
                                         {searchQuery
                                             ? `We couldn't find any photographers matching "${searchQuery}"`
-                                            : "No photographers are currently available"}
+                                            : showVerifiedOnly
+                                                ? "No verified photographers are currently available"
+                                                : "No photographers are currently available"}
                                     </p>
                                     {searchQuery && (
                                         <Button
@@ -530,6 +591,14 @@ export default function PhotographersPage() {
                                             className="mt-6 bg-emerald-600 hover:bg-emerald-700"
                                         >
                                             Clear Search
+                                        </Button>
+                                    )}
+                                    {!searchQuery && showVerifiedOnly && (
+                                        <Button
+                                            onClick={() => setShowVerifiedOnly(false)}
+                                            className="mt-6 bg-blue-600 hover:bg-blue-700"
+                                        >
+                                            Show All Photographers
                                         </Button>
                                     )}
                                 </div>
@@ -618,7 +687,12 @@ export default function PhotographersPage() {
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                                     <div className="absolute bottom-6 left-6 text-white">
-                                        <h2 className="text-3xl font-bold mb-2">{selectedPhotographer.name}</h2>
+                                        <div className="flex items-center gap-2">
+                                            <h2 className="text-3xl font-bold mb-2">{selectedPhotographer.name}</h2>
+                                            {selectedPhotographer.isVerified && (
+                                                <FaCheckCircle className="text-blue-400 text-2xl" title="Verified Photographer" />
+                                            )}
+                                        </div>
                                         <div className="text-lg text-emerald-300">Professional Photographer</div>
                                     </div>
                                 </div>
@@ -640,11 +714,16 @@ export default function PhotographersPage() {
                                         <div>
                                             <h3 className="text-xl font-bold mb-3 text-zinc-900 dark:text-white">Details</h3>
                                             <div className="space-y-3">
-
                                                 <div className="flex items-center gap-3">
                                                     <FaEnvelope className="text-emerald-600" />
                                                     <span className="text-zinc-700 dark:text-zinc-300">{selectedPhotographer.email}</span>
                                                 </div>
+                                                {selectedPhotographer.phone && selectedPhotographer.phone !== "Not provided" && (
+                                                    <div className="flex items-center gap-3">
+                                                        <FaPhone className="text-emerald-600" />
+                                                        <span className="text-zinc-700 dark:text-zinc-300">{formatPhoneNumber(selectedPhotographer.phone)}</span>
+                                                    </div>
+                                                )}
                                                 <div className="flex items-center gap-3">
                                                     <FaCalendarAlt className="text-emerald-600" />
                                                     <span className="text-zinc-700 dark:text-zinc-300">{selectedPhotographer.experience} Experience</span>
@@ -653,6 +732,12 @@ export default function PhotographersPage() {
                                                     <FaStar className="text-yellow-400" />
                                                     <span className="text-zinc-700 dark:text-zinc-300">{selectedPhotographer.rating?.toFixed(1)} Rating ({selectedPhotographer.sessions}+ sessions)</span>
                                                 </div>
+                                                {selectedPhotographer.isVerified && (
+                                                    <div className="flex items-center gap-3">
+                                                        <FaCheckCircle className="text-blue-500" />
+                                                        <span className="text-zinc-700 dark:text-zinc-300 font-medium text-blue-600 dark:text-blue-400">Verified Photographer</span>
+                                                    </div>
+                                                )}
                                             </div>
 
                                             <h3 className="text-xl font-bold mt-6 mb-3 text-zinc-900 dark:text-white">Achievements</h3>
@@ -664,11 +749,26 @@ export default function PhotographersPage() {
                                                     </li>
                                                 ))}
                                             </ul>
+
+                                            {/* Contact Actions */}
+                                            <div className="mt-6 flex gap-3">
+                                                <a href={`mailto:${selectedPhotographer.email}`} className="flex-1">
+                                                    <Button className="w-full bg-emerald-600 hover:bg-emerald-700">
+                                                        <FaEnvelope className="mr-2" /> Email
+                                                    </Button>
+                                                </a>
+                                                {selectedPhotographer.phone && selectedPhotographer.phone !== "Not provided" && (
+                                                    <a href={`tel:${selectedPhotographer.phone.replace(/\D/g, '')}`} className="flex-1">
+                                                        <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                                                            <FaPhone className="mr-2" /> Call
+                                                        </Button>
+                                                    </a>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
 
                                     <div className="border-t border-zinc-200 dark:border-zinc-700 pt-6 flex gap-4">
-
                                         <Button variant="outline" onClick={() => setSelectedPhotographer(null)}>
                                             Close
                                         </Button>

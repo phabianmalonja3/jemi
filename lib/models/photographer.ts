@@ -14,6 +14,8 @@ interface Photographer {
     bio?: string;
     quote?: string;
     experience?: string;
+    isVerified: boolean,
+    phone: string,
     sessions?: number;
     achievements?: string[];
     instagram?: string;
