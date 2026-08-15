@@ -77,7 +77,7 @@ export default function TransactionsPage() {
         />
         <button
           onClick={fetchTransactions}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm font-medium transition"
+          className="bg-emerald-600 text-white px-4 py-2 rounded-md hover:bg-emerald-600 text-sm font-medium transition"
         >
           Refresh
         </button>

@@ -125,7 +125,6 @@ export default function PhotographersPage() {
     const teamRef = useRef(null);
     const gridRef = useRef<HTMLDivElement>(null);
 
-    // Fetch data from API
     const fetchPhotographers = async (page: number = 0) => {
         try {
             setLoading(true);

@@ -336,12 +336,7 @@ export default function AppVersionManager() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:outline-none"
               >
                 <option value="com.jemi.app">Jemi App (com.jemi.app)</option>
-                <option value="com.jemigraph.app">
-                  Jemigrapher (com.jemigraph.app)
-                </option>
-                <option value="com.jemigraph.jemigraph">
-                  Jemigraph (com.jemigraph.jemigraph)
-                </option>
+                <option value="com.jemigrapher.app">Jemigrapher (com.jemigrapher.app)</option>
               </select>
             </div>
 
