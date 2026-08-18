@@ -19,7 +19,7 @@ interface TeamMember {
     name: string;
     role: string;
     bio: string;
-    image: string;
+      imageUrl: string;
     social: {
         instagram?: string;
         twitter?: string;
@@ -205,8 +205,8 @@ export default async function AboutPage() {
                                 <div className="relative h-80 overflow-hidden bg-zinc-200 dark:bg-zinc-800">
                                     <Image
                                         src={
-                                            member.image 
-                                                ? (member.image.startsWith("http") ? member.image : `${process.env.NEXT_PUBLIC_API_URL}${member.image}`)
+                                            member.imageUrl 
+                                                ? (member.imageUrl.startsWith("http") ? member.imageUrl : `${process.env.NEXT_PUBLIC_API_URL}${member.imageUrl}`)
                                                 : "/default_user.svg"
                                         }
                                         alt={member.name}
