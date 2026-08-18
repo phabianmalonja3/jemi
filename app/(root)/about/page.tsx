@@ -201,12 +201,14 @@ export default async function AboutPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {team.map((member, index) => (
+
+                            
                             <Card key={index} className="overflow-hidden flex flex-col h-full group hover:-translate-y-1 transition-all duration-300">
                                 <div className="relative h-80 overflow-hidden bg-zinc-200 dark:bg-zinc-800">
                                     <Image
                                         src={
                                             member.imageUrl 
-                                                ? (member.imageUrl.startsWith("http") ? member.imageUrl : `${process.env.NEXT_PUBLIC_API_URL}${member.imageUrl}`)
+                                                ?  `${process.env.NEXT_PUBLIC_API_URL}${member.imageUrl}`
                                                 : "/default_user.svg"
                                         }
                                         alt={member.name}
