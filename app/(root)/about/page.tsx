@@ -212,6 +212,7 @@ export default async function AboutPage() {
                                                 : "/default_user.svg"
                                         }
                                         alt={member.name}
+                                        unoptimized
                                         fill
                                         className="object-cover group-hover:scale-110 transition-transform duration-500"
                                     />
