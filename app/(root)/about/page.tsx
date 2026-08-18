@@ -30,7 +30,7 @@ interface TeamMember {
 async function getTeamMembers(): Promise<TeamMember[]> {
     try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/team`, {
-            cache: "no-store", // or use ISR like { next: { revalidate: 3600 } }
+            cache: "no-store", // Ensures fresh data on every request
         });
 
         if (!res.ok) {
@@ -203,16 +203,16 @@ export default async function AboutPage() {
                         {team.map((member, index) => (
                             <Card key={index} className="overflow-hidden flex flex-col h-full group hover:-translate-y-1 transition-all duration-300">
                                 <div className="relative h-80 overflow-hidden bg-zinc-200 dark:bg-zinc-800">
-                                   <Image
-    src={
-        member.image 
-            ? (member.image.startsWith("http") ? member.image : `${process.env.NEXT_PUBLIC_API_URL}${member.image}`)
-            : "/default_user.svg"
-    }
-    alt={member.name}
-    fill
-    className="object-cover group-hover:scale-110 transition-transform duration-500"
-/>
+                                    <Image
+                                        src={
+                                            member.image 
+                                                ? (member.image.startsWith("http") ? member.image : `${process.env.NEXT_PUBLIC_API_URL}${member.image}`)
+                                                : "/default_user.svg"
+                                        }
+                                        alt={member.name}
+                                        fill
+                                        className="object-cover group-hover:scale-110 transition-transform duration-500"
+                                    />
                                 </div>
                                 <CardHeader className="flex-grow">
                                     <CardTitle className="text-xl">{member.name}</CardTitle>
