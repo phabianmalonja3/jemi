@@ -1,150 +1,82 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import {
-    FaCamera,
-    FaHeart,
-    FaGlobe,
-    FaUsers,
-    FaAward,
-    FaStar,
-    FaQuoteLeft,
-    FaArrowRight,
-    FaInstagram,
-    FaFacebook,
-    FaTwitter,
-    FaYoutube,
-    FaMapMarkerAlt,
-    FaCalendarAlt,
-    FaClock
-} from "react-icons/fa";
-import { useEffect, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Footer from "@/components/web/Footer";
+import { 
+    FaCamera, 
+    FaHeart, 
+    FaAward, 
+    FaGlobe, 
+    FaInstagram, 
+    FaTwitter, 
+    FaGlobeAmericas 
+} from "react-icons/fa";
 
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
+// Define TypeScript interface for team members matching your backend response
+interface TeamMember {
+    name: string;
+    role: string;
+    bio: string;
+    image: string;
+    social: {
+        instagram?: string;
+        twitter?: string;
+        website?: string;
+    };
 }
 
-export default function AboutPage() {
-    const statsRef = useRef(null);
-    const teamRef = useRef(null);
-    const valuesRef = useRef(null);
-
-    useEffect(() => {
-        const ctx = gsap.context(() => {
-            gsap.from(".stat-number", {
-                scrollTrigger: {
-                    trigger: statsRef.current,
-                    start: "top 80%",
-                    toggleActions: "play none none reverse",
-                },
-                innerHTML: 0,
-                duration: 2,
-                snap: "innerHTML",
-                stagger: 0.3,
-                ease: "power1.inOut"
-            });
-
-            gsap.from(".team-member", {
-                scrollTrigger: {
-                    trigger: teamRef.current,
-                    start: "top 70%",
-                    toggleActions: "play none none reverse",
-                },
-                y: 50,
-                opacity: 0,
-                duration: 0.8,
-                stagger: 0.2,
-            });
-
-            gsap.from(".value-card", {
-                scrollTrigger: {
-                    trigger: valuesRef.current,
-                    start: "top 70%",
-                    toggleActions: "play none none reverse",
-                },
-                scale: 0.9,
-                opacity: 0,
-                duration: 0.6,
-                stagger: 0.15,
-            });
+async function getTeamMembers(): Promise<TeamMember[]> {
+    try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/team`, {
+            cache: "no-store", // or use ISR like { next: { revalidate: 3600 } }
         });
 
-        return () => ctx.revert();
-    }, []);
+        if (!res.ok) {
+            throw new Error("Failed to fetch team members from backend");
+        }
 
-  
+        return await res.json();
+    } catch (error) {
+        console.error("Error fetching team:", error);
+        return []; // Fallback to empty array if backend is down
+    }
+}
+
+export default async function AboutPage() {
+    const team = await getTeamMembers();
 
     const values = [
         {
             title: "Passion for Photography",
             description: "We live and breathe photography. Every member of our team shares an unbridled passion for capturing beautiful moments.",
             icon: FaCamera,
-            color: "emerald"
+            bgClass: "bg-emerald-100 dark:bg-emerald-900/30",
+            textClass: "text-emerald-600 dark:text-emerald-400"
         },
         {
             title: "Authentic Experiences",
             description: "We believe in genuine connections and authentic travel experiences that go beyond typical tourist spots.",
             icon: FaHeart,
-            color: "rose"
+            bgClass: "bg-rose-100 dark:bg-rose-900/30",
+            textClass: "text-rose-600 dark:text-rose-400"
         },
         {
             title: "Professional Excellence",
             description: "Our photographers are award-winning professionals dedicated to delivering the highest quality work.",
             icon: FaAward,
-            color: "blue"
+            bgClass: "bg-blue-100 dark:bg-blue-900/30",
+            textClass: "text-blue-600 dark:text-blue-400"
         },
         {
             title: "Sustainable Tourism",
             description: "We're committed to responsible travel practices that protect and preserve local communities and environments.",
             icon: FaGlobe,
-            color: "green"
+            bgClass: "bg-green-100 dark:bg-green-900/30",
+            textClass: "text-green-600 dark:text-green-400"
         }
     ];
-
-    const team = [
-        {
-            name: "Jeremiah lutego weslaus",
-            role: "Founder & Lead Photographer",
-            bio: "Former National Geographic photographer with over 15 years of experience capturing the world's most breathtaking locations.",
-             image: "/images/ceo.jpeg",
-            social: { instagram: "#", twitter: "#" }
-        },
-        {
-  name: "Phabian Ezekiel Malonja",
-  role: "System Developer & Visual Ethnographer",
-  bio: "Award-winning portrait and cultural photographer who has documented traditions in over 40 countries, now bridging legacy storytelling with digital systems.",
-  image: "/default_user.svg",
-  social: { 
-    instagram: "https://instagram.com/phabian.malonja", 
-    twitter: "https://twitter.com/phabian_malonja",
-    website: "https://phabianmalonja.com" // optional addition
-  }
-},
-        {
-            name: "David Kim",
-            role: "Workshop Director",
-            bio: "Passionate educator and landscape photographer dedicated to helping others master their craft.",
-          image: "/default_user.svg",
-            social: { instagram: "#", twitter: "#" }
-        },
-        {
-            name: "Emma Watson",
-            role: "Wildlife Specialist",
-            bio: "Marine biologist turned wildlife photographer, specializing in conservation storytelling.",
-             image: "/default_user.svg",
-            social: { instagram: "#", twitter: "#" }
-        }
-    ];
-
-  
 
     return (
         <>
@@ -163,33 +95,14 @@ export default function AboutPage() {
                 </div>
 
                 <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8 }}
-                    >
-
-                    </motion.div>
-
-                    <motion.h1
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.2 }}
-                        className="text-4xl md:text-6xl font-bold text-white mb-6"
-                    >
+                    <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
                         Capturing Moments,
                         <br />
                         <span className="text-emerald-400">Creating Memories</span>
-                    </motion.h1>
-
-                    <motion.p
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.3 }}
-                        className="text-lg md:text-xl text-gray-200 max-w-2xl mx-auto"
-                    >
+                    </h1>
+                    <p className="text-lg md:text-xl text-gray-200 max-w-2xl mx-auto">
                         We're on a mission to connect passionate photographers with extraordinary travel experiences around the globe
-                    </motion.p>
+                    </p>
                 </div>
             </section>
 
@@ -197,11 +110,7 @@ export default function AboutPage() {
             <section className="py-20 px-6">
                 <div className="max-w-6xl mx-auto">
                     <div className="grid lg:grid-cols-2 gap-12 items-center">
-                        <motion.div
-                            initial={{ opacity: 0, x: -50 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.6 }}
-                        >
+                        <div>
                             <Badge variant="secondary" className="mb-4">Our Journey</Badge>
                             <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 dark:text-white mb-6">
                                 From a Dream to a Global Community
@@ -214,74 +123,37 @@ export default function AboutPage() {
                                 </p>
                                 <p>
                                     Today, we've helped over 5,000 travelers capture their most precious moments across 120+ destinations
-                                    worldwide. Our team of 50+ professional photographers brings together diverse expertise, from wildlife
-                                    photography in Africa to cultural portraits in Asia and landscape photography in Europe.
-                                </p>
-                                <p>
-                                    But beyond the numbers, we're most proud of the community we've built. Every photo shared, every
-                                    skill learned, and every friendship formed on our tours is a testament to the power of visual storytelling.
+                                    worldwide. Our team of 50+ professional photographers brings together diverse expertise.
                                 </p>
                             </div>
-                        </motion.div>
+                        </div>
 
-                        <motion.div
-                            initial={{ opacity: 0, x: 50 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.6 }}
-                            className="relative"
-                        >
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-4">
-                                    <div className="relative h-64 rounded-lg overflow-hidden">
-                                        <Image
-                                            src="/images/avatar.png"
-                                            alt="Story 1"
-                                            fill
-                                            className="object-cover"
-                                        />
-                                    </div>
-                                    <div className="relative h-48 rounded-lg overflow-hidden">
-                                        <Image
-                                            src="/images/avatar.png"
-                                            alt="Story 2"
-                                            fill
-                                            className="object-cover"
-                                        />
-                                    </div>
+                        <div className="relative grid grid-cols-2 gap-4">
+                            <div className="space-y-4">
+                                <div className="relative h-64 rounded-lg overflow-hidden">
+                                    <Image src="/images/avatar.png" alt="Story 1" fill className="object-cover" />
                                 </div>
-                                <div className="space-y-4 pt-8">
-                                    <div className="relative h-48 rounded-lg overflow-hidden">
-                                        <Image
-                                            src="/images/avatar.png"
-                                            alt="Story 3"
-                                            fill
-                                            className="object-cover"
-                                        />
-                                    </div>
-                                    <div className="relative h-64 rounded-lg overflow-hidden">
-                                        <Image
-                                               src="/images/avatar.png"
-                                            alt="Story 4"
-                                            fill
-                                            className="object-cover"
-                                        />
-                                    </div>
+                                <div className="relative h-48 rounded-lg overflow-hidden">
+                                    <Image src="/images/avatar.png" alt="Story 2" fill className="object-cover" />
                                 </div>
                             </div>
-                        </motion.div>
+                            <div className="space-y-4 pt-8">
+                                <div className="relative h-48 rounded-lg overflow-hidden">
+                                    <Image src="/images/avatar.png" alt="Story 3" fill className="object-cover" />
+                                </div>
+                                <div className="relative h-64 rounded-lg overflow-hidden">
+                                    <Image src="/images/avatar.png" alt="Story 4" fill className="object-cover" />
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
 
             {/* Our Values Section */}
-            <section ref={valuesRef} className="py-20 px-6">
+            <section className="py-20 px-6 bg-zinc-100/50 dark:bg-zinc-900/50">
                 <div className="max-w-6xl mx-auto">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6 }}
-                        className="text-center mb-12"
-                    >
+                    <div className="text-center mb-12">
                         <Badge variant="secondary" className="mb-4">What Drives Us</Badge>
                         <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 dark:text-white mb-4">
                             Our Core Values
@@ -289,48 +161,35 @@ export default function AboutPage() {
                         <p className="text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">
                             The principles that guide everything we do
                         </p>
-                    </motion.div>
+                    </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {values.map((value, index) => {
                             const Icon = value.icon;
                             return (
-                                <motion.div
-                                    key={index}
-                                    className="value-card group"
-                                    whileHover={{ y: -5 }}
-                                >
-                                    <Card className="h-full text-center hover:shadow-xl transition-all duration-300">
-                                        <CardContent className="pt-6">
-                                            <div className={`w-16 h-16 bg-${value.color}-100 dark:bg-${value.color}-900/30 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}>
-                                                <Icon className={`text-2xl text-${value.color}-600 dark:text-${value.color}-400`} />
-                                            </div>
-                                            <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">
-                                                {value.title}
-                                            </h3>
-                                            <p className="text-zinc-600 dark:text-zinc-400 text-sm">
-                                                {value.description}
-                                            </p>
-                                        </CardContent>
-                                    </Card>
-                                </motion.div>
+                                <Card key={index} className="h-full text-center hover:shadow-xl transition-all duration-300">
+                                    <CardContent className="pt-6">
+                                        <div className={`w-16 h-16 ${value.bgClass} rounded-full flex items-center justify-center mx-auto mb-4`}>
+                                            <Icon className={`text-2xl ${value.textClass}`} />
+                                        </div>
+                                        <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">
+                                            {value.title}
+                                        </h3>
+                                        <p className="text-zinc-600 dark:text-zinc-400 text-sm">
+                                            {value.description}
+                                        </p>
+                                    </CardContent>
+                                </Card>
                             );
                         })}
                     </div>
                 </div>
             </section>
 
-
-
-            {/* Team Section */}
-            <section ref={teamRef} className="py-20 px-6">
+            {/* Team Section (Dynamic from Backend) */}
+            <section className="py-20 px-6">
                 <div className="max-w-6xl mx-auto">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6 }}
-                        className="text-center mb-12"
-                    >
+                    <div className="text-center mb-12">
                         <Badge variant="secondary" className="mb-4">Meet the Team</Badge>
                         <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 dark:text-white mb-4">
                             Behind the Lens
@@ -338,45 +197,52 @@ export default function AboutPage() {
                         <p className="text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">
                             The passionate individuals who make our photography tours extraordinary
                         </p>
-                    </motion.div>
+                    </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {team.map((member, index) => (
-                            <motion.div
-                                key={index}
-                                className="team-member group"
-                                whileHover={{ y: -5 }}
-                            >
-                                <Card className="overflow-hidden">
-                                    <div className="relative h-80 overflow-hidden">
-                                        <Image
-                                            src={member.image}
-                                            alt={member.name}
-                                            fill
-                                            className="object-cover group-hover:scale-110 transition-transform duration-500"
-                                        />
-                                    </div>
-                                    <CardHeader>
-                                        <CardTitle className="text-xl">{member.name}</CardTitle>
-                                        <CardDescription className="text-emerald-600 dark:text-emerald-400 font-medium">
-                                            {member.role}
-                                        </CardDescription>
-                                        <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-2">
-                                            {member.bio}
-                                        </p>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="flex gap-3">
-                                            <a href={member.social.instagram} className="text-zinc-400 hover:text-emerald-600 transition">
+                            <Card key={index} className="overflow-hidden flex flex-col h-full group hover:-translate-y-1 transition-all duration-300">
+                                <div className="relative h-80 overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                                   <Image
+    src={
+        member.image 
+            ? (member.image.startsWith("http") ? member.image : `${process.env.NEXT_PUBLIC_API_URL}${member.image}`)
+            : "/default_user.svg"
+    }
+    alt={member.name}
+    fill
+    className="object-cover group-hover:scale-110 transition-transform duration-500"
+/>
+                                </div>
+                                <CardHeader className="flex-grow">
+                                    <CardTitle className="text-xl">{member.name}</CardTitle>
+                                    <CardDescription className="text-emerald-600 dark:text-emerald-400 font-medium">
+                                        {member.role}
+                                    </CardDescription>
+                                    <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-2">
+                                        {member.bio}
+                                    </p>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="flex gap-3">
+                                        {member.social?.instagram && (
+                                            <a href={member.social.instagram} target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-emerald-600 transition">
                                                 <FaInstagram className="text-xl" />
                                             </a>
-                                            <a href={member.social.twitter} className="text-zinc-400 hover:text-emerald-600 transition">
+                                        )}
+                                        {member.social?.twitter && (
+                                            <a href={member.social.twitter} target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-emerald-600 transition">
                                                 <FaTwitter className="text-xl" />
                                             </a>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </motion.div>
+                                        )}
+                                        {member.social?.website && (
+                                            <a href={member.social.website} target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-emerald-600 transition">
+                                                <FaGlobeAmericas className="text-xl" />
+                                            </a>
+                                        )}
+                                    </div>
+                                </CardContent>
+                            </Card>
                         ))}
                     </div>
                 </div>
