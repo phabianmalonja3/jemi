@@ -111,19 +111,23 @@ export default function AboutPage() {
 
     const team = [
         {
-            name: "Jeremiah ",
+            name: "Jeremiah lutego weslaus",
             role: "Founder & Lead Photographer",
             bio: "Former National Geographic photographer with over 15 years of experience capturing the world's most breathtaking locations.",
-             image: "/default_user.svg",
+             image: "/images/ceo.jpeg",
             social: { instagram: "#", twitter: "#" }
         },
         {
-            name: "Sofia Rodriguez",
-            role: "Creative Director",
-            bio: "Award-winning portrait and cultural photographer who has documented traditions in over 40 countries.",
-            image: "/default_user.svg",
-            social: { instagram: "#", twitter: "#" }
-        },
+  name: "Phabian Ezekiel Malonja",
+  role: "System Developer & Visual Ethnographer",
+  bio: "Award-winning portrait and cultural photographer who has documented traditions in over 40 countries, now bridging legacy storytelling with digital systems.",
+  image: "/default_user.svg",
+  social: { 
+    instagram: "https://instagram.com/phabian.malonja", 
+    twitter: "https://twitter.com/phabian_malonja",
+    website: "https://phabianmalonja.com" // optional addition
+  }
+},
         {
             name: "David Kim",
             role: "Workshop Director",
