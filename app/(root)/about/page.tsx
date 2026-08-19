@@ -21,9 +21,9 @@ interface TeamMember {
     bio: string;
       imageUrl: string;
     social: {
-        instagram?: string;
-        twitter?: string;
-        website?: string;
+        instagramUrl?: string;
+        twitterUrl?: string;
+        websiteUrl?: string;
     };
 }
 
@@ -228,18 +228,18 @@ export default async function AboutPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <div className="flex gap-3">
-                                        {member.social?.instagram && (
-                                            <a href={member.social.instagram} target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-emerald-600 transition">
+                                        {member.social?.instagramUrl && (
+                                            <a href={member.social.instagramUrl} target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-emerald-600 transition">
                                                 <FaInstagram className="text-xl" />
                                             </a>
                                         )}
-                                        {member.social?.twitter && (
-                                            <a href={member.social.twitter} target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-emerald-600 transition">
+                                        {member.social?.twitterUrl && (
+                                            <a href={member.social.twitterUrl} target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-emerald-600 transition">
                                                 <FaTwitter className="text-xl" />
                                             </a>
                                         )}
-                                        {member.social?.website && (
-                                            <a href={member.social.website} target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-emerald-600 transition">
+                                        {member.social?.websiteUrl && (
+                                            <a href={member.social.websiteUrl} target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-emerald-600 transition">
                                                 <FaGlobeAmericas className="text-xl" />
                                             </a>
                                         )}
