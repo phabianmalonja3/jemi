@@ -77,7 +77,7 @@ export default function ContactPage() {
         {
             icon: FaPhone,
             title: "Call Us",
-            details: ["+255 713 132 128", "+255 628 000 347"],
+            details: ["+255 791 069 302", "+255 628 000 347"],
             link: "tel:+255628000347"
         },
         {
