@@ -92,6 +92,9 @@ export default function UserManagementPage() {
       );
 
       // Set users from response content
+
+
+      console.log(response.data.content);
       setUsers(response.data.content);
       setPagination({
         page: response.data.number,

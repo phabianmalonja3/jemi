@@ -4,7 +4,18 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
 
-
+interface Booking {
+  id: string;
+  type: string;
+  pickupTime: string;
+  addressName: string;
+  amountPaid: number;
+  status: string;
+  paymentStatus: string;
+  photographer?: { id: string; name: string };
+  client?: { id: string; name: string };
+  pkg?: { id: string; name: string };
+}
 
 export default function AdminBookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -26,6 +37,7 @@ export default function AdminBookingsPage() {
       const data = response.data;
       console.log("Fetched bookings:", data);
 
+      // Inashughulikia Page response ya Spring Boot (data.content) au Array ya kawaida
       setBookings(Array.isArray(data) ? data : data.content || []);
     } catch (error) {
       console.error(error);
@@ -39,30 +51,30 @@ export default function AdminBookingsPage() {
     fetchBookings();
   }, []);
 
-  // Filter bookings locally based on Booking Reference or Client Name
+  // Kuchuja bookings kulingana na Client Name, Photographer Name, au Address
   const filteredBookings = bookings.filter(
     (b) =>
-      b.bookingReference?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      b.clientName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      b.photographerName?.toLowerCase().includes(searchTerm.toLowerCase())
+      b.addressName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      b.client?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      b.photographer?.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Booking Management (Admin)</h1>
+      <h1 className="text-2xl font-bold mb-6">Booking Management </h1>
 
       {/* Search and Refresh Section */}
       <div className="flex gap-4 mb-6">
         <input
           type="text"
-          placeholder="Search by Reference, Client, or Photographer..."
+          placeholder="Search by Address, Client, or Photographer..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="border px-3 py-2 rounded-md w-96 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <button
           onClick={fetchBookings}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm font-medium transition"
+          className="bg-emerald-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm font-medium transition"
         >
           Refresh
         </button>
@@ -77,7 +89,7 @@ export default function AdminBookingsPage() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Reference / Type
+                  Type / Address
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Client
@@ -86,13 +98,13 @@ export default function AdminBookingsPage() {
                   Photographer
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Amount
+                  Amount Paid
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Scheduled Date
+                  Pickup Time
                 </th>
               </tr>
             </thead>
@@ -102,20 +114,20 @@ export default function AdminBookingsPage() {
                   <tr key={booking.id} className="hover:bg-gray-50 transition">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
-                        {booking.bookingReference || "N/A"}
+                        {booking.addressName || "N/A"}
                       </div>
                       <div className="text-xs text-gray-500 font-mono uppercase">
-                        {booking.bookingType || "STANDARD"}
+                        {booking.type || "STANDARD"}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {booking.clientName || "Unknown Client"}
+                      {booking.client?.name || "Unknown Client"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {booking.photographerName || "Unassigned"}
+                      {booking.photographer?.name || "Unassigned"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
-                      {booking.amount ? `${booking.amount.toLocaleString()} TZS` : "-"}
+                      {booking.amountPaid ? `${Number(booking.amountPaid).toLocaleString()} TZS` : "-"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <span
@@ -133,9 +145,9 @@ export default function AdminBookingsPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
-                      {booking.scheduledAt
-                        ? new Date(booking.scheduledAt).toLocaleString()
-                        : "Instant Booking"}
+                      {booking.pickupTime
+                        ? new Date(booking.pickupTime).toLocaleString()
+                        : "N/A"}
                     </td>
                   </tr>
                 ))
