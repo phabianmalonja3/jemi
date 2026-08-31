@@ -14,7 +14,8 @@ import {
   Cog,
   Smartphone,
   Users2Icon,
-  UserCheck
+  UserCheck,
+  Star
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -30,7 +31,8 @@ const ADMIN_LINKS = [
   { icon: ArrowLeftRight, label: "Transactions", href: "/dashboard/admin/transactions" },
   { icon: Calendar, label: "Bookings", href: "/dashboard/admin/bookings" },
   { icon: Users2Icon, label: "Teams", href: "/dashboard/admin/team" },        // ← Teams
-  { icon: UserCheck, label: "Subscribers", href: "/dashboard/admin/subscribers" }, // ← Subscribers
+  { icon: UserCheck, label: "Subscribers", href: "/dashboard/admin/subscribers" },
+  { icon: Star, label: "Reviews", href: "/dashboard/admin/reviews" }, // ← Subscribers
   { icon: Bell, label: "Notifications", href: "/dashboard/admin/notifications" },
   { icon: Smartphone, label: "App Updates", href: "/dashboard/admin/applications/versions" },
   { icon: Cog, label: "Settings", href: "/dashboard/admin/profile" },
