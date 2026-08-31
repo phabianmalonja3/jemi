@@ -26,7 +26,7 @@ import { toast } from "sonner";
 const ADMIN_LINKS = [
   { icon: LayoutDashboard, label: "Overview", href: "/dashboard" },
   { icon: Users, label: "User Management", href: "/dashboard/admin/users" },
-  { icon: Package, label: "Package Manager", href: "/dashboard/admin/packages" },
+  // { icon: Package, label: "Package Manager", href: "/dashboard/admin/packages" },
   { icon: Wallet, label: "Wallet Management", href: "/dashboard/admin/wallet" },
   { icon: ArrowLeftRight, label: "Transactions", href: "/dashboard/admin/transactions" },
   { icon: Calendar, label: "Bookings", href: "/dashboard/admin/bookings" },
