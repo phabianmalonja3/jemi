@@ -13,7 +13,8 @@ import {
   Settings2,
   Cog,
   Smartphone,
-  Users2Icon
+  Users2Icon,
+  UserCheck
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -21,22 +22,18 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { toast } from "sonner";
 
-// --- Navigation Config ---
-
 const ADMIN_LINKS = [
   { icon: LayoutDashboard, label: "Overview", href: "/dashboard" },
   { icon: Users, label: "User Management", href: "/dashboard/admin/users" },
   { icon: Package, label: "Package Manager", href: "/dashboard/admin/packages" },
   { icon: Wallet, label: "Wallet Management", href: "/dashboard/admin/wallet" },
   { icon: ArrowLeftRight, label: "Transactions", href: "/dashboard/admin/transactions" },
-  { icon: Bell, label: "Notifications", href: "/dashboard/admin/notifications" },
-  { icon: Cog, label: "Settings", href: "/dashboard/admin/profile" },
-  { icon: Smartphone, label: "App Updates", href: "/dashboard/admin/applications/versions" },
   { icon: Calendar, label: "Bookings", href: "/dashboard/admin/bookings" },
-  { icon: Users2Icon, label: "Teams", href: "/dashboard/admin/team" }
- 
-
-  // <Bell size={20} />
+  { icon: Users2Icon, label: "Teams", href: "/dashboard/admin/team" },        // ← Teams
+  { icon: UserCheck, label: "Subscribers", href: "/dashboard/admin/subscribers" }, // ← Subscribers
+  { icon: Bell, label: "Notifications", href: "/dashboard/admin/notifications" },
+  { icon: Smartphone, label: "App Updates", href: "/dashboard/admin/applications/versions" },
+  { icon: Cog, label: "Settings", href: "/dashboard/admin/profile" },
 ];
 
 const SidebarItem = ({ icon: Icon, label, href, active, isCollapsed, onClick }: any) => (
