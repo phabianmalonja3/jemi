@@ -22,6 +22,7 @@ import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { toast } from "sonner";
+import axios from "axios";
 
 const ADMIN_LINKS = [
   { icon: LayoutDashboard, label: "Overview", href: "/dashboard" },
@@ -77,20 +78,28 @@ export function Sidebar() {
  
 const handleLogout = async () => {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout-all`, {
-      method: 'POST',
-      credentials: 'include', 
-    });
+    const token = localStorage.getItem("token");
+    
+    const response = await axios.post(
+      `${process.env.NEXT_PUBLIC_API_URL}/auth/logout-all`,
+      {},
+      {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true, // Hii ni sawa na credentials: 'include'
+      }
+    );
 
-    if (!res.ok) {
-      throw new Error('Logout failed');
-    }
-
+    // Ondoa token kutoka localStorage
+    localStorage.removeItem("token");
+    
     toast.success("Logged out successfully");
     setTimeout(() => { 
       window.location.href = "/auth/login"; 
     }, 1000);
   } catch (error) {
+    console.error("Logout error:", error);
     toast.error("Logout failed");
   }
 };
