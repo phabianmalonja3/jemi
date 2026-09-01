@@ -74,16 +74,26 @@ export function Sidebar() {
 
   if (!user) return null;
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      toast.success("Logged out successfully");
-      setTimeout(() => { window.location.href = "/auth/login"; }, 1000);
-    } catch (error) {
-      toast.error("Logout failed");
-    }
-  };
+ 
+const handleLogout = async () => {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout-all`, {
+      method: 'POST',
+      credentials: 'include', 
+    });
 
+    if (!res.ok) {
+      throw new Error('Logout failed');
+    }
+
+    toast.success("Logged out successfully");
+    setTimeout(() => { 
+      window.location.href = "/auth/login"; 
+    }, 1000);
+  } catch (error) {
+    toast.error("Logout failed");
+  }
+};
   const userInitial = user.name?.charAt(0).toUpperCase() || "U";
   const userName = user.name?.split(' ')[0] || user.name || "User";
 
