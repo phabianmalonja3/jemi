@@ -95,7 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     if (!user) return;
 
     let timer: NodeJS.Timeout;
-    const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 Minutes
+    const INACTIVITY_TIMEOUT = 2 * 60 * 1000; // 5 Minutes
 
     const handleInactivity = async () => {
       await logout();
