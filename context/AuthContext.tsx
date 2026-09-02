@@ -18,9 +18,6 @@ import {
 } from "../lib/actions";
 import axios from "axios";
 
-
-
-
 // --- Types ---
 export interface User {
   id: number;
@@ -36,10 +33,10 @@ interface AuthContextType {
   isPhotographer: boolean;
   isAuthenticated: boolean;
   isLoading: boolean;
-login: (email: string, password: string) => Promise<{ 
+  login: (email: string, password: string) => Promise<{ 
     success: boolean; 
-    user?: User;      // user sasa ni optional (?)
-    message?: string; // ongeza message kwa ajili ya error
+    user?: User;      
+    message?: string; 
   }>;
   logout: () => void;
 }
@@ -68,44 +65,89 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     initAuth();
   }, []);
 
- const login = useCallback(async (email: string, password: string) => {
-  setIsLoading(true);
-  try {
-    const response = await axios.post(`${BASE_URL}/auth/login`, { email, password });
-
-    const { accessToken, user } = response.data;
-    
-    // Hizi zinawekwa tu kama login imefanikiwa
-    localStorage.setItem("is_login", "true");
-    localStorage.setItem("token", accessToken);
-    
-    await setAuthSession(accessToken, user);
-    setUser(user);
-    
-    return { success: true, user };
-  } catch (error: any) {
-    // 1. Usiweke "is_login" kuwa true kwenye catch
-    // 2. Ondoa "throw error" kama unataka kushughulikia error hapo hapo
-    // au iruhusu error ionekane kwenye UI component yako.
-    
-    console.error("Login failed:", error.response?.data?.message || error.message);
-    
-    // Rudisha status ya kosa ili UI iweze kuisoma
-    return { 
-      success: false, 
-      message: error.response?.data?.message || "Invalid email or password" 
-    };
-  } finally {
-    setIsLoading(false);
-  }
-}, []);
-
   const logout = useCallback(async () => {
-    await clearAuthSession();
-    setUser(null);
-    router.push("/auth/login");
-    toast.info("Signed out successfully");
-  }, [router]);
+    try {
+      const token = localStorage.getItem("token");
+      if (token) {
+        await axios.post(
+          `${BASE_URL}/auth/logout-all`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            withCredentials: true,
+          }
+        );
+      }
+    } catch (error) {
+      console.error("Logout API call failed:", error);
+    } finally {
+      await clearAuthSession();
+      setUser(null);
+      router.push("/auth/login");
+      toast.info("Signed out successfully");
+    }
+  }, [router, BASE_URL]);
+
+  // ⏱️ Inactivity Timeout Logic (Dakika 5)
+  useEffect(() => {
+    if (!user) return;
+
+    let timer: NodeJS.Timeout;
+    const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 Minutes
+
+    const handleInactivity = async () => {
+      await logout();
+      toast.warning("Session expired due to inactivity.");
+    };
+
+    const resetTimer = () => {
+      clearTimeout(timer);
+      timer = setTimeout(handleInactivity, INACTIVITY_TIMEOUT);
+    };
+
+    const events = ["mousemove", "keydown", "click", "scroll", "touchstart"];
+    
+    events.forEach((event) => {
+      window.addEventListener(event, resetTimer);
+    });
+
+    resetTimer();
+
+    return () => {
+      clearTimeout(timer);
+      events.forEach((event) => {
+        window.removeEventListener(event, resetTimer);
+      });
+    };
+  }, [user, logout]);
+
+  const login = useCallback(async (email: string, password: string) => {
+    setIsLoading(true);
+    try {
+      const response = await axios.post(`${BASE_URL}/auth/login`, { email, password });
+
+      const { accessToken, user } = response.data;
+      
+      localStorage.setItem("is_login", "true");
+      localStorage.setItem("token", accessToken);
+      
+      await setAuthSession(accessToken, user);
+      setUser(user);
+      
+      return { success: true, user };
+    } catch (error: any) {
+      console.error("Login failed:", error.response?.data?.message || error.message);
+      
+      return { 
+        success: false, 
+        message: error.response?.data?.message || "Invalid email or password" 
+      };
+    } finally {
+      setIsLoading(false);
+    }
+  }, [BASE_URL]);
 
   const isPhotographer = user?.role === "PHOTOGRAPHER";
   const isAuthenticated = !!user;
