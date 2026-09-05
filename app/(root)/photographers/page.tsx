@@ -4,6 +4,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
 import {
     FaCamera,
     FaEnvelope,
@@ -16,29 +17,82 @@ import {
     FaUser,
     FaAt,
     FaChevronDown,
-    FaCheckCircle,
     FaPhone,
     FaMapMarkerAlt,
 } from "react-icons/fa";
-import { useEffect, useRef, useState, useCallback } from "react";
+
+import {
+    useEffect,
+    useRef,
+    useState,
+    useCallback,
+} from "react";
+
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+
 import Footer from "@/components/web/Footer";
 
 if (typeof window !== "undefined") {
     gsap.registerPlugin(ScrollTrigger);
 }
 
+
+const VERIFIED_ICON = "/icons/verification.svg";
+
+interface Photographer {
+    id: string;
+    name?: string;
+    email: string;
+    phone?: string | null;
+    bio?: string | null;
+    profileImage?: string | null;
+
+    isVerified: boolean;
+    isBusy?: boolean;
+    isOnline?: boolean;
+
+    averageRating?: number;
+    totalReviews?: number;
+
+    rating?: number;
+    specialty?: string;
+    location?: string;
+    quote?: string;
+    experience?: string;
+    sessions?: number;
+
+    achievements?: string[];
+
+    instagram?: string;
+    facebook?: string;
+    twitter?: string;
+}
+
+interface PageableResponse {
+    content: Photographer[];
+    totalElements: number;
+    totalPages: number;
+    size: number;
+    number: number;
+}
+
 // ============================================================
 // HELPERS
 // ============================================================
 
-const getDisplayName = (photographer: Photographer): string => {
-    if (photographer.name && photographer.name.trim() !== "") {
+const getDisplayName = (
+    photographer: Photographer
+): string => {
+    if (
+        photographer.name &&
+        photographer.name.trim() !== ""
+    ) {
         return photographer.name;
     }
 
-    const emailName = photographer.email.split("@")[0];
+    const emailName =
+        photographer.email.split("@")[0];
 
     if (
         emailName &&
@@ -90,41 +144,54 @@ const getPhotographerDetails = (
     const hash = photographer.id
         .split("")
         .reduce(
-            (acc, char) => acc + char.charCodeAt(0),
+            (acc, char) =>
+                acc + char.charCodeAt(0),
             0
         );
 
-    const rating = getDisplayRating(photographer);
-    const sessions = getSessionCount(photographer);
-    const experienceYears = 3 + (hash % 10);
+    const rating =
+        getDisplayRating(photographer);
+
+    const sessions =
+        getSessionCount(photographer);
+
+    const experienceYears =
+        3 + (hash % 10);
 
     return {
         ...photographer,
 
         name: getDisplayName(photographer),
 
-        rating: rating,
+        rating,
 
-        specialty: "Professional Photographer",
+        specialty:
+            "Professional Photographer",
 
         location: "Tanzania",
 
-        profileImage: photographer.profileImage,
+        profileImage:
+            photographer.profileImage,
 
         bio: photographer.bio || "",
 
-        quote: quotes[hash % quotes.length],
+        quote:
+            quotes[hash % quotes.length],
 
-        experience: `${experienceYears}+ Years`,
+        experience:
+            `${experienceYears}+ Years`,
 
-        sessions: sessions,
+        sessions,
 
         phone:
-            photographer.phone || "Not provided",
+            photographer.phone ||
+            "Not provided",
 
         achievements: [
             "International Photography Award Winner",
-            `${Math.floor(rating * 20)}+ Satisfied Clients`,
+            `${Math.floor(
+                rating * 20
+            )}+ Satisfied Clients`,
             "Master of Light & Composition",
         ],
 
@@ -144,9 +211,15 @@ export default function PhotographersPage() {
     const [
         photographersData,
         setPhotographersData,
-    ] = useState<PageableResponse | null>(null);
+    ] =
+        useState<PageableResponse | null>(
+            null
+        );
 
-    const [photographers, setPhotographers] =
+    const [
+        photographers,
+        setPhotographers,
+    ] =
         useState<Photographer[]>([]);
 
     const [loading, setLoading] =
@@ -158,7 +231,10 @@ export default function PhotographersPage() {
     const [
         selectedPhotographer,
         setSelectedPhotographer,
-    ] = useState<Photographer | null>(null);
+    ] =
+        useState<Photographer | null>(
+            null
+        );
 
     const [searchQuery, setSearchQuery] =
         useState("");
@@ -171,20 +247,30 @@ export default function PhotographersPage() {
 
     const [searchField, setSearchField] =
         useState<
-            "all" |
-            "name" |
-            "email" |
-            "phone" |
-            "location"
+            | "all"
+            | "name"
+            | "email"
+            | "phone"
+            | "location"
         >("all");
 
-    const [showVerifiedOnly, setShowVerifiedOnly] =
-        useState(true);
+    const [
+        showVerifiedOnly,
+        setShowVerifiedOnly,
+    ] = useState(true);
 
-    const heroRef = useRef(null);
-    const teamRef = useRef(null);
+    const heroRef = useRef<HTMLElement | null>(
+        null
+    );
+
+    const teamRef = useRef<HTMLElement | null>(
+        null
+    );
+
     const gridRef =
-        useRef<HTMLDivElement>(null);
+        useRef<HTMLDivElement | null>(
+            null
+        );
 
     // ============================================================
     // FETCH PHOTOGRAPHERS
@@ -197,9 +283,10 @@ export default function PhotographersPage() {
             setLoading(true);
             setError(null);
 
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/photographers?page=${page}&size=12`
-            );
+            const response =
+                await fetch(
+                    `${process.env.NEXT_PUBLIC_API_URL}/photographers?page=${page}&size=12`
+                );
 
             if (!response.ok) {
                 throw new Error(
@@ -210,13 +297,15 @@ export default function PhotographersPage() {
             const data: PageableResponse =
                 await response.json();
 
-            let filteredContent = data.content;
+            let filteredContent =
+                data.content;
 
             if (showVerifiedOnly) {
                 filteredContent =
                     data.content.filter(
                         (photographer) =>
-                            photographer.isVerified === true
+                            photographer.isVerified ===
+                            true
                     );
             }
 
@@ -227,7 +316,8 @@ export default function PhotographersPage() {
 
             setPhotographersData({
                 ...data,
-                content: filteredContent,
+                content:
+                    filteredContent,
             });
 
             setPhotographers(
@@ -241,14 +331,19 @@ export default function PhotographersPage() {
                 ) || 1
             );
         } catch (err: any) {
-            setError(err.message);
+            setError(
+                err.message ||
+                    "Something went wrong."
+            );
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchPhotographers(currentPage);
+        fetchPhotographers(
+            currentPage
+        );
     }, [
         currentPage,
         showVerifiedOnly,
@@ -260,7 +355,9 @@ export default function PhotographersPage() {
 
     const filteredPhotographers =
         useCallback(() => {
-            let filtered = [...photographers];
+            let filtered = [
+                ...photographers,
+            ];
 
             if (searchQuery.trim()) {
                 const query =
@@ -268,72 +365,79 @@ export default function PhotographersPage() {
                         .toLowerCase()
                         .trim();
 
-                filtered = filtered.filter(
-                    (photographer) => {
-                        switch (searchField) {
-                            case "name":
-                                return (
-                                    photographer.name
-                                        ?.toLowerCase()
-                                        .includes(
-                                            query
-                                        ) ||
-                                    false
-                                );
+                filtered =
+                    filtered.filter(
+                        (
+                            photographer
+                        ) => {
+                            switch (
+                                searchField
+                            ) {
+                                case "name":
+                                    return (
+                                        photographer.name
+                                            ?.toLowerCase()
+                                            .includes(
+                                                query
+                                            ) ||
+                                        false
+                                    );
 
-                            case "email":
-                                return photographer.email
-                                    .toLowerCase()
-                                    .includes(query);
-
-                            case "phone":
-                                return (
-                                    photographer.phone
-                                        ?.toLowerCase()
-                                        .includes(
-                                            query
-                                        ) ||
-                                    false
-                                );
-
-                            case "location":
-                                return (
-                                    photographer.location
-                                        ?.toLowerCase()
-                                        .includes(
-                                            query
-                                        ) ||
-                                    false
-                                );
-
-                            case "all":
-                            default:
-                                return (
-                                    photographer.name
-                                        ?.toLowerCase()
-                                        .includes(
-                                            query
-                                        ) ||
-                                    photographer.email
+                                case "email":
+                                    return photographer.email
                                         .toLowerCase()
                                         .includes(
                                             query
-                                        ) ||
-                                    photographer.phone
-                                        ?.toLowerCase()
-                                        .includes(
-                                            query
-                                        ) ||
-                                    photographer.location
-                                        ?.toLowerCase()
-                                        .includes(
-                                            query
-                                        ) ||
-                                    false
-                                );
+                                        );
+
+                                case "phone":
+                                    return (
+                                        photographer.phone
+                                            ?.toLowerCase()
+                                            .includes(
+                                                query
+                                            ) ||
+                                        false
+                                    );
+
+                                case "location":
+                                    return (
+                                        photographer.location
+                                            ?.toLowerCase()
+                                            .includes(
+                                                query
+                                            ) ||
+                                        false
+                                    );
+
+                                case "all":
+                                default:
+                                    return (
+                                        photographer.name
+                                            ?.toLowerCase()
+                                            .includes(
+                                                query
+                                            ) ||
+                                        photographer.email
+                                            .toLowerCase()
+                                            .includes(
+                                                query
+                                            ) ||
+                                        photographer.phone
+                                            ?.toLowerCase()
+                                            .includes(
+                                                query
+                                            ) ||
+                                        photographer.location
+                                            ?.toLowerCase()
+                                            .includes(
+                                                query
+                                            ) ||
+                                        false
+                                    );
+                            }
                         }
-                    }
-                );
+                    );
             }
 
             return filtered;
@@ -353,59 +457,69 @@ export default function PhotographersPage() {
     useEffect(() => {
         if (
             loading ||
-            displayedPhotographers.length === 0
+            displayedPhotographers.length ===
+                0
         ) {
             return;
         }
 
-        const timer = setTimeout(() => {
-            const ctx = gsap.context(() => {
-                gsap.fromTo(
-                    ".hero-content",
-                    {
-                        y: 50,
-                        opacity: 0,
-                    },
-                    {
-                        y: 0,
-                        opacity: 1,
-                        duration: 0.8,
-                        ease: "power3.out",
-                    }
-                );
+        const timer =
+            setTimeout(() => {
+                const ctx =
+                    gsap.context(
+                        () => {
+                            gsap.fromTo(
+                                ".hero-content",
+                                {
+                                    y: 50,
+                                    opacity: 0,
+                                },
+                                {
+                                    y: 0,
+                                    opacity: 1,
+                                    duration: 0.8,
+                                    ease: "power3.out",
+                                }
+                            );
 
-                const cards =
-                    document.querySelectorAll(
-                        ".photographer-card"
-                    );
+                            const cards =
+                                document.querySelectorAll(
+                                    ".photographer-card"
+                                );
 
-                if (cards.length > 0) {
-                    gsap.fromTo(
-                        cards,
-                        {
-                            y: 50,
-                            opacity: 0,
-                        },
-                        {
-                            y: 0,
-                            opacity: 1,
-                            duration: 0.5,
-                            stagger: 0.08,
-                            ease: "power2.out",
-                            scrollTrigger: {
-                                trigger:
-                                    teamRef.current,
-                                start: "top 85%",
-                                toggleActions:
-                                    "play none none reverse",
-                            },
+                            if (
+                                cards.length >
+                                0
+                            ) {
+                                gsap.fromTo(
+                                    cards,
+                                    {
+                                        y: 50,
+                                        opacity: 0,
+                                    },
+                                    {
+                                        y: 0,
+                                        opacity: 1,
+                                        duration: 0.5,
+                                        stagger: 0.08,
+                                        ease: "power2.out",
+                                        scrollTrigger:
+                                            {
+                                                trigger:
+                                                    teamRef.current,
+                                                start: "top 85%",
+                                                toggleActions:
+                                                    "play none none reverse",
+                                            },
+                                    }
+                                );
+                            }
                         }
                     );
-                }
-            });
 
-            return () => ctx.revert();
-        }, 100);
+                return () =>
+                    ctx.revert();
+            }, 100);
 
         return () =>
             clearTimeout(timer);
@@ -431,24 +545,25 @@ export default function PhotographersPage() {
         setSearchField("all");
     };
 
-    const getSearchPlaceholder = () => {
-        switch (searchField) {
-            case "name":
-                return "Search by photographer name...";
+    const getSearchPlaceholder =
+        () => {
+            switch (searchField) {
+                case "name":
+                    return "Search by photographer name...";
 
-            case "email":
-                return "Search by email address...";
+                case "email":
+                    return "Search by email address...";
 
-            case "phone":
-                return "Search by phone number...";
+                case "phone":
+                    return "Search by phone number...";
 
-            case "location":
-                return "Search by location...";
+                case "location":
+                    return "Search by location...";
 
-            default:
-                return "Search by name, email, phone, or location...";
-        }
-    };
+                default:
+                    return "Search by name, email, phone, or location...";
+            }
+        };
 
     const formatPhoneNumber = (
         phone: string
@@ -461,16 +576,24 @@ export default function PhotographersPage() {
         }
 
         const cleaned =
-            phone.replace(/\D/g, "");
+            phone.replace(
+                /\D/g,
+                ""
+            );
 
-        if (cleaned.length === 10) {
+        if (
+            cleaned.length === 10
+        ) {
             return `(${cleaned.slice(
                 0,
                 3
             )}) ${cleaned.slice(
                 3,
                 6
-            )}-${cleaned.slice(6, 10)}`;
+            )}-${cleaned.slice(
+                6,
+                10
+            )}`;
         }
 
         return phone;
@@ -484,6 +607,7 @@ export default function PhotographersPage() {
         return (
             <div className="flex flex-col items-center justify-center min-h-screen bg-zinc-50 dark:bg-black">
                 <div className="text-center space-y-4">
+
                     <div className="w-20 h-20 mx-auto bg-red-100 rounded-full flex items-center justify-center">
                         <FaCamera className="text-3xl text-red-500" />
                     </div>
@@ -502,6 +626,7 @@ export default function PhotographersPage() {
                     >
                         Try Again
                     </Button>
+
                 </div>
             </div>
         );
@@ -523,7 +648,8 @@ export default function PhotographersPage() {
                     ref={heroRef}
                     className="relative overflow-hidden bg-[#25632D]"
                 >
-                    {/* Pattern - NO GRADIENT */}
+
+                    {/* Pattern */}
 
                     <div className="absolute inset-0 opacity-10">
                         <div
@@ -547,18 +673,18 @@ export default function PhotographersPage() {
                         <FaCamera />
                     </div>
 
-                    <div
-                        ref={heroRef}
-                        className="relative max-w-6xl mx-auto px-6 py-24 md:py-32 hero-content opacity-0"
-                    >
+                    <div className="relative max-w-6xl mx-auto px-6 py-24 md:py-32 hero-content opacity-0">
+
                         <div className="text-center">
 
                             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight">
+
                                 Find Your Perfect
 
                                 <span className="block text-[#D8F3DC]">
                                     Photographer
                                 </span>
+
                             </h1>
 
                             <p className="text-lg md:text-xl text-white/80 mb-10 max-w-2xl mx-auto">
@@ -571,6 +697,7 @@ export default function PhotographersPage() {
                             {/* SEARCH */}
 
                             <div className="max-w-3xl mx-auto">
+
                                 <div className="bg-white/10 backdrop-blur-md rounded-2xl p-1 shadow-2xl">
 
                                     <div className="relative">
@@ -580,10 +707,15 @@ export default function PhotographersPage() {
                                         <Input
                                             type="text"
                                             placeholder={getSearchPlaceholder()}
-                                            value={searchQuery}
-                                            onChange={(e) =>
+                                            value={
+                                                searchQuery
+                                            }
+                                            onChange={(
+                                                e
+                                            ) =>
                                                 setSearchQuery(
-                                                    e.target
+                                                    e
+                                                        .target
                                                         .value
                                                 )
                                             }
@@ -635,7 +767,9 @@ export default function PhotographersPage() {
                                             icon: FaMapMarkerAlt,
                                         },
                                     ].map(
-                                        (filter) => {
+                                        (
+                                            filter
+                                        ) => {
                                             const Icon =
                                                 filter.icon;
 
@@ -666,7 +800,7 @@ export default function PhotographersPage() {
                                         }
                                     )}
 
-                                    {/* VERIFIED */}
+                                    {/* VERIFIED FILTER */}
 
                                     <button
                                         onClick={() =>
@@ -680,9 +814,18 @@ export default function PhotographersPage() {
                                                 : "bg-white/10 text-white hover:bg-white/20"
                                         }`}
                                     >
-                                        <FaCheckCircle className="text-xs" />
+
+                                        <Image
+                                            src={
+                                                VERIFIED_ICON
+                                            }
+                                            alt="Verified"
+                                            width={14}
+                                            height={14}
+                                        />
 
                                         Verified Only
+
                                     </button>
 
                                 </div>
@@ -692,10 +835,15 @@ export default function PhotographersPage() {
 
                             <motion.div
                                 animate={{
-                                    y: [0, 10, 0],
+                                    y: [
+                                        0,
+                                        10,
+                                        0,
+                                    ],
                                 }}
                                 transition={{
-                                    repeat: Infinity,
+                                    repeat:
+                                        Infinity,
                                     duration: 2,
                                 }}
                                 className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden md:block"
@@ -736,8 +884,19 @@ export default function PhotographersPage() {
 
                                 {showVerifiedOnly && (
                                     <span className="ml-2 text-blue-600">
-                                        <FaCheckCircle className="inline mr-1 text-xs" />
+
+                                        <Image
+                                            src={
+                                                VERIFIED_ICON
+                                            }
+                                            alt="Verified"
+                                            width={13}
+                                            height={13}
+                                            className="inline-block mr-1"
+                                        />
+
                                         Verified only
+
                                     </span>
                                 )}
 
@@ -779,6 +938,7 @@ export default function PhotographersPage() {
                     ref={teamRef}
                     className="py-12 px-6"
                 >
+
                     <div className="max-w-6xl mx-auto">
 
                         {loading ? (
@@ -801,7 +961,9 @@ export default function PhotographersPage() {
                         ) : (
                             <>
                                 <div
-                                    ref={gridRef}
+                                    ref={
+                                        gridRef
+                                    }
                                     className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
                                 >
 
@@ -870,10 +1032,23 @@ export default function PhotographersPage() {
 
                                                             </span>
 
+                                                            {/* VERIFIED BADGE */}
+
                                                             {photographer.isVerified && (
                                                                 <span className="px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 bg-blue-500/90 text-white">
 
-                                                                    <FaCheckCircle className="text-xs" />
+                                                                    <Image
+                                                                        src={
+                                                                            VERIFIED_ICON
+                                                                        }
+                                                                        alt="Verified"
+                                                                        width={
+                                                                            14
+                                                                        }
+                                                                        height={
+                                                                            14
+                                                                        }
+                                                                    />
 
                                                                     Verified
 
@@ -918,8 +1093,22 @@ export default function PhotographersPage() {
                                                                 }
                                                             </h3>
 
+                                                            {/* VERIFIED SVG */}
+
                                                             {photographer.isVerified && (
-                                                                <FaCheckCircle className="text-blue-500 text-lg shrink-0 ml-2" />
+                                                                <Image
+                                                                    src={
+                                                                        VERIFIED_ICON
+                                                                    }
+                                                                    alt="Verified"
+                                                                    width={
+                                                                        20
+                                                                    }
+                                                                    height={
+                                                                        20
+                                                                    }
+                                                                    className="shrink-0 ml-2"
+                                                                />
                                                             )}
 
                                                         </div>
@@ -965,6 +1154,7 @@ export default function PhotographersPage() {
                                                         <div className="grid grid-cols-2 gap-4 mb-4 pb-4 border-b border-zinc-200 dark:border-zinc-700">
 
                                                             <div>
+
                                                                 <p className="text-xs text-zinc-500 dark:text-zinc-400">
                                                                     Experience
                                                                 </p>
@@ -974,9 +1164,11 @@ export default function PhotographersPage() {
                                                                         photographer.experience
                                                                     }
                                                                 </p>
+
                                                             </div>
 
                                                             <div>
+
                                                                 <p className="text-xs text-zinc-500 dark:text-zinc-400">
                                                                     Sessions
                                                                 </p>
@@ -986,6 +1178,7 @@ export default function PhotographersPage() {
                                                                         photographer.sessions
                                                                     }+
                                                                 </p>
+
                                                             </div>
 
                                                         </div>
@@ -1054,11 +1247,13 @@ export default function PhotographersPage() {
                                             </h3>
 
                                             <p className="text-zinc-500 max-w-md mx-auto">
+
                                                 {searchQuery
                                                     ? `We couldn't find any photographers matching "${searchQuery}"`
                                                     : showVerifiedOnly
                                                     ? "No verified photographers are currently available"
                                                     : "No photographers are currently available"}
+
                                             </p>
 
                                             {searchQuery && (
@@ -1134,7 +1329,10 @@ export default function PhotographersPage() {
                                                     totalPages
                                                 ),
                                             },
-                                            (_, i) => {
+                                            (
+                                                _,
+                                                i
+                                            ) => {
                                                 let pageNum =
                                                     i;
 
@@ -1227,6 +1425,7 @@ export default function PhotographersPage() {
                 ================================================== */}
 
                 <AnimatePresence>
+
                     {selectedPhotographer && (
                         <motion.div
                             initial={{
@@ -1309,8 +1508,22 @@ export default function PhotographersPage() {
                                                     }
                                                 </h2>
 
+                                                {/* VERIFIED SVG */}
+
                                                 {selectedPhotographer.isVerified && (
-                                                    <FaCheckCircle className="text-blue-400 text-2xl" />
+                                                    <Image
+                                                        src={
+                                                            VERIFIED_ICON
+                                                        }
+                                                        alt="Verified"
+                                                        width={
+                                                            24
+                                                        }
+                                                        height={
+                                                            24
+                                                        }
+                                                        className="mb-2"
+                                                    />
                                                 )}
 
                                             </div>
@@ -1343,13 +1556,19 @@ export default function PhotographersPage() {
                                                 </div>
 
                                                 <div className="mt-4 p-4 bg-[#EAF4EC] dark:bg-[#25632D]/20 rounded-lg italic">
+
                                                     <p className="text-[#25632D] dark:text-green-300">
+
                                                         "
+
                                                         {
                                                             selectedPhotographer.quote
                                                         }
+
                                                         "
+
                                                     </p>
+
                                                 </div>
 
                                             </div>
@@ -1363,18 +1582,22 @@ export default function PhotographersPage() {
                                                 <div className="space-y-3">
 
                                                     <div className="flex items-center gap-3">
+
                                                         <FaEnvelope className="text-[#25632D]" />
+
                                                         <span className="text-zinc-700 dark:text-zinc-300">
                                                             {
                                                                 selectedPhotographer.email
                                                             }
                                                         </span>
+
                                                     </div>
 
                                                     {selectedPhotographer.phone &&
                                                         selectedPhotographer.phone !==
                                                             "Not provided" && (
                                                             <div className="flex items-center gap-3">
+
                                                                 <FaPhone className="text-[#25632D]" />
 
                                                                 <span className="text-zinc-700 dark:text-zinc-300">
@@ -1382,10 +1605,12 @@ export default function PhotographersPage() {
                                                                         selectedPhotographer.phone
                                                                     )}
                                                                 </span>
+
                                                             </div>
                                                         )}
 
                                                     <div className="flex items-center gap-3">
+
                                                         <FaCalendarAlt className="text-[#25632D]" />
 
                                                         <span className="text-zinc-700 dark:text-zinc-300">
@@ -1394,9 +1619,11 @@ export default function PhotographersPage() {
                                                             }{" "}
                                                             Experience
                                                         </span>
+
                                                     </div>
 
                                                     <div className="flex items-center gap-3">
+
                                                         <FaStar className="text-yellow-400" />
 
                                                         <span className="text-zinc-700 dark:text-zinc-300">
@@ -1409,18 +1636,35 @@ export default function PhotographersPage() {
                                                             {
                                                                 selectedPhotographer.sessions
                                                             }
-                                                            + sessions)
+                                                            +
+                                                            sessions)
                                                         </span>
+
                                                     </div>
+
+                                                    {/* VERIFIED */}
 
                                                     {selectedPhotographer.isVerified && (
                                                         <div className="flex items-center gap-3">
-                                                            <FaCheckCircle className="text-blue-500" />
+
+                                                            <Image
+                                                                src={
+                                                                    VERIFIED_ICON
+                                                                }
+                                                                alt="Verified"
+                                                                width={
+                                                                    18
+                                                                }
+                                                                height={
+                                                                    18
+                                                                }
+                                                            />
 
                                                             <span className="font-medium text-blue-600 dark:text-blue-400">
                                                                 Verified
                                                                 Photographer
                                                             </span>
+
                                                         </div>
                                                     )}
 
@@ -1443,11 +1687,13 @@ export default function PhotographersPage() {
                                                                 }
                                                                 className="flex items-center gap-2 text-zinc-600 dark:text-zinc-400"
                                                             >
+
                                                                 <FaAward className="text-[#25632D] text-sm" />
 
                                                                 {
                                                                     achievement
                                                                 }
+
                                                             </li>
                                                         )
                                                     )}
@@ -1462,10 +1708,15 @@ export default function PhotographersPage() {
                                                         href={`mailto:${selectedPhotographer.email}`}
                                                         className="flex-1"
                                                     >
+
                                                         <Button className="w-full bg-[#25632D] hover:bg-[#1e5125]">
+
                                                             <FaEnvelope className="mr-2" />
+
                                                             Email
+
                                                         </Button>
+
                                                     </a>
 
                                                     {selectedPhotographer.phone &&
@@ -1478,10 +1729,15 @@ export default function PhotographersPage() {
                                                                 )}`}
                                                                 className="flex-1"
                                                             >
+
                                                                 <Button className="w-full bg-blue-600 hover:bg-blue-700">
+
                                                                     <FaPhone className="mr-2" />
+
                                                                     Call
+
                                                                 </Button>
+
                                                             </a>
                                                         )}
 
@@ -1514,10 +1770,10 @@ export default function PhotographersPage() {
 
                         </motion.div>
                     )}
+
                 </AnimatePresence>
 
             </div>
-
 
             {/* FOOTER */}
 
