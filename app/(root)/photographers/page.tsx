@@ -1518,6 +1518,7 @@ export default function PhotographersPage() {
 
             </div>
 
+
             {/* FOOTER */}
 
             <Footer />
