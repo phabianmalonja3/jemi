@@ -1,13 +1,11 @@
 import Image from "next/image";
-import { motion } from "framer-motion";
 import {
     FaCamera,
     FaHeart,
     FaAward,
-    FaGlobe,
+    FaGlobeAmericas,
     FaInstagram,
     FaTwitter,
-    FaGlobeAmericas
 } from "react-icons/fa";
 
 import {
@@ -15,7 +13,7 @@ import {
     CardContent,
     CardDescription,
     CardHeader,
-    CardTitle
+    CardTitle,
 } from "@/components/ui/card";
 
 import { Badge } from "@/components/ui/badge";
@@ -45,7 +43,9 @@ async function getTeamMembers(): Promise<TeamMember[]> {
         );
 
         if (!res.ok) {
-            throw new Error("Failed to fetch team members from backend");
+            throw new Error(
+                "Failed to fetch team members from backend"
+            );
         }
 
         const data = await res.json();
@@ -61,86 +61,52 @@ async function getTeamMembers(): Promise<TeamMember[]> {
 export default async function AboutPage() {
     const team = await getTeamMembers();
 
-    const values = [
-        {
-            title: "Passion for Photography",
-            description:
-                "We live and breathe photography. Every member of our team shares an unbridled passion for capturing beautiful moments.",
-            icon: FaCamera,
-            bgClass:
-                "bg-emerald-100 dark:bg-emerald-900/30",
-            textClass:
-                "text-emerald-600 dark:text-emerald-400"
-        },
-        {
-            title: "Authentic Experiences",
-            description:
-                "We believe in genuine connections and authentic travel experiences that go beyond typical tourist spots.",
-            icon: FaHeart,
-            bgClass:
-                "bg-rose-100 dark:bg-rose-900/30",
-            textClass:
-                "text-rose-600 dark:text-rose-400"
-        },
-        {
-            title: "Professional Excellence",
-            description:
-                "Our photographers are award-winning professionals dedicated to delivering the highest quality work.",
-            icon: FaAward,
-            bgClass:
-                "bg-blue-100 dark:bg-blue-900/30",
-            textClass:
-                "text-blue-600 dark:text-blue-400"
-        },
-        {
-            title: "Sustainable Tourism",
-            description:
-                "We're committed to responsible travel practices that protect and preserve local communities and environments.",
-            icon: FaGlobe,
-            bgClass:
-                "bg-green-100 dark:bg-green-900/30",
-            textClass:
-                "text-green-600 dark:text-green-400"
-        }
-    ];
-
     return (
         <>
             <div className="flex flex-col min-h-screen bg-gradient-to-b from-zinc-50 to-white dark:from-black dark:to-zinc-900">
 
-                {/* ================= HERO SECTION ================= */}
+                {/* =====================================================
+                    HERO SECTION
+                ====================================================== */}
 
                 <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden">
 
+                    {/* Background Image */}
                     <div className="absolute inset-0 z-0">
 
                         <Image
                             src="/banners/about_us.jpg"
                             alt="About us hero"
                             fill
-                            className="object-cover"
                             priority
+                            className="object-cover"
                         />
 
+                        {/* Overlay */}
                         <div className="absolute inset-0 bg-black/60 dark:bg-black/70" />
 
                     </div>
 
+                    {/* Hero Content */}
                     <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
 
                         <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+
                             Capturing Moments,
                             <br />
 
-                            <span className="text-emerald-400">
+                            <span className="text-[#25632D]">
                                 Creating Memories
                             </span>
+
                         </h1>
 
                         <p className="text-lg md:text-xl text-gray-200 max-w-2xl mx-auto">
+
                             We're on a mission to connect passionate
                             photographers with extraordinary travel
                             experiences around the globe
+
                         </p>
 
                     </div>
@@ -148,13 +114,17 @@ export default async function AboutPage() {
                 </section>
 
 
-                {/* ================= OUR STORY ================= */}
+                {/* =====================================================
+                    OUR STORY
+                ====================================================== */}
 
                 <section className="py-20 px-6">
 
                     <div className="max-w-6xl mx-auto">
 
                         <div className="grid lg:grid-cols-2 gap-12 items-center">
+
+                            {/* STORY TEXT */}
 
                             <div>
 
@@ -191,7 +161,11 @@ export default async function AboutPage() {
                             </div>
 
 
+                            {/* STORY IMAGES */}
+
                             <div className="relative grid grid-cols-2 gap-4">
+
+                                {/* LEFT COLUMN */}
 
                                 <div className="space-y-4">
 
@@ -199,7 +173,7 @@ export default async function AboutPage() {
 
                                         <Image
                                             src="/images/avatar.png"
-                                            alt="Story 1"
+                                            alt="Jemigraph photography story"
                                             fill
                                             className="object-cover"
                                         />
@@ -210,7 +184,7 @@ export default async function AboutPage() {
 
                                         <Image
                                             src="/images/avatar.png"
-                                            alt="Story 2"
+                                            alt="Jemigraph photography"
                                             fill
                                             className="object-cover"
                                         />
@@ -220,13 +194,15 @@ export default async function AboutPage() {
                                 </div>
 
 
+                                {/* RIGHT COLUMN */}
+
                                 <div className="space-y-4 pt-8">
 
                                     <div className="relative h-48 rounded-lg overflow-hidden">
 
                                         <Image
                                             src="/images/avatar.png"
-                                            alt="Story 3"
+                                            alt="Photography experience"
                                             fill
                                             className="object-cover"
                                         />
@@ -237,7 +213,7 @@ export default async function AboutPage() {
 
                                         <Image
                                             src="/images/avatar.png"
-                                            alt="Story 4"
+                                            alt="Travel photography"
                                             fill
                                             className="object-cover"
                                         />
@@ -255,92 +231,15 @@ export default async function AboutPage() {
                 </section>
 
 
-                {/* ================= OUR VALUES ================= */}
-
-                <section className="py-20 px-6 bg-zinc-100/50 dark:bg-zinc-900/50">
-
-                    <div className="max-w-6xl mx-auto">
-
-                        <div className="text-center mb-12">
-
-                            <Badge
-                                variant="secondary"
-                                className="mb-4"
-                            >
-                                What Drives Us
-                            </Badge>
-
-                            <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 dark:text-white mb-4">
-
-                                Our Core Values
-
-                            </h2>
-
-                            <p className="text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">
-
-                                The principles that guide everything we do
-
-                            </p>
-
-                        </div>
-
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-
-                            {values.map((value, index) => {
-
-                                const Icon = value.icon;
-
-                                return (
-
-                                    <Card
-                                        key={index}
-                                        className="h-full text-center hover:shadow-xl transition-all duration-300"
-                                    >
-
-                                        <CardContent className="pt-6">
-
-                                            <div
-                                                className={`w-16 h-16 ${value.bgClass} rounded-full flex items-center justify-center mx-auto mb-4`}
-                                            >
-
-                                                <Icon
-                                                    className={`text-2xl ${value.textClass}`}
-                                                />
-
-                                            </div>
-
-                                            <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">
-
-                                                {value.title}
-
-                                            </h3>
-
-                                            <p className="text-zinc-600 dark:text-zinc-400 text-sm">
-
-                                                {value.description}
-
-                                            </p>
-
-                                        </CardContent>
-
-                                    </Card>
-
-                                );
-                            })}
-
-                        </div>
-
-                    </div>
-
-                </section>
-
-
-                {/* ================= TEAM SECTION ================= */}
+                {/* =====================================================
+                    TEAM SECTION
+                ====================================================== */}
 
                 <section className="py-20 px-6">
 
                     <div className="max-w-6xl mx-auto">
+
+                        {/* SECTION HEADER */}
 
                         <div className="text-center mb-12">
 
@@ -367,7 +266,9 @@ export default async function AboutPage() {
                         </div>
 
 
-                        {/* TEAM MEMBERS */}
+                        {/* =================================================
+                            TEAM MEMBERS
+                        ================================================== */}
 
                         {team.length === 0 ? (
 
@@ -426,7 +327,7 @@ export default async function AboutPage() {
 
                                                     </CardTitle>
 
-                                                    <CardDescription className="text-emerald-600 dark:text-emerald-400 font-medium">
+                                                    <CardDescription className="text-[#25632D] dark:text-emerald-400 font-medium">
 
                                                         {member.role}
 
@@ -441,7 +342,9 @@ export default async function AboutPage() {
                                                 </CardHeader>
 
 
-                                                {/* ================= SOCIAL MEDIA ================= */}
+                                                {/* =================================================
+                                                    SOCIAL MEDIA
+                                                ================================================== */}
 
                                                 <CardContent>
 
@@ -452,7 +355,9 @@ export default async function AboutPage() {
                                                         {member.instagramUrl && (
 
                                                             <a
-                                                                href={member.instagramUrl}
+                                                                href={
+                                                                    member.instagramUrl
+                                                                }
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 aria-label={`${member.name} Instagram`}
@@ -466,12 +371,14 @@ export default async function AboutPage() {
                                                         )}
 
 
-                                                        {/* TWITTER / X */}
+                                                        {/* TWITTER */}
 
                                                         {member.twitterUrl && (
 
                                                             <a
-                                                                href={member.twitterUrl}
+                                                                href={
+                                                                    member.twitterUrl
+                                                                }
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 aria-label={`${member.name} Twitter`}
@@ -490,11 +397,13 @@ export default async function AboutPage() {
                                                         {member.websiteUrl && (
 
                                                             <a
-                                                                href={member.websiteUrl}
+                                                                href={
+                                                                    member.websiteUrl
+                                                                }
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 aria-label={`${member.name} Website`}
-                                                                className="text-zinc-400 hover:text-emerald-600 transition duration-300 hover:scale-110"
+                                                                className="text-zinc-400 hover:text-[#25632D] transition duration-300 hover:scale-110"
                                                             >
 
                                                                 <FaGlobeAmericas className="text-xl" />
@@ -522,8 +431,9 @@ export default async function AboutPage() {
 
             </div>
 
-            <Footer />
+          
 
+            <Footer />
         </>
     );
 }
