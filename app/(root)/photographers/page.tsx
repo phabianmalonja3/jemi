@@ -1032,28 +1032,7 @@ export default function PhotographersPage() {
 
                                                             </span>
 
-                                                            {/* VERIFIED BADGE */}
-
-                                                            {photographer.isVerified && (
-                                                                <span className="px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 bg-blue-500/90 text-white">
-
-                                                                    <Image
-                                                                        src={
-                                                                            VERIFIED_ICON
-                                                                        }
-                                                                        alt="Verified"
-                                                                        width={
-                                                                            14
-                                                                        }
-                                                                        height={
-                                                                            14
-                                                                        }
-                                                                    />
-
-                                                                    Verified
-
-                                                                </span>
-                                                            )}
+                                                         
 
                                                         </div>
 
