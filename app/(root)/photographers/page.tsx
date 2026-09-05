@@ -1081,10 +1081,10 @@ export default function PhotographersPage() {
                                                                     }
                                                                     alt="Verified"
                                                                     width={
-                                                                        20
+                                                                        40
                                                                     }
                                                                     height={
-                                                                        20
+                                                                        40
                                                                     }
                                                                     className="shrink-0 ml-2"
                                                                 />
