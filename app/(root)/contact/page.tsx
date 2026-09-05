@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+
 import {
     FaEnvelope,
     FaPhone,
@@ -13,20 +14,27 @@ import {
     FaTwitter,
     FaYoutube,
     FaPaperPlane,
-    FaCheckCircle,
     FaHeadset,
-    FaGlobe,
-    FaWhatsapp
+    FaWhatsapp,
 } from "react-icons/fa";
 
 import Footer from "@/components/web/Footer";
 import { useState } from "react";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {toast} from "sonner";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+
 import { Badge } from "@/components/ui/badge";
+
 import {
     Select,
     SelectContent,
@@ -41,352 +49,746 @@ export default function ContactPage() {
         email: "",
         subject: "",
         category: "",
-        message: ""
+        message: "",
     });
+
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleSubmit = async (e:any) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
         setIsSubmitting(true);
 
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        try {
+            // TODO: Connect this to your backend API
+            await new Promise((resolve) =>
+                setTimeout(resolve, 1500)
+            );
 
-//       toast({
-//      titleT: "Message Sent! 🎉",
-//     description: "We'll get back to you within 24 hours. Thank you for reaching out!",
-// });
+            setFormData({
+                name: "",
+                email: "",
+                subject: "",
+                category: "",
+                message: "",
+            });
 
-        setFormData({
-            name: "",
-            email: "",
-            subject: "",
-            category: "",
-            message: ""
-        });
-        setIsSubmitting(false);
+        } catch (error) {
+            console.error("Contact form error:", error);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const contactInfo = [
         {
             icon: FaEnvelope,
             title: "Email Us",
-            details: ["info@jemigraph.co.tz", "support@jemigraph.co.tz"],
-            link: "mailto:info@jemigraph.co.tz"
+            details: [
+                "info@jemigraph.co.tz",
+                "support@jemigraph.co.tz",
+            ],
+            link: "mailto:info@jemigraph.co.tz",
         },
         {
             icon: FaPhone,
             title: "Call Us",
-            details: ["+255 791 069 302", "+255 628 000 347"],
-            link: "tel:+255628000347"
+            details: [
+                "+255 791 069 302",
+                "+255 628 000 347",
+            ],
+            link: "tel:+255628000347",
         },
         {
             icon: FaMapMarkerAlt,
             title: "Visit Us",
-            details: ["Geza", "Tanzania", "Kigambon Dar es salaam"],
-            link: "https://maps.google.com"
+            details: [
+                "Gezaulole",
+                "Tanzania",
+                "Kigamboni, Dar es Salaam",
+            ],
+            link: "https://maps.google.com",
         },
         {
             icon: FaClock,
             title: "Business Hours",
-            details: ["Monday - Friday: 9AM - 6PM EST", "Saturday: 10AM - 4PM EST", "Sunday: Closed"],
-            link: null
-        }
-    ];
-
-    const faqs = [
-        {
-            question: "How do I book a photography tour?",
-            answer: "You can book directly through our website by selecting an event or photographer and completing the booking form. You'll receive a confirmation email with all details."
+            details: [
+                "Monday - Friday: 9AM - 6PM",
+                "Saturday: 10AM - 4PM",
+                "Sunday: Closed",
+            ],
+            link: null,
         },
-        {
-            question: "What equipment do I need?",
-            answer: "A camera (DSLR, mirrorless, or even a smartphone with good camera), extra batteries, memory cards, and comfortable walking shoes. We provide tripods and other equipment if needed."
-        },
-        {
-            question: "Can I request a custom private tour?",
-            answer: "Absolutely! Contact us with your requirements, and we'll create a personalized photography experience tailored to your needs and skill level."
-        },
-        {
-
-
-            question: "What's your cancellation policy?",
-            answer: "Free cancellation up to 14 days before the event. 50% refund up to 7 days before. No refunds within 7 days, but you can transfer to another date."
-        },
-        {
-            question: "Do you offer group discounts?",
-            answer: "Yes! Groups of 4 or more receive 10% off. Contact us for special group rates and corporate photography workshops."
-        },
-        {
-            question: "Are the tours suitable for beginners?",
-            answer: "Yes! Our tours cater to all skill levels. Our photographers provide guidance based on your experience level, from basic camera settings to advanced techniques."
-        }
     ];
 
     return (
         <>
-        <div className="flex flex-col min-h-screen bg-linear-to-b from-zinc-50 to-white dark:from-black dark:to-zinc-900">
-            {/* Hero Section */}
-            <section className="relative h-[40vh] min-h-75 flex items-center justify-center overflow-hidden">
-                <div className="absolute inset-0 z-0">
-                    <Image
-                        src="/banners/contact-hero.png"
-                        alt="Contact us"
-                        fill
-                        className="object-cover"
-                        priority
-                    />
-                    <div className="absolute inset-0 bg-black/60 dark:bg-black/70" />
-                </div>
+            <div className="flex flex-col min-h-screen bg-white dark:bg-zinc-950">
 
-                <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8 }}
-                    >
-                        <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
-                            <FaHeadset className="text-emerald-400" />
-                            <span className="text-white text-sm">Get in Touch</span>
+                {/* =====================================================
+                    HERO SECTION
+                ====================================================== */}
+
+                <section className="relative h-[40vh] min-h-[300px] flex items-center justify-center overflow-hidden">
+
+                    {/* Background Image */}
+                    <div className="absolute inset-0 z-0">
+
+                        <Image
+                            src="/banners/contact-hero.png"
+                            alt="Contact Jemigraph"
+                            fill
+                            className="object-cover"
+                            priority
+                        />
+
+                        {/* Jemigraph Green Overlay */}
+                        <div className="absolute inset-0 bg-[#25632D]/85" />
+
+                    </div>
+
+                    {/* Hero Content */}
+                    <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
+
+                        <motion.div
+                            initial={{
+                                opacity: 0,
+                                y: 20,
+                            }}
+                            animate={{
+                                opacity: 1,
+                                y: 0,
+                            }}
+                            transition={{
+                                duration: 0.8,
+                            }}
+                        >
+
+                            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-5 py-2 mb-6 border border-white/20">
+
+                                <FaHeadset className="text-white" />
+
+                                <span className="text-white text-sm font-medium">
+                                    Get in Touch
+                                </span>
+
+                            </div>
+
+                        </motion.div>
+
+                        <motion.h1
+                            initial={{
+                                opacity: 0,
+                                y: 30,
+                            }}
+                            animate={{
+                                opacity: 1,
+                                y: 0,
+                            }}
+                            transition={{
+                                duration: 0.8,
+                                delay: 0.2,
+                            }}
+                            className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-5"
+                        >
+                            Let&#39;s Start a Conversation
+                        </motion.h1>
+
+                        <motion.p
+                            initial={{
+                                opacity: 0,
+                                y: 30,
+                            }}
+                            animate={{
+                                opacity: 1,
+                                y: 0,
+                            }}
+                            transition={{
+                                duration: 0.8,
+                                delay: 0.3,
+                            }}
+                            className="text-lg md:text-xl text-white/85 max-w-2xl mx-auto"
+                        >
+                            Have questions about our tours? Need a custom
+                            photography experience? We&#39;re here to help!
+                        </motion.p>
+
+                    </div>
+
+                </section>
+
+
+                {/* =====================================================
+                    CONTACT INFORMATION
+                ====================================================== */}
+
+                <section className="py-16 px-6 relative z-20">
+
+                    <div className="max-w-6xl mx-auto">
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+                            {contactInfo.map((info, index) => {
+
+                                const Icon = info.icon;
+
+                                return (
+
+                                    <motion.div
+                                        key={index}
+                                        initial={{
+                                            opacity: 0,
+                                            y: 30,
+                                        }}
+                                        whileInView={{
+                                            opacity: 1,
+                                            y: 0,
+                                        }}
+                                        viewport={{
+                                            once: true,
+                                        }}
+                                        transition={{
+                                            delay: index * 0.1,
+                                        }}
+                                    >
+
+                                        <Card className="h-full border-zinc-200 dark:border-zinc-800 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+
+                                            <CardContent className="p-6 text-center">
+
+                                                {/* Icon */}
+
+                                                <div className="w-14 h-14 bg-[#25632D]/10 rounded-full flex items-center justify-center mx-auto mb-5">
+
+                                                    <Icon className="text-xl text-[#25632D]" />
+
+                                                </div>
+
+                                                {/* Title */}
+
+                                                <h3 className="font-bold text-zinc-900 dark:text-white mb-3">
+                                                    {info.title}
+                                                </h3>
+
+                                                {/* Details */}
+
+                                                <div className="space-y-1">
+
+                                                    {info.details.map(
+                                                        (detail, idx) => (
+
+                                                            <p
+                                                                key={idx}
+                                                                className="text-sm text-zinc-600 dark:text-zinc-400"
+                                                            >
+                                                                {detail}
+                                                            </p>
+
+                                                        )
+                                                    )}
+
+                                                </div>
+
+                                                {/* Link */}
+
+                                                {info.link && (
+
+                                                    <a
+                                                        href={info.link}
+                                                        target={
+                                                            info.link.startsWith(
+                                                                "http"
+                                                            )
+                                                                ? "_blank"
+                                                                : undefined
+                                                        }
+                                                        rel={
+                                                            info.link.startsWith(
+                                                                "http"
+                                                            )
+                                                                ? "noopener noreferrer"
+                                                                : undefined
+                                                        }
+                                                        className="inline-block mt-4 text-[#25632D] hover:text-[#1e5125] text-sm font-semibold transition-colors"
+                                                    >
+                                                        Get in Touch →
+                                                    </a>
+
+                                                )}
+
+                                            </CardContent>
+
+                                        </Card>
+
+                                    </motion.div>
+
+                                );
+
+                            })}
+
                         </div>
-                    </motion.div>
 
-                    <motion.h1
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.2 }}
-                        className="text-4xl md:text-5xl font-bold text-white mb-4"
-                    >
-                        Let&#39;s Start a Conversation
-                    </motion.h1>
-
-                    <motion.p
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.3 }}
-                        className="text-lg text-gray-200 max-w-2xl mx-auto"
-                    >
-                        Have questions about our tours? Need a custom photography experience? We&#39;re here to help!
-                    </motion.p>
-                </div>
-            </section>
-
-            {/* Contact Info Cards */}
-            <section className="py-16 px-6 mt-16 relative z-20">
-                <div className="max-w-6xl mx-auto">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {contactInfo.map((info, index) => {
-                            const Icon = info.icon;
-                            return (
-                                <motion.div
-                                    key={index}
-                                    initial={{ opacity: 0, y: 30 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: index * 0.1 }}
-                                >
-                                    <Card className="h-full hover:shadow-xl transition-shadow">
-                                        <CardContent className="p-6 text-center">
-                                            <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                                                <Icon className="text-xl text-emerald-600 dark:text-emerald-400" />
-                                            </div>
-                                            <h3 className="font-bold text-zinc-900 dark:text-white mb-3">
-                                                {info.title}
-                                            </h3>
-                                            <div className="space-y-1">
-                                                {info.details.map((detail, idx) => (
-                                                    <p key={idx} className="text-sm text-zinc-600 dark:text-zinc-400">
-                                                        {detail}
-                                                    </p>
-                                                ))}
-                                            </div>
-                                            {info.link && (
-                                                <a href={info.link} className="inline-block mt-3 text-emerald-600 hover:text-emerald-700 text-sm font-medium">
-                                                    Get in Touch →
-                                                </a>
-                                            )}
-                                        </CardContent>
-                                    </Card>
-                                </motion.div>
-                            );
-                        })}
                     </div>
-                </div>
-            </section>
 
-            {/* Contact Form & Map Section */}
-            <section className="py-16 px-6">
-                <div className="max-w-6xl mx-auto">
-                    <div className="grid lg:grid-cols-2 gap-12">
-                        {/* Contact Form */}
-                        <motion.div
-                            initial={{ opacity: 0, x: -30 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.6 }}
-                        >
-                            <Badge variant="secondary" className="mb-4">Send a Message</Badge>
-                            <h2 className="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-white mb-4">
-                                We&#39;d Love to Hear From You
-                            </h2>
-                            <p className="text-zinc-600 dark:text-zinc-400 mb-6">
-                                Fill out the form below and our team will get back to you within 24 hours.
-                            </p>
+                </section>
 
-                            <form onSubmit={handleSubmit} className="space-y-4">
-                                <div className="grid md:grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="name">Full Name *</Label>
-                                        <Input
-                                            id="name"
-                                            required
-                                            placeholder="client "
-                                            value={formData.name}
-                                            onChange={(e) => setFormData({...formData, name: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="email">Email Address *</Label>
-                                        <Input
-                                            id="email"
-                                            type="email"
-                                            required
-                                            placeholder="hello@example.com"
-                                            value={formData.email}
-                                            onChange={(e) => setFormData({...formData, email: e.target.value})}
-                                        />
-                                    </div>
-                                </div>
 
-                                <div className="grid md:grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="subject">Subject *</Label>
-                                        <Input
-                                            id="subject"
-                                            required
-                                            placeholder="Booking inquiry"
-                                            value={formData.subject}
-                                            onChange={(e) => setFormData({...formData, subject: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="category">Category</Label>
-                                        <Select
-                                            value={formData.category}
-                                            onValueChange={(value) => setFormData({...formData, category: value})}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select a category" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="booking">Booking Inquiry</SelectItem>
-                                                <SelectItem value="custom">Custom Tour Request</SelectItem>
-                                                <SelectItem value="partnership">Partnership Opportunity</SelectItem>
-                                                <SelectItem value="support">Technical Support</SelectItem>
-                                                <SelectItem value="other">Other</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                </div>
+                {/* =====================================================
+                    CONTACT FORM + MAP
+                ====================================================== */}
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="message">Message *</Label>
-                                    <Textarea
-                                        id="message"
-                                        required
-                                        placeholder="Tell us about your photography interests, questions, or special requests..."
-                                        rows={6}
-                                        value={formData.message}
-                                        onChange={(e) => setFormData({...formData, message: e.target.value})}
-                                    />
-                                </div>
+                <section className="py-16 px-6">
 
-                                <Button
-                                    type="submit"
-                                    className="w-full bg-emerald-600 hover:bg-emerald-700"
-                                    disabled={isSubmitting}
+                    <div className="max-w-6xl mx-auto">
+
+                        <div className="grid lg:grid-cols-2 gap-12">
+
+                            {/* =================================================
+                                CONTACT FORM
+                            ================================================== */}
+
+                            <motion.div
+                                initial={{
+                                    opacity: 0,
+                                    x: -30,
+                                }}
+                                whileInView={{
+                                    opacity: 1,
+                                    x: 0,
+                                }}
+                                viewport={{
+                                    once: true,
+                                }}
+                                transition={{
+                                    duration: 0.6,
+                                }}
+                            >
+
+                                <Badge
+                                    variant="secondary"
+                                    className="mb-4 bg-[#25632D]/10 text-[#25632D] border border-[#25632D]/20"
                                 >
-                                    {isSubmitting ? (
-                                        <>Sending... <FaPaperPlane className="ml-2 animate-pulse" /></>
-                                    ) : (
-                                        <>Send Message <FaPaperPlane className="ml-2" /></>
-                                    )}
-                                </Button>
-                            </form>
-                        </motion.div>
+                                    Send a Message
+                                </Badge>
 
-                        {/* Map & Support Info */}
-                        <motion.div
-                            initial={{ opacity: 0, x: 30 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.6 }}
-                            className="space-y-6"
-                        >
-                            <Card>
-    <CardHeader>
-        <CardTitle>Find Us</CardTitle>
-        <CardDescription>Our office in Gezaulole</CardDescription>
-    </CardHeader>
-    <CardContent>
-        <div className="relative w-full h-64 rounded-lg overflow-hidden bg-zinc-200 dark:bg-zinc-800">
-            <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3961.210643298583!2d39.41159817317805!3d-6.865342467166217!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x185dc9928f39a6a9%3A0xe023acf1eb609ebc!2sGezaulole!5e0!3m2!1sen!2stz!4v1783752671016!5m2!1sen!2stz"
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen={true}
-                loading="lazy"
-                referrerPolicy="strict-origin-when-cross-origin"
-            />
-        </div>
-    </CardContent>
-</Card>
+                                <h2 className="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-white mb-4">
+                                    We&#39;d Love to Hear From You
+                                </h2>
 
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>24/7 Support</CardTitle>
-                                    <CardDescription>We&#39;re always here to help</CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <div className="flex items-center gap-3">
-                                        <FaWhatsapp className="text-2xl text-green-500" />
-                                        <div>
-                                            <p className="font-semibold">WhatsApp Support</p>
-                                            <p className="text-sm text-zinc-500">+255 (0) 754 321 654</p>
+                                <p className="text-zinc-600 dark:text-zinc-400 mb-7">
+                                    Fill out the form below and our team will
+                                    get back to you within 24 hours.
+                                </p>
+
+
+                                {/* FORM */}
+
+                                <form
+                                    onSubmit={handleSubmit}
+                                    className="space-y-5"
+                                >
+
+                                    {/* Name + Email */}
+
+                                    <div className="grid md:grid-cols-2 gap-4">
+
+                                        <div className="space-y-2">
+
+                                            <Label htmlFor="name">
+                                                Full Name *
+                                            </Label>
+
+                                            <Input
+                                                id="name"
+                                                required
+                                                placeholder="Your name"
+                                                value={formData.name}
+                                                onChange={(e) =>
+                                                    setFormData({
+                                                        ...formData,
+                                                        name: e.target.value,
+                                                    })
+                                                }
+                                                className="focus-visible:ring-[#25632D]"
+                                            />
+
                                         </div>
-                                    </div>
-                                    
-                                </CardContent>
-                            </Card>
 
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Follow Us</CardTitle>
-                                    <CardDescription>Stay connected on social media</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="flex gap-4">
-                                        <a href="#" className="w-10 h-10 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors">
-                                            <FaInstagram className="text-xl text-zinc-600 dark:text-zinc-400" />
-                                        </a>
-                                        <a href="#" className="w-10 h-10 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors">
-                                            <FaFacebook className="text-xl text-zinc-600 dark:text-zinc-400" />
-                                        </a>
-                                        <a href="#" className="w-10 h-10 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors">
-                                            <FaTwitter className="text-xl text-zinc-600 dark:text-zinc-400" />
-                                        </a>
-                                        <a href="#" className="w-10 h-10 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors">
-                                            <FaYoutube className="text-xl text-zinc-600 dark:text-zinc-400" />
-                                        </a>
+
+                                        <div className="space-y-2">
+
+                                            <Label htmlFor="email">
+                                                Email Address *
+                                            </Label>
+
+                                            <Input
+                                                id="email"
+                                                type="email"
+                                                required
+                                                placeholder="hello@example.com"
+                                                value={formData.email}
+                                                onChange={(e) =>
+                                                    setFormData({
+                                                        ...formData,
+                                                        email: e.target.value,
+                                                    })
+                                                }
+                                                className="focus-visible:ring-[#25632D]"
+                                            />
+
+                                        </div>
+
                                     </div>
-                                </CardContent>
-                            </Card>
-                        </motion.div>
+
+
+                                    {/* Subject + Category */}
+
+                                    <div className="grid md:grid-cols-2 gap-4">
+
+                                        <div className="space-y-2">
+
+                                            <Label htmlFor="subject">
+                                                Subject *
+                                            </Label>
+
+                                            <Input
+                                                id="subject"
+                                                required
+                                                placeholder="Booking inquiry"
+                                                value={formData.subject}
+                                                onChange={(e) =>
+                                                    setFormData({
+                                                        ...formData,
+                                                        subject: e.target.value,
+                                                    })
+                                                }
+                                                className="focus-visible:ring-[#25632D]"
+                                            />
+
+                                        </div>
+
+
+                                        <div className="space-y-2">
+
+                                            <Label htmlFor="category">
+                                                Category
+                                            </Label>
+
+                                            <Select
+                                                value={formData.category}
+                                                onValueChange={(value) =>
+                                                    setFormData({
+                                                        ...formData,
+                                                        category: value,
+                                                    })
+                                                }
+                                            >
+
+                                                <SelectTrigger className="focus:ring-[#25632D]">
+
+                                                    <SelectValue
+                                                        placeholder="Select a category"
+                                                    />
+
+                                                </SelectTrigger>
+
+                                                <SelectContent>
+
+                                                    <SelectItem value="booking">
+                                                        Booking Inquiry
+                                                    </SelectItem>
+
+                                                    <SelectItem value="custom">
+                                                        Custom Tour Request
+                                                    </SelectItem>
+
+                                                    <SelectItem value="partnership">
+                                                        Partnership Opportunity
+                                                    </SelectItem>
+
+                                                    <SelectItem value="support">
+                                                        Technical Support
+                                                    </SelectItem>
+
+                                                    <SelectItem value="other">
+                                                        Other
+                                                    </SelectItem>
+
+                                                </SelectContent>
+
+                                            </Select>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    {/* Message */}
+
+                                    <div className="space-y-2">
+
+                                        <Label htmlFor="message">
+                                            Message *
+                                        </Label>
+
+                                        <Textarea
+                                            id="message"
+                                            required
+                                            placeholder="Tell us about your photography interests, questions, or special requests..."
+                                            rows={6}
+                                            value={formData.message}
+                                            onChange={(e) =>
+                                                setFormData({
+                                                    ...formData,
+                                                    message: e.target.value,
+                                                })
+                                            }
+                                            className="focus-visible:ring-[#25632D]"
+                                        />
+
+                                    </div>
+
+
+                                    {/* Submit */}
+
+                                    <Button
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                        className="w-full bg-[#25632D] hover:bg-[#1e5125] text-white"
+                                    >
+
+                                        {isSubmitting ? (
+                                            <>
+                                                Sending...
+
+                                                <FaPaperPlane className="ml-2 animate-pulse" />
+                                            </>
+                                        ) : (
+                                            <>
+                                                Send Message
+
+                                                <FaPaperPlane className="ml-2" />
+                                            </>
+                                        )}
+
+                                    </Button>
+
+                                </form>
+
+                            </motion.div>
+
+
+                            {/* =================================================
+                                RIGHT SIDE
+                            ================================================== */}
+
+                            <motion.div
+                                initial={{
+                                    opacity: 0,
+                                    x: 30,
+                                }}
+                                whileInView={{
+                                    opacity: 1,
+                                    x: 0,
+                                }}
+                                viewport={{
+                                    once: true,
+                                }}
+                                transition={{
+                                    duration: 0.6,
+                                }}
+                                className="space-y-6"
+                            >
+
+                                {/* =================================================
+                                    MAP
+                                ================================================== */}
+
+                                <Card>
+
+                                    <CardHeader>
+
+                                        <CardTitle>
+                                            Find Us
+                                        </CardTitle>
+
+                                        <CardDescription>
+                                            Our office in Gezaulole
+                                        </CardDescription>
+
+                                    </CardHeader>
+
+                                    <CardContent>
+
+                                        <div className="relative w-full h-64 rounded-lg overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+
+                                            <iframe
+                                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3961.210643298583!2d39.41159817317805!3d-6.865342467166217!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x185dc9928f39a6a9%3A0xe023acf1eb609ebc!2sGezaulole!5e0!3m2!1sen!2stz!4v1783752671016!5m2!1sen!2stz"
+                                                width="100%"
+                                                height="100%"
+                                                style={{
+                                                    border: 0,
+                                                }}
+                                                allowFullScreen
+                                                loading="lazy"
+                                                referrerPolicy="strict-origin-when-cross-origin"
+                                            />
+
+                                        </div>
+
+                                    </CardContent>
+
+                                </Card>
+
+
+                                {/* =================================================
+                                    WHATSAPP SUPPORT
+                                ================================================== */}
+
+                                <Card>
+
+                                    <CardHeader>
+
+                                        <CardTitle>
+                                            24/7 Support
+                                        </CardTitle>
+
+                                        <CardDescription>
+                                            We&#39;re always here to help
+                                        </CardDescription>
+
+                                    </CardHeader>
+
+                                    <CardContent>
+
+                                        <a
+                                            href="https://wa.me/255754321654"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center gap-4 group"
+                                        >
+
+                                            <div className="w-12 h-12 rounded-full bg-[#25632D]/10 flex items-center justify-center">
+
+                                                <FaWhatsapp className="text-2xl text-[#25632D]" />
+
+                                            </div>
+
+                                            <div>
+
+                                                <p className="font-semibold text-zinc-900 dark:text-white group-hover:text-[#25632D] transition-colors">
+                                                    WhatsApp Support
+                                                </p>
+
+                                                <p className="text-sm text-zinc-500">
+                                                    +255 754 321 654
+                                                </p>
+
+                                            </div>
+
+                                        </a>
+
+                                    </CardContent>
+
+                                </Card>
+
+
+                                {/* =================================================
+                                    SOCIAL MEDIA
+                                ================================================== */}
+
+                                <Card>
+
+                                    <CardHeader>
+
+                                        <CardTitle>
+                                            Follow Us
+                                        </CardTitle>
+
+                                        <CardDescription>
+                                            Stay connected on social media
+                                        </CardDescription>
+
+                                    </CardHeader>
+
+                                    <CardContent>
+
+                                        <div className="flex gap-4">
+
+                                            {/* Instagram */}
+
+                                            <a
+                                                href="#"
+                                                aria-label="Instagram"
+                                                className="w-11 h-11 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center hover:bg-[#25632D] transition-all duration-300 group"
+                                            >
+
+                                                <FaInstagram className="text-xl text-zinc-600 dark:text-zinc-400 group-hover:text-white transition-colors" />
+
+                                            </a>
+
+
+                                            {/* Facebook */}
+
+                                            <a
+                                                href="#"
+                                                aria-label="Facebook"
+                                                className="w-11 h-11 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center hover:bg-[#25632D] transition-all duration-300 group"
+                                            >
+
+                                                <FaFacebook className="text-xl text-zinc-600 dark:text-zinc-400 group-hover:text-white transition-colors" />
+
+                                            </a>
+
+
+                                            {/* Twitter */}
+
+                                            <a
+                                                href="#"
+                                                aria-label="Twitter"
+                                                className="w-11 h-11 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center hover:bg-[#25632D] transition-all duration-300 group"
+                                            >
+
+                                                <FaTwitter className="text-xl text-zinc-600 dark:text-zinc-400 group-hover:text-white transition-colors" />
+
+                                            </a>
+
+
+                                            {/* YouTube */}
+
+                                            <a
+                                                href="#"
+                                                aria-label="YouTube"
+                                                className="w-11 h-11 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center hover:bg-[#25632D] transition-all duration-300 group"
+                                            >
+
+                                                <FaYoutube className="text-xl text-zinc-600 dark:text-zinc-400 group-hover:text-white transition-colors" />
+
+                                            </a>
+
+                                        </div>
+
+                                    </CardContent>
+
+                                </Card>
+
+                            </motion.div>
+
+                        </div>
+
                     </div>
-                </div>
-            </section>
+
+                </section>
+
+            </div>
 
 
-        </div>
-        < Footer/>
+            {/* =====================================================
+                FOOTER
+            ====================================================== */}
+
+            <Footer />
+
         </>
     );
 }
