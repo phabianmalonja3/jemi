@@ -167,82 +167,25 @@ export default function Home() {
 
       <div className="flex flex-col min-h-screen bg-gradient-to-b from-zinc-50 via-white to-zinc-50 dark:from-black dark:via-zinc-900 dark:to-black overflow-x-hidden">
         {/* Hero Section */}
-        <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentSlide}
-              initial={{ opacity: 0, scale: 1.1 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.8, ease: "easeInOut" }}
-              className="absolute inset-0 z-0"
-            >
-              <Image
-                src={heroSlides[currentSlide].image}
-                alt={`Slide ${currentSlide + 1}`}
-                fill
-                className="object-cover"
-                priority
-                sizes="100vw"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/70" />
-            </motion.div>
-          </AnimatePresence>
-
-          {!isMobile && (
-            <>
-              <button onClick={prevSlide} className="absolute left-4 md:left-8 z-20 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-full p-3 text-white transition-all duration-300 hover:scale-110">
-                <FaChevronLeft className="text-xl" />
-              </button>
-              <button onClick={nextSlide} className="absolute right-4 md:right-8 z-20 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-full p-3 text-white transition-all duration-300 hover:scale-110">
-                <FaChevronRight className="text-xl" />
-              </button>
-            </>
-          )}
-
-          <div className="absolute bottom-6 md:bottom-10 left-1/2 transform -translate-x-1/2 z-20 flex gap-2 md:gap-3">
-            {heroSlides.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentSlide(index)}
-                className={`transition-all duration-500 rounded-full ${currentSlide === index ? "w-8 md:w-10 h-1.5 md:h-2 bg-emerald-400 shadow-lg" : "w-1.5 md:w-2 h-1.5 md:h-2 bg-white/40 hover:bg-white/80"}`}
-              />
-            ))}
-          </div>
-
-          <div className="relative z-10 text-center px-4 sm:px-6 max-w-5xl mx-auto">
-            <div className="hero-badge">
-              <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md rounded-full px-4 py-2 mb-6 border border-white/20">
-                <FaCamera className="text-emerald-400 text-sm" />
-                <span className="text-white text-sm font-medium tracking-wide">{heroSlides[currentSlide].tag}</span>
-              </div>
-            </div>
-
-            <h1 key={`title-${currentSlide}`} className="hero-title text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
-              {heroSlides[currentSlide].title}<br />
-              <span className="text-emerald-400 bg-gradient-to-r from-emerald-400 to-emerald-300 bg-clip-text text-transparent">
-                {heroSlides[currentSlide].highlight}
-              </span>
-            </h1>
-
-            <motion.p key={`subtitle-${currentSlide}`} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="hero-subtitle text-base sm:text-lg md:text-xl text-gray-200 mb-8 max-w-2xl mx-auto">
-              {heroSlides[currentSlide].subtitle}
-            </motion.p>
-
-            <div className="hero-button flex flex-col sm:flex-row gap-4 justify-center px-4">
-              <Link href="/booking" className="w-full sm:w-auto">
-                <Button className="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 text-white h-12 md:h-14 px-10 rounded-full shadow-xl">
-                  Book Your Adventure <FaArrowRight className="ml-2" />
-                </Button>
-              </Link>
-              <Link href="/portfolio" className="w-full sm:w-auto">
-                <Button variant="outline" className="w-full border-2 border-white/80 text-white hover:bg-white/20 h-12 md:h-14 px-10 rounded-full">
-                  View Portfolio
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </section>
+        <section
+  ref={heroRef}
+  className="relative min-h-screen flex items-center justify-center overflow-hidden"
+>
+  {/* Background Video */}
+  <div className="absolute inset-0 z-0">
+    <video
+      autoPlay
+      muted
+      loop
+      playsInline
+      preload="auto"
+      className="absolute inset-0 w-full h-full object-cover"
+    >
+      <source src="/videos/hero.mp4" type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
+  </div>
+</section>
 
         {/* Stats Section */}
         <section ref={statsRef} className="py-16 md:py-24 px-4 bg-white dark:bg-black">
