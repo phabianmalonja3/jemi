@@ -262,106 +262,251 @@ export default function Home() {
         </section>
 
         {/* Subscription Packages Section */}
-        <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center max-w-3xl mx-auto mb-16">
-              <h1 className="text-3xl font-extrabold text-slate-900 sm:text-4xl">
-                Choose Your Subscription Package
-              </h1>
-              <p className="mt-4 text-lg text-slate-600">
-                Pay easily through your mobile phone and continue enjoying our services seamlessly.
-              </p>
+      <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-950 via-emerald-950 to-slate-900 py-12 px-4 sm:px-6 lg:px-8">
 
-              {errorMessage && (
-                <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
-                  {errorMessage}
-                </div>
-              )}
-              {successMessage && (
-                <div className="mt-4 p-3 bg-green-100 text-green-700 rounded-lg text-sm">
-                  {successMessage}
-                </div>
-              )}
-            </div>
+  {/* Glassmorphism Background Effects */}
+  <div className="pointer-events-none absolute inset-0 overflow-hidden">
+    <div className="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-emerald-500/20 blur-3xl" />
+    <div className="absolute -right-32 top-1/3 h-96 w-96 rounded-full bg-green-400/10 blur-3xl" />
+    <div className="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-emerald-600/10 blur-3xl" />
+  </div>
 
-            {fetchingPlans ? (
-              <div className="flex justify-center items-center py-20">
-                <Loader2 className="animate-spin h-8 w-8 text-[#357738]" />
-                <span className="ml-2 text-slate-600">Loading packages...</span>
-              </div>
-            ) : plans.length === 0 ? (
-              <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-slate-200 max-w-xl mx-auto p-8">
-                <AlertCircle className="mx-auto h-12 w-12 text-slate-400 mb-4" />
-                <h3 className="text-lg font-medium text-slate-900">No Packages Available</h3>
-                <p className="mt-2 text-sm text-slate-500">
-                  There are currently no active subscription packages available. Please check back later or contact support.
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 lg:gap-x-8">
-                {plans.map((plan) => {
-                  const isPopular = plan.name === "QUARTERLY";
-                  return (
-                    <div
-                      key={plan.id}
-                      className={`relative bg-white rounded-2xl shadow-xl border ${
-                        isPopular ? "border-[#357738] ring-2 ring-[#357738]" : "border-slate-200"
-                      } p-8 flex flex-col justify-between`}
-                    >
-                      {isPopular && (
-                        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                          <span className="inline-flex items-center px-4 py-1 rounded-full text-xs font-semibold uppercase tracking-wide bg-[#357738] text-white shadow-md">
-                            <Sparkles className="w-3 h-3 mr-1" /> Most Popular
-                          </span>
-                        </div>
-                      )}
+  <div className="relative z-10 max-w-7xl mx-auto">
 
-                      <div>
-                        <h3 className="text-xl font-bold text-slate-950 uppercase tracking-wide">{plan.name}</h3>
-                        <p className="mt-4 text-slate-500 text-sm">{plan.description}</p>
+    {/* Header */}
+    <div className="text-center max-w-3xl mx-auto mb-16">
 
-                        <div className="mt-6">
-                          <span className="text-4xl font-extrabold text-slate-900">
-                            TZS {plan.price.toLocaleString()}
-                          </span>
-                          <span className="text-base font-medium text-slate-500"> / {plan.durationInDays} days</span>
-                        </div>
+      <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white">
+        Choose Your{" "}
+        <span className="bg-gradient-to-r from-emerald-300 to-green-400 bg-clip-text text-transparent">
+          Subscription Package
+        </span>
+      </h1>
 
-                        <ul className="mt-6 space-y-4">
-                          <li className="flex items-start">
-                            <div className="flex-shrink-0">
-                              <Check className="h-5 w-5 text-green-500" />
-                            </div>
-                            <p className="ml-3 text-sm text-slate-600">Access for {plan.durationInDays} days</p>
-                          </li>
-                          <li className="flex items-start">
-                            <div className="flex-shrink-0">
-                              <Check className="h-5 w-5 text-green-500" />
-                            </div>
-                            <p className="ml-3 text-sm text-slate-600">Full system capabilities</p>
-                          </li>
-                        </ul>
-                      </div>
+      <p className="mt-4 text-base sm:text-lg text-slate-300">
+        Pay easily through your mobile phone and continue enjoying our
+        services seamlessly.
+      </p>
 
-                      {/* Kitufe cha Kuchagua Kifurushi kinachofungua Modal */}
-                      <div className="mt-8">
-                        <button
-                          onClick={() => {
-                            setSelectedPlan(plan);
-                            setIsModalOpen(true);
-                          }}
-                          className="w-full bg-[#357738] text-white py-3 rounded-xl font-semibold hover:bg-[#2d6430] transition shadow-md"
-                        >
-                          Choose Plan
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+      {/* Error */}
+      {errorMessage && (
+        <div className="mt-6 rounded-2xl border border-red-400/20 bg-red-500/10 backdrop-blur-xl px-5 py-4 text-sm text-red-200 shadow-xl">
+          {errorMessage}
         </div>
+      )}
+
+      {/* Success */}
+      {successMessage && (
+        <div className="mt-6 rounded-2xl border border-emerald-400/20 bg-emerald-500/10 backdrop-blur-xl px-5 py-4 text-sm text-emerald-200 shadow-xl">
+          {successMessage}
+        </div>
+      )}
+    </div>
+
+    {/* Loading */}
+    {fetchingPlans ? (
+      <div className="flex justify-center items-center py-20">
+        <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/10 px-6 py-4 backdrop-blur-xl shadow-xl">
+          <Loader2 className="animate-spin h-6 w-6 text-emerald-400" />
+
+          <span className="text-slate-200">
+            Loading packages...
+          </span>
+        </div>
+      </div>
+
+    ) : plans.length === 0 ? (
+
+      /* Empty State */
+      <div className="mx-auto max-w-xl rounded-3xl border border-white/10 bg-white/10 p-8 text-center shadow-2xl backdrop-blur-xl">
+
+        <AlertCircle className="mx-auto h-12 w-12 text-slate-400 mb-4" />
+
+        <h3 className="text-lg font-semibold text-white">
+          No Packages Available
+        </h3>
+
+        <p className="mt-2 text-sm leading-6 text-slate-300">
+          There are currently no active subscription packages available.
+          Please check back later or contact support.
+        </p>
+
+      </div>
+
+    ) : (
+
+      /* Plans */
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 lg:gap-8">
+
+        {plans.map((plan) => {
+
+          const isPopular = plan.name === "QUARTERLY";
+
+          return (
+            <div
+              key={plan.id}
+              className={`
+                group relative overflow-hidden
+                rounded-3xl
+                p-[1px]
+                transition-all duration-500
+                hover:-translate-y-2
+                hover:shadow-2xl
+                ${
+                  isPopular
+                    ? "bg-gradient-to-b from-emerald-300/80 via-emerald-500/40 to-transparent"
+                    : "bg-gradient-to-b from-white/20 via-white/10 to-transparent"
+                }
+              `}
+            >
+
+              {/* Card */}
+              <div
+                className={`
+                  relative h-full rounded-3xl
+                  bg-white/[0.08]
+                  backdrop-blur-2xl
+                  border border-white/[0.08]
+                  p-8
+                  flex flex-col justify-between
+                  shadow-2xl
+                  ${
+                    isPopular
+                      ? "shadow-emerald-950/40"
+                      : "shadow-black/20"
+                  }
+                `}
+              >
+
+                {/* Decorative Glow */}
+                <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-emerald-400/10 blur-3xl transition-all duration-500 group-hover:bg-emerald-400/20" />
+
+                {/* Popular Badge */}
+                {isPopular && (
+                  <div className="absolute -top-0 left-1/2 -translate-x-1/2">
+                    <span className="inline-flex items-center gap-1 rounded-b-xl bg-gradient-to-r from-emerald-500 to-green-500 px-5 py-2 text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-emerald-900/30">
+                      <Sparkles className="h-3 w-3" />
+                      Most Popular
+                    </span>
+                  </div>
+                )}
+
+                <div className={isPopular ? "pt-5" : ""}>
+
+                  {/* Plan Name */}
+                  <h3 className="text-xl font-bold uppercase tracking-wider text-white">
+                    {plan.name}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="mt-4 text-sm leading-6 text-slate-300">
+                    {plan.description}
+                  </p>
+
+                  {/* Price */}
+                  <div className="mt-7">
+
+                    <span className="text-4xl font-extrabold tracking-tight text-white">
+                      TZS {plan.price.toLocaleString()}
+                    </span>
+
+                    <span className="ml-1 text-sm font-medium text-slate-400">
+                      / {plan.durationInDays} days
+                    </span>
+
+                  </div>
+
+                  {/* Features */}
+                  <ul className="mt-7 space-y-4">
+
+                    <li className="flex items-start gap-3">
+                      <div className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500/20">
+                        <Check className="h-3.5 w-3.5 text-emerald-400" />
+                      </div>
+
+                      <p className="text-sm text-slate-300">
+                        Access for {plan.durationInDays} days
+                      </p>
+                    </li>
+
+                    <li className="flex items-start gap-3">
+                      <div className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500/20">
+                        <Check className="h-3.5 w-3.5 text-emerald-400" />
+                      </div>
+
+                      <p className="text-sm text-slate-300">
+                        Full system capabilities
+                      </p>
+                    </li>
+
+                  </ul>
+
+                </div>
+
+                {/* Choose Button */}
+                <div className="mt-8">
+
+                  <button
+                    onClick={() => {
+                      setSelectedPlan(plan);
+                      setIsModalOpen(true);
+                    }}
+                    className="
+                      group/btn
+                      relative
+                      w-full
+                      overflow-hidden
+                      rounded-2xl
+                      border border-emerald-400/20
+                      bg-gradient-to-r
+                      from-emerald-600
+                      to-green-500
+                      py-3.5
+                      font-semibold
+                      text-white
+                      shadow-lg
+                      shadow-emerald-950/30
+                      transition-all
+                      duration-300
+                      hover:from-emerald-500
+                      hover:to-green-400
+                      hover:shadow-emerald-500/20
+                      hover:scale-[1.02]
+                      active:scale-[0.98]
+                    "
+                  >
+                    <span className="relative z-10">
+                      Choose Plan
+                    </span>
+
+                    {/* Button shine */}
+                    <span className="
+                      absolute
+                      inset-0
+                      -translate-x-full
+                      bg-gradient-to-r
+                      from-transparent
+                      via-white/20
+                      to-transparent
+                      transition-transform
+                      duration-700
+                      group-hover/btn:translate-x-full
+                    " />
+
+                  </button>
+
+                </div>
+
+              </div>
+            </div>
+          );
+        })}
+
+      </div>
+    )}
+  </div>
+</div>
+
 
         <TestMonies />
         <Footer />
