@@ -262,8 +262,10 @@ export default function Home() {
         </section>
 
         {/* Subscription Packages Section */}
-      <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-950 via-emerald-950 to-slate-900 py-12 px-4 sm:px-6 lg:px-8">
-
+  <div 
+  className="relative min-h-screen overflow-hidden py-12 px-4 sm:px-6 lg:px-8"
+  style={{ backgroundColor: "#102d17" }}
+>
   {/* Glassmorphism Background Effects */}
   <div className="pointer-events-none absolute inset-0 overflow-hidden">
     <div className="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-emerald-500/20 blur-3xl" />
@@ -290,14 +292,14 @@ export default function Home() {
 
       {/* Error */}
       {errorMessage && (
-        <div className="mt-6 rounded-2xl border border-red-400/20 bg-red-500/10 backdrop-blur-xl px-5 py-4 text-sm text-red-200 shadow-xl">
+        <div className="mt-6 rounded-2xl border border-red-400/20 bg-red-500/15 backdrop-blur-xl px-5 py-4 text-sm text-red-200 shadow-xl">
           {errorMessage}
         </div>
       )}
 
       {/* Success */}
       {successMessage && (
-        <div className="mt-6 rounded-2xl border border-emerald-400/20 bg-emerald-500/10 backdrop-blur-xl px-5 py-4 text-sm text-emerald-200 shadow-xl">
+        <div className="mt-6 rounded-2xl border border-emerald-400/20 bg-emerald-500/15 backdrop-blur-xl px-5 py-4 text-sm text-emerald-200 shadow-xl">
           {successMessage}
         </div>
       )}
@@ -306,7 +308,7 @@ export default function Home() {
     {/* Loading */}
     {fetchingPlans ? (
       <div className="flex justify-center items-center py-20">
-        <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/10 px-6 py-4 backdrop-blur-xl shadow-xl">
+        <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/30 px-6 py-4 backdrop-blur-xl shadow-xl">
           <Loader2 className="animate-spin h-6 w-6 text-emerald-400" />
 
           <span className="text-slate-200">
@@ -318,7 +320,7 @@ export default function Home() {
     ) : plans.length === 0 ? (
 
       /* Empty State */
-      <div className="mx-auto max-w-xl rounded-3xl border border-white/10 bg-white/10 p-8 text-center shadow-2xl backdrop-blur-xl">
+      <div className="mx-auto max-w-xl rounded-3xl border border-white/10 bg-black/30 p-8 text-center shadow-2xl backdrop-blur-xl">
 
         <AlertCircle className="mx-auto h-12 w-12 text-slate-400 mb-4" />
 
@@ -364,7 +366,7 @@ export default function Home() {
               <div
                 className={`
                   relative h-full rounded-3xl
-                  bg-white/[0.08]
+                  bg-black/40
                   backdrop-blur-2xl
                   border border-white/[0.08]
                   p-8
@@ -372,8 +374,8 @@ export default function Home() {
                   shadow-2xl
                   ${
                     isPopular
-                      ? "shadow-emerald-950/40"
-                      : "shadow-black/20"
+                      ? "shadow-emerald-950/60"
+                      : "shadow-black/40"
                   }
                 `}
               >
@@ -506,7 +508,6 @@ export default function Home() {
     )}
   </div>
 </div>
-
 
         <TestMonies />
         <Footer />
