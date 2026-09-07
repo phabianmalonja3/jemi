@@ -108,7 +108,7 @@ const paymentPartners = [
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 h-15 flex items-center justify-between">
                     <Link href="/" className="hover:opacity-80 transition-opacity flex items-center justify-between grid-cols-2">
                         <Image src="/logo.png" width={50} height={50} alt="Logo" priority unoptimized />
-                        <div className="mx-2 font-bold text-2xl text-[#25632D]">JemiGraph</div>
+                        <div className="mx-2 font-bold text-2xl text-[#25632D]">Jemigraph</div>
                     </Link>
 
                     {/* Desktop Navigation */}

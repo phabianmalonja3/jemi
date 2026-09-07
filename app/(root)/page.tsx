@@ -167,25 +167,82 @@ export default function Home() {
 
       <div className="flex flex-col min-h-screen bg-gradient-to-b from-zinc-50 via-white to-zinc-50 dark:from-black dark:via-zinc-900 dark:to-black overflow-x-hidden">
         {/* Hero Section */}
-        <section
+ <section
   ref={heroRef}
-  className="relative min-h-screen flex items-center justify-center overflow-hidden"
+  className="relative w-full min-h-screen flex items-center justify-center overflow-hidden bg-black"
 >
-  {/* Background Video */}
-  <div className="absolute inset-0 z-0">
-    <video
-      autoPlay
-      muted
-      loop
-      playsInline
-      preload="auto"
-      className="absolute inset-0 w-full h-full object-cover"
-    >
-      <source src="/videos/hero.mp4" type="video/mp4" />
-      Your browser does not support the video tag.
-    </video>
+  <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
+    
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+
+      {/* Video */}
+      <div className="w-full order-1 lg:order-2">
+        <div className="relative w-full overflow-hidden rounded-2xl shadow-2xl">
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            className="w-full h-auto max-h-[70vh] object-contain"
+          >
+            <source src="/videos/hero.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </div>
+
+      {/* Hero Content */}
+      <div className="relative z-10 text-center lg:text-left order-2 lg:order-1">
+
+        {/* Badge */}
+        <div className="hero-badge">
+          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-full px-4 py-2 mb-6 border border-white/20">
+            <FaCamera className="text-emerald-400 text-sm" />
+
+            <span className="text-white text-sm font-medium tracking-wide">
+              Photography
+            </span>
+          </div>
+        </div>
+
+        {/* Title */}
+        <h1 className="hero-title text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+          Capture Your
+          <br />
+
+          <span className="bg-gradient-to-r from-emerald-400 to-emerald-300 bg-clip-text text-transparent">
+            Perfect Moments
+          </span>
+        </h1>
+
+        {/* Subtitle */}
+        <motion.p
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="hero-subtitle text-base sm:text-lg md:text-xl text-gray-200 mb-8 max-w-2xl mx-auto lg:mx-0"
+        >
+          Creating beautiful memories through professional photography
+          and unforgettable experiences.
+        </motion.p>
+
+        {/* Booking Button */}
+        <div className="hero-button flex justify-center lg:justify-start px-4 lg:px-0">
+         <Link href="/photographers" className="w-full sm:w-auto">
+  <Button className="w-full sm:w-auto bg-gradient-to-r from-emerald-600 to-emerald-500 text-white h-12 md:h-14 px-10 rounded-full shadow-xl">
+    See Our Professional Photographers
+    <FaArrowRight className="ml-2" />
+  </Button>
+</Link>
+
+        </div>
+
+      </div>
+
+    </div>
   </div>
 </section>
+
 
         {/* Stats Section */}
         <section ref={statsRef} className="py-16 md:py-24 px-4 bg-white dark:bg-black">
