@@ -29,7 +29,8 @@ import {
   Smartphone,
   Users2Icon,
   UserCheck,
-  Star
+  Star,
+  Monitor
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -50,10 +51,10 @@ const ADMIN_LINKS = [
   { icon: UserCheck, label: "Subscribers", href: "/dashboard/admin/subscribers" },
   { icon: Star, label: "Reviews", href: "/dashboard/admin/reviews" },
   { icon: Bell, label: "Notifications", href: "/dashboard/admin/notifications" },
+  { icon: Monitor, label: "Sessions", href: "/dashboard/admin/sessions" },
   { icon: Smartphone, label: "App Updates", href: "/dashboard/admin/applications/versions" },
   { icon: Cog, label: "Settings", href: "/dashboard/admin/profile" },
 ];
-
 // SidebarItem Component
 const SidebarItem = ({ icon: Icon, label, href, active, isCollapsed, onClick }: any) => (
   <Link href={href || "#"} onClick={onClick} className="relative group">
