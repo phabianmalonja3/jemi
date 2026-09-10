@@ -264,7 +264,7 @@ export default function AdminSubscribersPage() {
       {/* Data Table */}
       {loading ? (
         <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-b-emerald-600"></div>
           <span className="ml-3 text-gray-500">Loading subscribers...</span>
         </div>
       ) : (
