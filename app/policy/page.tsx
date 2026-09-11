@@ -11,9 +11,15 @@ export default function PrivacyPolicy() {
       </p>
 
       <p className="mb-6">
-        Welcome to Jemigrapher. We respect your privacy and are committed to
-        protecting your personal information when you use the Jemigrapher
-        mobile application and services.
+        This Privacy Policy applies to the <strong>Jemigrapher</strong> mobile
+        application, package name <strong>com.jemigrapher.app</strong>.
+        Jemigrapher is provided by <strong>Ahmad Siasa</strong>.
+      </p>
+
+      <p className="mb-6">
+        We respect your privacy and are committed to protecting your personal
+        information when you use the Jemigrapher mobile application and
+        services.
       </p>
 
       <h2 className="text-xl font-semibold mt-8 mb-3">
@@ -62,8 +68,8 @@ export default function PrivacyPolicy() {
         tracking during an active booking. When background location access is
         enabled, location information may be collected when the application is
         running in the background or when the app is not actively being used.
-        This is used to allow clients to track the assigned photographer while
-        the photographer is travelling to the booking location.
+        This allows clients to track the assigned photographer while the
+        photographer is travelling to the booking location.
       </p>
 
       <p className="mb-6">
@@ -119,6 +125,12 @@ export default function PrivacyPolicy() {
       </p>
 
       <ul className="list-none space-y-1 mb-8">
+        <li>
+          <strong>App:</strong> Jemigrapher
+        </li>
+        <li>
+          <strong>Package Name:</strong> com.jemigrapher.app
+        </li>
         <li>
           <strong>Developer:</strong> Ahmad Siasa
         </li>
