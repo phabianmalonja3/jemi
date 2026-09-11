@@ -309,7 +309,6 @@ export default function ForgotClient({ token }: { readonly token: any }) {
               </div>
             </form>
           )}
-
           <div className="mt-6 pt-4 border-t border-slate-200 text-center">
             <p className="text-[10px] text-slate-500">
               Remember your password?{' '}
