@@ -30,7 +30,8 @@ import {
   Users2Icon,
   UserCheck,
   Star,
-  Monitor
+  Monitor,
+  ServerIcon
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -43,8 +44,7 @@ import axios from "axios";
 const ADMIN_LINKS = [
   { icon: LayoutDashboard, label: "Overview", href: "/dashboard" },
   { icon: Users, label: "User Management", href: "/dashboard/admin/users" },
-  // { icon: Package, label: "Package Manager", href: "/dashboard/admin/packages" },
-  // { icon: Wallet, label: "Wallet Management", href: "/dashboard/admin/wallet" }, // REMOVED
+  { icon: ServerIcon, label: "Server Health", href: "/dashboard/admin/server" },
   { icon: ArrowLeftRight, label: "Transactions", href: "/dashboard/admin/transactions" },
   { icon: Calendar, label: "Bookings", href: "/dashboard/admin/bookings" },
   { icon: Users2Icon, label: "Teams", href: "/dashboard/admin/team" },
