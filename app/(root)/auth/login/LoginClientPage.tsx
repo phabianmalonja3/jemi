@@ -517,7 +517,7 @@ function LoginClientPage() {
                                         <LogIn size={18} />
 
                                         <span className="text-sm">
-                                            Login to System   
+                                            Login to System    
                                         </span>
                                     </div>
                                 )}
