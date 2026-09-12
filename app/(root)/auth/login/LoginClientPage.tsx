@@ -403,7 +403,7 @@ function LoginClientPage() {
                                 </label>
 
                                 <Link
-                                    href="/forgot-password"
+                                    href="/auth/forgot-password"
                                     className="text-[10px] text-emerald-600 font-bold hover:text-emerald-700 transition-colors hover:underline"
                                 >
                                     Forgot Password?

@@ -157,17 +157,7 @@ export default function ForgotClient() {
       >
         <div className="bg-white/80 backdrop-blur-xl shadow-xl rounded-2xl p-6 border border-white/50">
           
-          <Link href="/auth/login">
-            <motion.button
-              whileHover={{ x: -3 }}
-              className="flex items-center gap-1 text-xs text-slate-500 hover:text-emerald-600 transition-colors mb-6"
-              type="button"
-            >
-              <ArrowLeft size={14} />
-              Back to Login
-            </motion.button>
-          </Link>
-
+          
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
