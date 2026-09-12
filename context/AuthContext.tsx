@@ -9,12 +9,10 @@ import React, {
   useMemo,
 } from "react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import {
   getAuthSession,
   setAuthSession,
   clearAuthSession,
-  apiClient,
 } from "../lib/actions";
 import axios from "axios";
 
@@ -53,7 +51,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
   const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
@@ -73,7 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const logout = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
-      if (token) {
+      if (token && BASE_URL) {
         await axios.post(
           `${BASE_URL}/auth/logout-all`,
           {},
@@ -88,19 +85,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     } catch (error) {
       console.error("Logout API call failed:", error);
     } finally {
+      localStorage.removeItem("token");
+      localStorage.removeItem("is_login");
+      
       await clearAuthSession();
       setUser(null);
-      router.push("/auth/login");
+      
       toast.info("Signed out successfully");
+      window.location.href = "/auth/login";
     }
-  }, [router, BASE_URL]);
+  }, [BASE_URL]);
 
   // ⏱️ Inactivity Timeout Logic
   useEffect(() => {
     if (!user) return;
 
     let timer: NodeJS.Timeout;
-    const INACTIVITY_TIMEOUT = 2 * 60 * 1000; // 2 Minutes
+    const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 Minutes
 
     const handleInactivity = async () => {
       await logout();

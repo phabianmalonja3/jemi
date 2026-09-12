@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
-export default function ForgotClient({ token }: { readonly token: any }) {
+export default function ForgotClient() {
   const base_url = process.env.NEXT_PUBLIC_API_URL;
   const router = useRouter();
   
@@ -24,10 +24,7 @@ export default function ForgotClient({ token }: { readonly token: any }) {
 
   useEffect(() => {
     setMounted(true);
-    if (token) {
-      router.push('/dashboard');
-    }
-  }, [router, token]);
+  }, []);
 
   // Step 1: Request OTP (/forgot-password)
   const handleRequestOtp = async (e: React.FormEvent) => {
@@ -145,22 +142,12 @@ export default function ForgotClient({ token }: { readonly token: any }) {
     }
   };
 
+  if (!mounted) return null;
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-white to-emerald-50/30 flex items-center justify-center px-4">
       
-      {/* Animated Background Orbs */}
-      <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
-        <motion.div
-          animate={{ x: [0, 80, 0], y: [0, 40, 0], scale: [1, 1.1, 1] }}
-          transition={{ duration: 20, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
-          className="absolute top-20 -left-20 w-64 h-64 bg-emerald-200/30 rounded-full blur-3xl"
-        />
-        <motion.div
-          animate={{ x: [0, -80, 0], y: [0, 60, 0], scale: [1, 1.2, 1] }}
-          transition={{ duration: 25, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
-          className="absolute bottom-20 -right-20 w-64 h-64 bg-blue-200/20 rounded-full blur-3xl"
-        />
-      </div>
+  
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -187,11 +174,7 @@ export default function ForgotClient({ token }: { readonly token: any }) {
             transition={{ delay: 0.2 }}
             className="text-center mb-6"
           >
-            <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-xl shadow-md mb-3">
-              {step === 'email' && <Mail className="w-6 h-6 text-white" />}
-              {step === 'otp' && <ShieldCheck className="w-6 h-6 text-white" />}
-              {step === 'reset' && <Lock className="w-6 h-6 text-white" />}
-            </div>
+          
             <h1 className="text-2xl font-black text-slate-900 tracking-tight">
               {step === 'email' && 'Reset Password'}
               {step === 'otp' && 'Verify OTP'}
@@ -208,9 +191,7 @@ export default function ForgotClient({ token }: { readonly token: any }) {
           {step === 'email' && (
             <form onSubmit={handleRequestOtp} className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase text-slate-500 tracking-wider flex items-center gap-1.5">
-                  <Mail size={10} /> Email Address
-                </label>
+                
                 <div className="relative">
                   <Input 
                     className="h-10 pl-9 text-sm border-slate-200 focus:border-emerald-500 rounded-lg bg-white/50"
@@ -221,7 +202,7 @@ export default function ForgotClient({ token }: { readonly token: any }) {
                     required 
                     disabled={isLoading}
                   />
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                  {/* <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} /> */}
                 </div>
                 {error && (
                   <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-[10px] text-rose-500 flex items-center gap-1 mt-1 font-medium">
@@ -233,7 +214,7 @@ export default function ForgotClient({ token }: { readonly token: any }) {
                 <Button 
                   type="submit" 
                   disabled={isLoading}
-                  className="w-full h-10 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 font-bold text-sm rounded-lg shadow-md"
+                  className="w-full h-10 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 font-bold text-sm rounded-lg shadow-md text-white"
                 >
                   {isLoading ? "Sending..." : "Send Reset Code"}
                 </Button>
@@ -245,11 +226,11 @@ export default function ForgotClient({ token }: { readonly token: any }) {
           {step === 'otp' && (
             <form onSubmit={handleValidateOtp} className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase text-slate-500 tracking-wider">
+                <label className="text-[10px] font-bold uppercase text-slate-500 tracking-wider text-white">
                   Verification Code (OTP)
                 </label>
                 <Input 
-                  className="h-10 text-sm tracking-widest text-center font-bold border-slate-200 focus:border-emerald-500 rounded-lg bg-white/50"
+                  className="h-10 text-sm tracking-widest text-center font-bold border-slate-200 focus:border-emerald-500 rounded-lg bg-white/50 "
                   type="text" 
                   maxLength={6}
                   placeholder="123456"
@@ -259,7 +240,7 @@ export default function ForgotClient({ token }: { readonly token: any }) {
                   disabled={isLoading}
                 />
                 {error && (
-                  <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-[10px] text-rose-500 flex items-center gap-1 mt-1 font-medium">
+                  <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-[10px] text-rose-500 flex items-center gap-1 mt-1 font-medium text-white">
                     <AlertCircle size={10} /> {error}
                   </motion.p>
                 )}
@@ -268,7 +249,7 @@ export default function ForgotClient({ token }: { readonly token: any }) {
                 <Button 
                   type="submit" 
                   disabled={isLoading}
-                  className="w-full h-10 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 font-bold text-sm rounded-lg shadow-md"
+                  className="w-full h-10 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 font-bold text-sm rounded-lg shadow-md text-white"
                 >
                   {isLoading ? "Verifying..." : "Verify OTP"}
                 </Button>
@@ -302,7 +283,7 @@ export default function ForgotClient({ token }: { readonly token: any }) {
                 <Button 
                   type="submit" 
                   disabled={isLoading}
-                  className="w-full h-10 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 font-bold text-sm rounded-lg shadow-md"
+                  className="w-full h-10 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 font-bold text-sm rounded-lg shadow-md text-white"
                 >
                   {isLoading ? "Updating..." : "Update Password"}
                 </Button>

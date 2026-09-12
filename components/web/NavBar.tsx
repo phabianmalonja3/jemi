@@ -1,14 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-
-
 import {
     FaBars, FaTimes, FaPhone, FaEnvelope, FaLock,
     FaUser, FaSignOutAlt, FaCreditCard, FaCamera,
-
     FaTachometerAlt,
-
 } from "react-icons/fa";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -27,86 +23,71 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/context/AuthContext";
-
-interface User {
-    id: number;
-    name: string;
-    email: string;
-    role: 'ADMIN' | 'PHOTOGRAPHER';
-    avatar?: string;
-}
+import AuthNavButton from "./AuthNavButton";
 
 const NavBar = () => {
-
-   const { isAuthenticated,logout } = useAuth(); 
+    // Tunachukua user, isAuthenticated, na logout moja kwa moja kutoka AuthContext
+    const { user, isAuthenticated, logout } = useAuth(); 
     const pathname = usePathname();
 
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [user, setUser] = useState<User | null>(null);
-
-
-
-    
-
 
     const handleLogout = async () => {
-        logout();
-    
-        setTimeout(() => {
-            window.location.href = "/auth/login";
-        }, 1000);
+        await logout();
     };
   
     if (pathname.startsWith("/dashboard")) return null;
-const paymentPartners = [
-  { src: "/logos/mpesa.png", alt: "M-Pesa", width: 100 },
-  { src: "/logos/yas.png", alt: "Yas", width: 110 },
-  { src: "/logos/airtel.png", alt: "Airtel Money", width: 100 },
-  { src: "/logos/crdb.png", alt: "CRDB Bank", width: 130 },
-];
+
+    const paymentPartners = [
+      { src: "/logos/mpesa.png", alt: "M-Pesa", width: 100 },
+      { src: "/logos/yas.png", alt: "Yas", width: 110 },
+      { src: "/logos/airtel.png", alt: "Airtel Money", width: 100 },
+      { src: "/logos/crdb.png", alt: "CRDB Bank", width: 130 },
+    ];
     
-    // Get user initial for avatar fallback
+    // Kupata herufi ya kwanza ya jina la user kwa ajili ya Avatar
     const userInitial = user?.name?.charAt(0).toUpperCase() || "U";
     const userName = user?.name?.split(' ')[0] || user?.name || "User";
 
     return (
         <>
-<div className="bg-[#25632D] text-white py-2 hidden sm:block border-b border-white/5">
-  <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-    
-    {/* Contact Info */}
-    <div className="flex gap-5 opacity-80 text-[10px] font-bold tracking-wider">
-      <a href="mailto:info@jemigraph.co.tz" className="flex items-center gap-1.5 hover:text-white transition-colors">
-        <FaEnvelope className="text-emerald-400" /> info@jemigraph.co.tz
-      </a>
-      <a href="tel:+255746560832" className="flex items-center gap-1.5 hover:text-emerald-400 transition-colors">
-        <FaPhone className="text-emerald-400" /> +255 746 560 832
-      </a>
-    </div>
+            <div className="bg-[#25632D] text-white py-2 hidden sm:block border-b border-white/5">
+              <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
+                
+                {/* Contact Info */}
+                <div className="flex gap-5 opacity-80 text-[10px] font-bold tracking-wider">
+                  <a href="mailto:info@jemigraph.co.tz" className="flex items-center gap-1.5 hover:text-white transition-colors">
+                    <FaEnvelope className="text-emerald-400" /> info@jemigraph.co.tz
+                  </a>
+                  <a href="tel:+255746560832" className="flex items-center gap-1.5 hover:text-emerald-400 transition-colors">
+                    <FaPhone className="text-emerald-400" /> +255 746 560 832
+                  </a>
+                </div>
 
-    {/* Payment Partners */}
-    <div className="flex items-center gap-3">
-      <div className="flex items-center gap-2">
-        {paymentPartners.map((logo) => (
-          <div key={logo.alt} className="bg-white/10 p-0.5 rounded-sm border border-white/10 shadow-sm">
-            <Image
-              src={logo.src}
-              width={logo.width}
-              height={24}
-              alt={logo.alt}
-              className="h-5 w-auto object-contain"
-            />
-          </div>
-        ))}
-      </div>
-    </div>
-    
-  </div>
-</div>
+                {/* Payment Partners */}
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    {paymentPartners.map((logo) => (
+                      <div key={logo.alt} className="bg-white/10 p-0.5 rounded-sm border border-white/10 shadow-sm">
+                        <Image
+                          src={logo.src}
+                          width={logo.width}
+                          height={24}
+                          alt={logo.alt}
+                          className="h-5 w-auto object-contain"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+              </div>
+            </div>
+
             {/* --- MAIN NAV --- */}
             <nav className="bg-white/95 backdrop-blur-md border-b sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 h-15 flex items-center justify-between">
-                    <Link href="/" className="hover:opacity-80 transition-opacity flex items-center justify-between grid-cols-2">
+                    <Link href="/" className="hover:opacity-80 transition-opacity flex items-center justify-between">
                         <Image src="/logo.png" width={50} height={50} alt="Logo" priority unoptimized />
                         <div className="mx-2 font-bold text-2xl text-[#25632D]">Jemigraph</div>
                     </Link>
@@ -129,41 +110,9 @@ const paymentPartners = [
                         </div>
                         <div className="h-8 w-[1px] bg-slate-200 mx-1" />
                         <div className="flex items-center gap-4">
-                            {isAuthenticated ? (
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" className="relative h-12 w-12 rounded-full p-0 border-2 border-emerald-500/20 hover:border-emerald-500 transition-all">
-                                            <Avatar className="h-full w-full">
-                                                <AvatarImage src={user?.avatar || "/avatar.jpg"} alt="User" />
-                                                <AvatarFallback className="bg-emerald-100 text-emerald-700 font-bold">
-                                                    {userInitial}
-                                                </AvatarFallback>
-                                            </Avatar>
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent className="w-56" align="end">
-                                        <DropdownMenuLabel className="flex flex-col gap-1">
-                                            <span className="text-sm font-bold">{userName}</span>
-                                            <span className="text-[10px] text-slate-400 font-normal">{user?.email}</span>
-                                        </DropdownMenuLabel>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem asChild>
-                                            <Link href="/dashboard" className="cursor-pointer py-2">
-                                                <FaTachometerAlt className="mr-2 h-4 w-4" /> Dashboard
-                                            </Link>
-                                        </DropdownMenuItem>
-                                        
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            ) : (
-                                /* Show Login Button when NOT logged in - Navigate to login page */
-                                <Link
-                                    href="/auth/login"
-                                    className="bg-[#25632D] hover:bg-[#25632D] text-white px-8 py-2 rounded-2xl font-bold text-[11px] tracking-widest shadow-xl flex items-center gap-2"
-                                >
-                                    <FaLock className="text-[10px]" /> LOGIN
-                                </Link>
-                            )}
+                          
+                               <AuthNavButton />
+                          
                         </div>
                     </div>
 
@@ -200,14 +149,34 @@ const paymentPartners = [
                             <FaCamera /> Find Photographer
                         </Link>
 
+                        {isAuthenticated ? (
+                            <>
+                                <Link
+                                    href="/dashboard"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="flex items-center justify-center gap-2 bg-[#25632D] text-white px-6 py-3 rounded-2xl font-bold text-[12px] tracking-widest"
+                                >
+                                    <FaTachometerAlt /> Dashboard
+                                </Link>
+                                <button
+                                    onClick={() => {
+                                        setMobileMenuOpen(false);
+                                        handleLogout();
+                                    }}
+                                    className="flex items-center justify-center gap-2 bg-rose-50 text-rose-600 border border-rose-200 px-6 py-3 rounded-2xl font-bold text-[12px] tracking-widest"
+                                >
+                                    <FaSignOutAlt /> Logout
+                                </button>
+                            </>
+                        ) : (
                             <Link
                                 href="/auth/login"
                                 onClick={() => setMobileMenuOpen(false)}
-                                className="flex items-center justify-center gap-2 bg-emerald-950 hover:bg-emerald-900 text-white px-6 py-3 rounded-2xl font-bold text-[12px] tracking-widest"
+                                className="flex items-center justify-center gap-2 bg-[#25632D] text-white px-6 py-3 rounded-2xl font-bold text-[12px] tracking-widest"
                             >
                                 <FaLock /> LOGIN
                             </Link>
-                     
+                        )}
                     </div>
                 </div>
             )}

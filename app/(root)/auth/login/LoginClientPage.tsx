@@ -403,7 +403,7 @@ function LoginClientPage() {
                                 </label>
 
                                 <Link
-                                    href="/auth/forgot-password"
+                                    href="/forgot-password"
                                     className="text-[10px] text-emerald-600 font-bold hover:text-emerald-700 transition-colors hover:underline"
                                 >
                                     Forgot Password?
@@ -514,10 +514,10 @@ function LoginClientPage() {
                                     </div>
                                 ) : (
                                     <div className="flex items-center gap-2">
-                                        <LogIn size={18} />
+                                        <LogIn size={18} className="text-white" />
 
-                                        <span className="text-sm">
-                                            Login to System     
+                                        <span className="text-sm text-white">
+                                            Login to System    
                                         </span>  
                                     </div>
                                 )}

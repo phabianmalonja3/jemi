@@ -9,16 +9,7 @@ import ForgotClient from './ForgotClient';
 
 
 
-    const token = (await  cookies()).get("token");
-
-    console.log(token)
 
 
-
-
-    console.log()
-
-
-
-  return <ForgotClient token={token} />
+  return <ForgotClient />
 }
