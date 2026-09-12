@@ -152,20 +152,7 @@ const paymentPartners = [
                                                 <FaTachometerAlt className="mr-2 h-4 w-4" /> Dashboard
                                             </Link>
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem asChild>
-                                            <Link href="/dashboard/profile" className="cursor-pointer py-2">
-                                                <FaUser className="mr-2 h-4 w-4" /> My Profile
-                                            </Link>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem asChild>
-                                            <Link href="/dashboard/admin/wallet" className="cursor-pointer py-2">
-                                                <FaCreditCard className="mr-2 h-4 w-4" /> Wallet
-                                            </Link>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem onClick={handleLogout} className="text-red-600 cursor-pointer font-bold py-2">
-                                            <FaSignOutAlt className="mr-2 h-4 w-4" /> Sign Out
-                                        </DropdownMenuItem>
+                                        
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             ) : (
