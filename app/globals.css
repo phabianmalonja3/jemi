@@ -2,7 +2,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-/* Figtree */
+/* Figtree Font Definitions */
 @font-face {
   font-family: "Figtree";
   src: url("/fonts/Figtree-Regular.woff2") format("woff2");
@@ -33,4 +33,17 @@
   font-weight: 700;
   font-style: normal;
   font-display: swap;
+}
+
+/* Kurekebisha tatizo la rangi ya maandishi kwenye Buttons za Tailwind v4 & Shadcn */
+button:not([class*="text-"]), 
+.btn:not([class*="text-"]) {
+  color: inherit;
+}
+
+/* Kuhakikisha Buttons zenye background ya rangi (kama emerald au primary) zinakuwa na maandishi meupe */
+button.bg-emerald-600, 
+button[class*="bg-emerald-"],
+button.bg-primary {
+  color: #ffffff !important;
 }

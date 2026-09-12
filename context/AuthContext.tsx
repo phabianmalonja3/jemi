@@ -38,6 +38,11 @@ interface AuthContextType {
     user?: User;      
     message?: string; 
   }>;
+  verifyAdminOtp: (email: string, code: string) => Promise<{
+    success: boolean;
+    user?: User;
+    message?: string;
+  }>;
   logout: () => void;
 }
 
@@ -90,12 +95,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [router, BASE_URL]);
 
-  // ⏱️ Inactivity Timeout Logic (Dakika 5)
+  // ⏱️ Inactivity Timeout Logic
   useEffect(() => {
     if (!user) return;
 
     let timer: NodeJS.Timeout;
-    const INACTIVITY_TIMEOUT = 2 * 60 * 1000; // 5 Minutes
+    const INACTIVITY_TIMEOUT = 2 * 60 * 1000; // 2 Minutes
 
     const handleInactivity = async () => {
       await logout();
@@ -149,6 +154,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [BASE_URL]);
 
+  const verifyAdminOtp = useCallback(async (email: string, code: string) => {
+    setIsLoading(true);
+    try {
+      const response = await axios.post(`${BASE_URL}/auth/verify-admin-otp`, { email, code });
+
+      const { accessToken, user } = response.data;
+      
+      localStorage.setItem("is_login", "true");
+      localStorage.setItem("token", accessToken);
+      
+      await setAuthSession(accessToken, user);
+      setUser(user);
+      
+      return { success: true, user };
+    } catch (error: any) {
+      console.error("OTP verification failed:", error.response?.data?.message || error.message);
+      
+      return { 
+        success: false, 
+        message: error.response?.data?.message || "Invalid verification code" 
+      };
+    } finally {
+      setIsLoading(false);
+    }
+  }, [BASE_URL]);
+
   const isPhotographer = user?.role === "PHOTOGRAPHER";
   const isAuthenticated = !!user;
 
@@ -159,9 +190,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       isAuthenticated,
       isLoading,
       login,
+      verifyAdminOtp,
       logout,
     }),
-    [user, isPhotographer, isAuthenticated, isLoading, login, logout]
+    [user, isPhotographer, isAuthenticated, isLoading, login, verifyAdminOtp, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

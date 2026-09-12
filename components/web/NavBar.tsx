@@ -213,51 +213,6 @@ const paymentPartners = [
                             <FaCamera /> Find Photographer
                         </Link>
 
-                        {isAuthenticated ? (
-                            <>
-                                <div className="flex items-center gap-3 pt-2">
-                                    <Avatar className="h-12 w-12">
-                                        <AvatarFallback className="bg-emerald-100 text-emerald-700 font-bold text-lg">
-                                            {userInitial}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                    <div>
-                                        <p className="font-bold text-slate-900">{userName}</p>
-                                        <p className="text-[10px] text-slate-400">{user?.email}</p>
-                                    </div>
-                                </div>
-                                <Link
-                                    href="/dashboard"
-                                    onClick={() => setMobileMenuOpen(false)}
-                                    className="flex items-center gap-2 text-slate-700 font-semibold py-2"
-                                >
-                                    <FaTachometerAlt /> Dashboard
-                                </Link>
-                                <Link
-                                    href="/profile"
-                                    onClick={() => setMobileMenuOpen(false)}
-                                    className="flex items-center gap-2 text-slate-700 font-semibold py-2"
-                                >
-                                    <FaUser /> Profile
-                                </Link>
-                                <Link
-                                    href="/billing"
-                                    onClick={() => setMobileMenuOpen(false)}
-                                    className="flex items-center gap-2 text-slate-700 font-semibold py-2"
-                                >
-                                    <FaCreditCard /> Payments
-                                </Link>
-                                <button
-                                    onClick={() => {
-                                        handleLogout();
-                                        setMobileMenuOpen(false);
-                                    }}
-                                    className="flex items-center gap-2 text-red-600 font-bold py-2"
-                                >
-                                    <FaSignOutAlt /> Sign Out
-                                </button>
-                            </>
-                        ) : (
                             <Link
                                 href="/auth/login"
                                 onClick={() => setMobileMenuOpen(false)}
@@ -265,7 +220,7 @@ const paymentPartners = [
                             >
                                 <FaLock /> LOGIN
                             </Link>
-                        )}
+                     
                     </div>
                 </div>
             )}

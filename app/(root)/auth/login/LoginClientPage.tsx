@@ -60,13 +60,13 @@ function LoginClientPage() {
             );
 
             if (res.success) {
-                toast.success("Login successful!");
+                toast.success("Login successful! Please verify OTP.");
 
                 // Refresh server components
                 router.refresh();
 
-                // Navigate to dashboard
-                router.push("/dashboard");
+                // Nenda kwenye ukurasa wa OTP badala ya dashboard
+                router.push(`/auth/otp?email=${encodeURIComponent(loginEmail.trim())}`);
             } else {
                 const message =
                     res.message ||
@@ -529,22 +529,7 @@ function LoginClientPage() {
                         CARD FOOTER
                     ================================================= */}
 
-                    <motion.div
-                        initial={{
-                            opacity: 0,
-                        }}
-                        animate={{
-                            opacity: 1,
-                        }}
-                        transition={{
-                            delay: 0.6,
-                        }}
-                        className="mt-8 pt-6 border-t border-slate-200 text-center"
-                    >
-                        <p className="text-xs text-slate-400">
-                            Secure login to your Jemigraph account
-                        </p>
-                    </motion.div>
+                    
 
                 </div>
 
