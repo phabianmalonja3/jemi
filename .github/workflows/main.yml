@@ -18,4 +18,7 @@ jobs:
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
             cd /var/www/html/jemi
+            git checkout package-lock.json
+            git reset --hard HEAD
+            git pull origin main
             ./deployemt.sh
