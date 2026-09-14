@@ -195,7 +195,7 @@ export default function PrivacyPolicy() {
         </li>
 
         <li>
-          <strong>Package Name:</strong> com.jemigraph.client
+          <strong>Package Name:</strong> com.jemi.app
         </li>
 
         <li>
