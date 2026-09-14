@@ -33,6 +33,7 @@ import {
   Monitor,
   ServerIcon
 } from "lucide-react";
+import { FaAppStore, FaGooglePlay } from "react-icons/fa";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
@@ -53,6 +54,17 @@ const ADMIN_LINKS = [
   { icon: Bell, label: "Notifications", href: "/dashboard/admin/notifications" },
   { icon: Monitor, label: "Sessions", href: "/dashboard/admin/sessions" },
   { icon: Smartphone, label: "App Updates", href: "/dashboard/admin/applications/versions" },
+  { 
+  icon: FaGooglePlay, 
+  label: "Google Play Manager", 
+  href: "/dashboard/admin/applications/android" 
+},
+{
+  icon: FaAppStore, 
+  label: "Google Play Manager", 
+  href: "/dashboard/admin/applications/ios" 
+},
+
   { icon: Cog, label: "Settings", href: "/dashboard/admin/profile" },
 ];
 // SidebarItem Component
@@ -207,48 +219,13 @@ export function Sidebar() {
             </button>
           </div>
 
-          {/* REMOVED LOGO - Replaced with empty div or can be removed entirely */}
-          <div className="h-10"></div>
-
-          {/* User Profile Info */}
-          <div
-            className={cn(
-              "mb-6",
-              isCollapsed && !isMobileOpen ? "flex flex-col items-center" : "px-2"
-            )}
-          >
-            {(!isCollapsed || isMobileOpen) && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mt-3 flex items-center gap-3"
-              >
-                {/* Avatar */}
-                <div className="w-10 h-10 rounded-full bg-emerald-100 border-2 border-white shadow-sm flex items-center justify-center text-emerald-700 font-bold text-sm uppercase">
-                  {userInitial}
-                </div>
-
-                {/* User Details */}
-                <div className="overflow-hidden">
-                  <h2 className="text-sm font-bold text-slate-900 leading-tight truncate">
-                    {userName}
-                  </h2>
-                  <p className="text-[10px] text-slate-400 truncate max-w-[150px]">
-                    {user.email}
-                  </p>
-                </div>
-              </motion.div>
-            )}
-          </div>
+         
+          
 
           {/* Navigation */}
           <nav className="flex-1 overflow-y-auto no-scrollbar space-y-6">
             <div>
-              {(!isCollapsed || isMobileOpen) && (
-                <p className="text-[10px] font-bold text-rose-500 uppercase mb-3 ml-2">
-                  Admin Control
-                </p>
-              )}
+              
               {ADMIN_LINKS.map((link) => (
                 <SidebarItem
                   key={link.href}
