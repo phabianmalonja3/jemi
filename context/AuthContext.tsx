@@ -101,8 +101,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     if (!user) return;
 
     let timer: NodeJS.Timeout;
-    const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 Minutes
-
+  const INACTIVITY_TIMEOUT = 24 * 60 * 60 * 1000; // Saa 24
     const handleInactivity = async () => {
       await logout();
       toast.warning("Session expired due to inactivity.");
