@@ -12,7 +12,7 @@ export default function PrivacyPolicy() {
 
       <p className="mb-6">
         This Privacy Policy applies to the <strong>Jemigraph</strong> mobile
-        application, package name <strong>com.jemigraph.client</strong>.
+        application, package name <strong>com.jemi.app</strong>.
         Jemigraph is provided by <strong>Ahmad Siasa</strong>.
       </p>
 
@@ -44,11 +44,6 @@ export default function PrivacyPolicy() {
           services requested through the app.
         </li>
 
-        <li>
-          <strong>Payment Information:</strong> Information necessary to
-          process payments for bookings and services. Payment processing may be
-          handled by third-party payment providers.
-        </li>
 
         <li>
           <strong>Device Information:</strong> Device notification tokens and
@@ -66,8 +61,7 @@ export default function PrivacyPolicy() {
         <li>Process and manage your bookings.</li>
         <li>Connect you with photographers and requested services.</li>
         <li>Provide location-based services during active bookings.</li>
-        <li>Send booking, payment, and service notifications.</li>
-        <li>Process payments and maintain transaction records.</li>
+        <li>Send booking, and service notifications.</li>
         <li>Provide customer support and resolve booking-related issues.</li>
         <li>Improve the performance and functionality of our services.</li>
       </ul>
