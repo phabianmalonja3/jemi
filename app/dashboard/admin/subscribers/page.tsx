@@ -70,10 +70,8 @@ export default function AdminSubscribersPage() {
 
   const fetchPlans = async () => {
     try {
-      const token = localStorage.getItem("token");
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/subscription-plans`,
-       
+        `${process.env.NEXT_PUBLIC_API_URL}/subscription-plans`
       );
       const activePlans = (response.data || []).filter((p: SubscriptionPlan) => p.active);
       setPlans(activePlans);
@@ -88,7 +86,7 @@ export default function AdminSubscribersPage() {
     fetchPlans();
   }, []);
 
-  // Handle Subscription Change Request Submission (Optimized Payload: userId & subscriptionPlanId)
+  // Handle Subscription Change Request Submission
   const handleRequestSubscriptionChange = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedUser || !selectedPlanId) return;
@@ -320,7 +318,8 @@ export default function AdminSubscribersPage() {
         <LoadingSpinner message="Loading subscribers..." size="md" />
       ) : (
         <div className="overflow-x-auto border rounded-lg shadow-sm">
-          <table className="min-w-full divide-y divide-gray-200">
+          {/* Imewekwa min-w-[1200px] ili kuzuia table isijikunje na kuficha safu ya Actions */}
+          <table className="min-w-[1200px] w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -439,12 +438,11 @@ export default function AdminSubscribersPage() {
                         <button
                           onClick={() => {
                             setSelectedUser(subscriber);
-                            // Pre-select plan ID if it matches an existing plan
                             const matchedPlan = plans.find((p) => p.name === subscriber.planName);
                             setSelectedPlanId(matchedPlan ? matchedPlan.id : "");
                             setIsModalOpen(true);
                           }}
-                          className="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-3 py-1 rounded-md transition"
+                          className="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-3 py-1 rounded-md transition shadow-sm"
                         >
                           Change Sub
                         </button>
@@ -513,7 +511,7 @@ export default function AdminSubscribersPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-4 py-2 bg-emerald-600 text-white rounded-md text-sm hover:bg-emerald-600 disabled:opacity-50"
+                  className="px-4 py-2 bg-emerald-600 text-white rounded-md text-sm hover:bg-emerald-700 disabled:opacity-50"
                 >
                   {submitting ? "Sending Request..." : "Send Approval Request"}
                 </button>
