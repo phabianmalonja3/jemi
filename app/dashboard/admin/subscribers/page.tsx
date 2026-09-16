@@ -36,6 +36,7 @@ export default function AdminSubscribersPage() {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [planFilter, setPlanFilter] = useState<string>("ALL");
@@ -46,9 +47,11 @@ export default function AdminSubscribersPage() {
   const [selectedPlanId, setSelectedPlanId] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const fetchSubscribers = async () => {
+  const fetchSubscribers = async (isRefresh = false) => {
     try {
-      setLoading(true);
+      if (isRefresh) setRefreshing(true);
+      else setLoading(true);
+
       const token = localStorage.getItem("token");
 
       const response = await axios.get(
@@ -65,6 +68,7 @@ export default function AdminSubscribersPage() {
       toast.error("There was an error fetching subscribers.");
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -73,7 +77,9 @@ export default function AdminSubscribersPage() {
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/subscription-plans`
       );
-      const activePlans = (response.data || []).filter((p: SubscriptionPlan) => p.active);
+      const activePlans = (response.data || []).filter(
+        (p: SubscriptionPlan) => p.active
+      );
       setPlans(activePlans);
     } catch (error) {
       console.error("Error fetching plans:", error);
@@ -86,7 +92,6 @@ export default function AdminSubscribersPage() {
     fetchPlans();
   }, []);
 
-  // Handle Subscription Change Request Submission
   const handleRequestSubscriptionChange = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedUser || !selectedPlanId) return;
@@ -106,7 +111,9 @@ export default function AdminSubscribersPage() {
         }
       );
 
-      toast.success("Request sent! The Super Admin has been notified via email for approval.");
+      toast.success(
+        "Request sent! The Super Admin has been notified via email for approval."
+      );
       setIsModalOpen(false);
       setSelectedUser(null);
       setSelectedPlanId("");
@@ -118,12 +125,10 @@ export default function AdminSubscribersPage() {
     }
   };
 
-  // Get unique plan names for filter
   const uniquePlans = Array.from(
     new Set(subscribers.map((s) => s.planName).filter((plan) => plan !== "N/A"))
   );
 
-  // Filter subscribers
   const filteredSubscribers = subscribers.filter((sub) => {
     const matchesSearch =
       sub.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -132,13 +137,11 @@ export default function AdminSubscribersPage() {
     const matchesStatus =
       statusFilter === "ALL" || sub.subscriptionStatus === statusFilter;
 
-    const matchesPlan =
-      planFilter === "ALL" || sub.planName === planFilter;
+    const matchesPlan = planFilter === "ALL" || sub.planName === planFilter;
 
     return matchesSearch && matchesStatus && matchesPlan;
   });
 
-  // Get status badge color and icon
   const getStatusBadge = (status: string) => {
     switch (status?.toUpperCase()) {
       case "ACTIVE":
@@ -214,7 +217,8 @@ export default function AdminSubscribersPage() {
     total: subscribers.length,
     active: subscribers.filter((s) => s.subscriptionStatus === "ACTIVE").length,
     trial: subscribers.filter((s) => s.subscriptionStatus === "TRIAL").length,
-    inactive: subscribers.filter((s) => s.subscriptionStatus === "INACTIVE").length,
+    inactive: subscribers.filter((s) => s.subscriptionStatus === "INACTIVE")
+      .length,
   };
 
   return (
@@ -240,7 +244,9 @@ export default function AdminSubscribersPage() {
         </div>
         <div className="bg-white rounded-lg shadow p-4 border-l-4 border-gray-400">
           <div className="text-sm text-gray-500">Inactive</div>
-          <div className="text-2xl font-bold text-gray-600">{stats.inactive}</div>
+          <div className="text-2xl font-bold text-gray-600">
+            {stats.inactive}
+          </div>
         </div>
       </div>
 
@@ -286,13 +292,13 @@ export default function AdminSubscribersPage() {
 
         <button
           onClick={() => {
-            fetchSubscribers();
+            fetchSubscribers(true);
             fetchPlans();
           }}
           className="bg-emerald-600 text-white px-4 py-2 rounded-md hover:bg-emerald-700 text-sm font-medium transition flex items-center gap-2"
         >
           <svg
-            className={`w-4 h-4 ${loading ? "animate-spin" : ""}`}
+            className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -308,8 +314,8 @@ export default function AdminSubscribersPage() {
         </button>
 
         <div className="ml-auto flex items-center text-sm text-gray-600">
-          Showing <strong className="mx-1">{filteredSubscribers.length}</strong> of{" "}
-          <strong className="mx-1">{subscribers.length}</strong> subscribers
+          Showing <strong className="mx-1">{filteredSubscribers.length}</strong>{" "}
+          of <strong className="mx-1">{subscribers.length}</strong> subscribers
         </div>
       </div>
 
@@ -317,9 +323,17 @@ export default function AdminSubscribersPage() {
       {loading ? (
         <LoadingSpinner message="Loading subscribers..." size="md" />
       ) : (
-        <div className="overflow-x-auto border rounded-lg shadow-sm">
-          {/* Imewekwa min-w-[1200px] ili kuzuia table isijikunje na kuficha safu ya Actions */}
-          <table className="min-w-[1200px] w-full divide-y divide-gray-200">
+        <div
+          className="w-full border rounded-lg shadow-sm"
+          style={{
+            overflowX: "auto",
+            WebkitOverflowScrolling: "touch",
+          }}
+        >
+          <table
+            className="w-full divide-y divide-gray-200"
+            style={{ minWidth: "1200px" }}
+          >
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -354,12 +368,20 @@ export default function AdminSubscribersPage() {
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredSubscribers.length > 0 ? (
                 filteredSubscribers.map((subscriber) => {
-                  const statusBadge = getStatusBadge(subscriber.subscriptionStatus);
+                  const statusBadge = getStatusBadge(
+                    subscriber.subscriptionStatus
+                  );
                   const daysRemaining = getDaysRemaining(subscriber.expiresAt);
-                  const isExpiringSoon = daysRemaining !== null && daysRemaining <= 7 && daysRemaining > 0;
+                  const isExpiringSoon =
+                    daysRemaining !== null &&
+                    daysRemaining <= 7 &&
+                    daysRemaining > 0;
 
                   return (
-                    <tr key={subscriber.userId} className="hover:bg-gray-50 transition">
+                    <tr
+                      key={subscriber.userId}
+                      className="hover:bg-gray-50 transition"
+                    >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-mono text-gray-600">
                           {subscriber.userId.slice(0, 8)}...
@@ -386,7 +408,9 @@ export default function AdminSubscribersPage() {
                               {subscriber.planName}
                             </span>
                           ) : (
-                            <span className="text-gray-400 text-xs">No Plan</span>
+                            <span className="text-gray-400 text-xs">
+                              No Plan
+                            </span>
                           )}
                         </div>
                       </td>
@@ -427,7 +451,9 @@ export default function AdminSubscribersPage() {
                                 : "text-green-600"
                             }`}
                           >
-                            {daysRemaining <= 0 ? "Expired" : `${daysRemaining} days`}
+                            {daysRemaining <= 0
+                              ? "Expired"
+                              : `${daysRemaining} days`}
                             {isExpiringSoon && " ⚠️"}
                           </span>
                         ) : (
@@ -438,11 +464,15 @@ export default function AdminSubscribersPage() {
                         <button
                           onClick={() => {
                             setSelectedUser(subscriber);
-                            const matchedPlan = plans.find((p) => p.name === subscriber.planName);
-                            setSelectedPlanId(matchedPlan ? matchedPlan.id : "");
+                            const matchedPlan = plans.find(
+                              (p) => p.name === subscriber.planName
+                            );
+                            setSelectedPlanId(
+                              matchedPlan ? matchedPlan.id : ""
+                            );
                             setIsModalOpen(true);
                           }}
-                          className="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-3 py-1 rounded-md transition shadow-sm"
+                          className="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-3 py-1 rounded-md transition shadow-sm whitespace-nowrap"
                         >
                           Change Sub
                         </button>
@@ -476,15 +506,24 @@ export default function AdminSubscribersPage() {
               Change Subscription
             </h3>
             <p className="text-sm text-gray-500 mb-4">
-              User: <span className="font-semibold text-gray-700">{selectedUser.email}</span>
+              User:{" "}
+              <span className="font-semibold text-gray-700">
+                {selectedUser.email}
+              </span>
             </p>
             <p className="text-xs text-amber-600 bg-amber-50 p-2 rounded mb-4">
-              ⚠️ This action will send an approval email to the Super Admin before these changes are officially saved.
+              ⚠️ This action will send an approval email to the Super Admin
+              before these changes are officially saved.
             </p>
 
-            <form onSubmit={handleRequestSubscriptionChange} className="space-y-4">
+            <form
+              onSubmit={handleRequestSubscriptionChange}
+              className="space-y-4"
+            >
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Select Plan</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Select Plan
+                </label>
                 <select
                   value={selectedPlanId}
                   onChange={(e) => setSelectedPlanId(e.target.value)}
@@ -494,7 +533,8 @@ export default function AdminSubscribersPage() {
                   <option value="">-- Select Plan --</option>
                   {plans.map((plan) => (
                     <option key={plan.id} value={plan.id}>
-                      {plan.name} ({plan.durationInDays} Days - TZS {plan.price.toLocaleString()})
+                      {plan.name} ({plan.durationInDays} Days - TZS{" "}
+                      {plan.price.toLocaleString()})
                     </option>
                   ))}
                 </select>
