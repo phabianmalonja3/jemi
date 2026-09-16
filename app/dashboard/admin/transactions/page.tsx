@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
+import LoadingSpinner from "@/components/web/LoadingSpinner";
 
 interface Transaction {
   id: string;
@@ -85,7 +86,7 @@ export default function TransactionsPage() {
 
       {/* Data Table */}
       {loading ? (
-        <p className="text-gray-500">Loading transactions...</p>
+<LoadingSpinner message="Loading subscribers..." size="lg" />
       ) : (
         <div className="overflow-x-auto border rounded-lg shadow-sm">
           <table className="min-w-full divide-y divide-gray-200">

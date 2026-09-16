@@ -14,6 +14,7 @@ import {
   FlagIcon,
 } from "@heroicons/react/24/outline";
 import { StarIcon as StarSolidIcon } from "@heroicons/react/24/solid";
+import LoadingSpinner from "@/components/web/LoadingSpinner";
 
 interface Review {
   id: string;
@@ -286,10 +287,7 @@ export default function AdminReviewsPage() {
 
       {/* Data Table */}
       {loading ? (
-        <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="ml-3 text-gray-500">Loading reviews...</span>
-        </div>
+        <LoadingSpinner message="Loading Reviews..." size="md" />
       ) : (
         <div className="overflow-x-auto border rounded-lg shadow-sm">
           <table className="min-w-full divide-y divide-gray-200">

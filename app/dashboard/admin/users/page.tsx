@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import axios from "axios";
 import { User, PaginatedResponse, UserFilters } from "@/types";
+import LoadingSpinner from "@/components/web/LoadingSpinner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v0.1";
 
@@ -359,14 +360,12 @@ export default function UserManagementPage() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {isLoading ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center">
-                    <div className="flex items-center justify-center gap-2">
-                      <Loader2 className="animate-spin text-emerald-600" size={24} />
-                      <p className="text-slate-500 font-medium">Loading users...</p>
-                    </div>
-                  </td>
-                </tr>
+
+                <div className="center">
+                  <LoadingSpinner message="Loading Users List..." size="md" />
+                </div>
+
+               
               ) : users.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-12 text-center">

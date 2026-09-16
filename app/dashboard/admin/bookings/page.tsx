@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
+import LoadingSpinner from "@/components/web/LoadingSpinner";
 
 interface Booking {
   id: string;
@@ -82,7 +83,7 @@ export default function AdminBookingsPage() {
 
       {/* Data Table */}
       {loading ? (
-        <p className="text-gray-500">Loading bookings...</p>
+        <LoadingSpinner message="Loading Bookings..." size="md" />
       ) : (
         <div className="overflow-x-auto border rounded-lg shadow-sm">
           <table className="min-w-full divide-y divide-gray-200">

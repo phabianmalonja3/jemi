@@ -9,10 +9,9 @@ import {
   ClockIcon,
   UserIcon,
   EnvelopeIcon,
-  PhoneIcon,
   CalendarIcon,
-  CurrencyDollarIcon,
 } from "@heroicons/react/24/outline";
+import LoadingSpinner from "@/components/web/LoadingSpinner";
 
 interface Subscriber {
   userId: string;
@@ -24,12 +23,28 @@ interface Subscriber {
   durationInDays: number;
 }
 
+interface SubscriptionPlan {
+  id: string;
+  name: string;
+  price: number;
+  durationInDays: number;
+  description: string;
+  active: boolean;
+}
+
 export default function AdminSubscribersPage() {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
+  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [planFilter, setPlanFilter] = useState<string>("ALL");
+
+  // Modal States for Change Subscription
+  const [selectedUser, setSelectedUser] = useState<Subscriber | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedPlanId, setSelectedPlanId] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const fetchSubscribers = async () => {
     try {
@@ -44,9 +59,6 @@ export default function AdminSubscribersPage() {
       );
 
       const data = response.data;
-      console.log("Fetched subscribers:", data);
-
-      // Handle both array and paginated response
       setSubscribers(Array.isArray(data) ? data : data.content || []);
     } catch (error) {
       console.error(error);
@@ -56,9 +68,57 @@ export default function AdminSubscribersPage() {
     }
   };
 
+  const fetchPlans = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/subscription-plans`,
+       
+      );
+      const activePlans = (response.data || []).filter((p: SubscriptionPlan) => p.active);
+      setPlans(activePlans);
+    } catch (error) {
+      console.error("Error fetching plans:", error);
+      toast.error("Failed to fetch subscription plans.");
+    }
+  };
+
   useEffect(() => {
     fetchSubscribers();
+    fetchPlans();
   }, []);
+
+  // Handle Subscription Change Request Submission (Optimized Payload: userId & subscriptionPlanId)
+  const handleRequestSubscriptionChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedUser || !selectedPlanId) return;
+
+    try {
+      setSubmitting(true);
+      const token = localStorage.getItem("token");
+
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/subscription-plans/request-change`,
+        {
+          userId: selectedUser.userId,
+          subscriptionPlanId: selectedPlanId,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      toast.success("Request sent! The Super Admin has been notified via email for approval.");
+      setIsModalOpen(false);
+      setSelectedUser(null);
+      setSelectedPlanId("");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to submit the modification request.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   // Get unique plan names for filter
   const uniquePlans = Array.from(
@@ -122,7 +182,6 @@ export default function AdminSubscribersPage() {
     }
   };
 
-  // Format date
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "N/A";
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -134,7 +193,6 @@ export default function AdminSubscribersPage() {
     });
   };
 
-  // Format currency
   const formatCurrency = (amount: number | null) => {
     if (!amount) return "N/A";
     return new Intl.NumberFormat("en-US", {
@@ -145,7 +203,6 @@ export default function AdminSubscribersPage() {
     }).format(amount);
   };
 
-  // Get days remaining
   const getDaysRemaining = (expiresAt: string | null) => {
     if (!expiresAt) return null;
     const now = new Date();
@@ -155,7 +212,6 @@ export default function AdminSubscribersPage() {
     return diffDays;
   };
 
-  // Statistics
   const stats = {
     total: subscribers.length,
     active: subscribers.filter((s) => s.subscriptionStatus === "ACTIVE").length,
@@ -192,7 +248,6 @@ export default function AdminSubscribersPage() {
 
       {/* Filters Section */}
       <div className="flex flex-wrap gap-4 mb-6">
-        {/* Search Input */}
         <div className="relative flex-1 min-w-[200px]">
           <input
             type="text"
@@ -204,7 +259,6 @@ export default function AdminSubscribersPage() {
           <EnvelopeIcon className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
         </div>
 
-        {/* Status Filter */}
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
@@ -218,7 +272,6 @@ export default function AdminSubscribersPage() {
           <option value="CANCELLED">Cancelled</option>
         </select>
 
-        {/* Plan Filter */}
         <select
           value={planFilter}
           onChange={(e) => setPlanFilter(e.target.value)}
@@ -233,9 +286,11 @@ export default function AdminSubscribersPage() {
           <option value="N/A">No Plan</option>
         </select>
 
-        {/* Refresh Button */}
         <button
-          onClick={fetchSubscribers}
+          onClick={() => {
+            fetchSubscribers();
+            fetchPlans();
+          }}
           className="bg-emerald-600 text-white px-4 py-2 rounded-md hover:bg-emerald-700 text-sm font-medium transition flex items-center gap-2"
         >
           <svg
@@ -254,7 +309,6 @@ export default function AdminSubscribersPage() {
           Refresh
         </button>
 
-        {/* Results count */}
         <div className="ml-auto flex items-center text-sm text-gray-600">
           Showing <strong className="mx-1">{filteredSubscribers.length}</strong> of{" "}
           <strong className="mx-1">{subscribers.length}</strong> subscribers
@@ -263,10 +317,7 @@ export default function AdminSubscribersPage() {
 
       {/* Data Table */}
       {loading ? (
-        <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-b-emerald-600"></div>
-          <span className="ml-3 text-gray-500">Loading subscribers...</span>
-        </div>
+        <LoadingSpinner message="Loading subscribers..." size="md" />
       ) : (
         <div className="overflow-x-auto border rounded-lg shadow-sm">
           <table className="min-w-full divide-y divide-gray-200">
@@ -295,6 +346,9 @@ export default function AdminSubscribersPage() {
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Days Left
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
                 </th>
               </tr>
             </thead>
@@ -381,13 +435,27 @@ export default function AdminSubscribersPage() {
                           <span className="text-gray-400 text-sm">N/A</span>
                         )}
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button
+                          onClick={() => {
+                            setSelectedUser(subscriber);
+                            // Pre-select plan ID if it matches an existing plan
+                            const matchedPlan = plans.find((p) => p.name === subscriber.planName);
+                            setSelectedPlanId(matchedPlan ? matchedPlan.id : "");
+                            setIsModalOpen(true);
+                          }}
+                          className="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-3 py-1 rounded-md transition"
+                        >
+                          Change Sub
+                        </button>
+                      </td>
                     </tr>
                   );
                 })
               ) : (
                 <tr>
                   <td
-                    colSpan={8}
+                    colSpan={9}
                     className="px-6 py-6 text-center text-sm text-gray-500"
                   >
                     <div className="flex flex-col items-center gap-2">
@@ -402,63 +470,56 @@ export default function AdminSubscribersPage() {
         </div>
       )}
 
-      {/* Export Button */}
-      {!loading && filteredSubscribers.length > 0 && (
-        <div className="mt-4 flex justify-end gap-3">
-          <button
-            onClick={() => {
-              // Copy to clipboard
-              const emails = filteredSubscribers.map((s) => s.email).join(", ");
-              navigator.clipboard.writeText(emails);
-              toast.success("Emails copied to clipboard!");
-            }}
-            className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 text-sm font-medium transition flex items-center gap-2"
-          >
-            <EnvelopeIcon className="w-4 h-4" />
-            Copy Emails
-          </button>
-          <button
-            onClick={() => {
-              // Export to CSV
-              const headers = [
-                "User ID",
-                "Email",
-                "Status",
-                "Plan",
-                "Amount (TZS)",
-                "Duration (Days)",
-                "Expires At",
-              ];
-              const csvData = filteredSubscribers.map((s) => [
-                s.userId,
-                s.email,
-                s.subscriptionStatus,
-                s.planName,
-                s.planAmount || "",
-                s.durationInDays,
-                s.expiresAt || "",
-              ]);
-              const csvContent =
-                "data:text/csv;charset=utf-8," +
-                [headers.join(","), ...csvData.map((row) => row.join(","))].join(
-                  "\n"
-                );
-              const encodedUri = encodeURI(csvContent);
-              const link = document.createElement("a");
-              link.setAttribute("href", encodedUri);
-              link.setAttribute("download", `subscribers_${new Date().toISOString().split('T')[0]}.csv`);
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-              toast.success("CSV exported successfully!");
-            }}
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm font-medium transition flex items-center gap-2"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-            Export CSV
-          </button>
+      {/* SUBSCRIPTION CHANGE MODAL */}
+      {isModalOpen && selectedUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">
+              Change Subscription
+            </h3>
+            <p className="text-sm text-gray-500 mb-4">
+              User: <span className="font-semibold text-gray-700">{selectedUser.email}</span>
+            </p>
+            <p className="text-xs text-amber-600 bg-amber-50 p-2 rounded mb-4">
+              ⚠️ This action will send an approval email to the Super Admin before these changes are officially saved.
+            </p>
+
+            <form onSubmit={handleRequestSubscriptionChange} className="space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Select Plan</label>
+                <select
+                  value={selectedPlanId}
+                  onChange={(e) => setSelectedPlanId(e.target.value)}
+                  className="w-full border px-3 py-2 rounded-md text-sm focus:ring-2 focus:ring-blue-500"
+                  required
+                >
+                  <option value="">-- Select Plan --</option>
+                  {plans.map((plan) => (
+                    <option key={plan.id} value={plan.id}>
+                      {plan.name} ({plan.durationInDays} Days - TZS {plan.price.toLocaleString()})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex justify-end gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 border rounded-md text-sm text-gray-600 hover:bg-gray-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="px-4 py-2 bg-emerald-600 text-white rounded-md text-sm hover:bg-emerald-600 disabled:opacity-50"
+                >
+                  {submitting ? "Sending Request..." : "Send Approval Request"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

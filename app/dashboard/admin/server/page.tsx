@@ -3,6 +3,7 @@
 import { apiClient } from '@/lib/api';
 import { useEffect, useState } from 'react';
 import { CpuChipIcon, ServerIcon, CircleStackIcon, GlobeAltIcon, CommandLineIcon } from '@heroicons/react/24/outline';
+import LoadingSpinner from '@/components/web/LoadingSpinner';
 
 export default function ServerMetricsDashboard() {
   const [stats, setStats] = useState<any>(null);
@@ -25,7 +26,7 @@ export default function ServerMetricsDashboard() {
     return () => clearInterval(interval);
   }, []);
 
-  if (loading && !stats) return <div className="p-6 text-gray-500">Loading extended server metrics...</div>;
+  if (loading && !stats) return <LoadingSpinner message="Loading Server Details..." size="md" />;
   if (!stats) return <div className="p-6 text-red-600">Error loading server metrics</div>;
 
   const formatBytes = (bytes: number) => {
