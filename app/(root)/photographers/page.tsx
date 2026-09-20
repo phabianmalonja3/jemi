@@ -32,6 +32,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import Footer from "@/components/web/Footer";
+import LoadingSpinner from "@/components/web/LoadingSpinner";
 
 if (typeof window !== "undefined") {
     gsap.registerPlugin(ScrollTrigger);
@@ -942,22 +943,7 @@ export default function PhotographersPage() {
                     <div className="max-w-6xl mx-auto">
 
                         {loading ? (
-                            <div className="flex flex-col items-center justify-center py-32">
-
-                                <div className="relative">
-
-                                    <div className="w-16 h-16 border-4 border-[#D8F3DC] rounded-full animate-spin border-t-[#25632D]" />
-
-                                    <FaCamera className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[#25632D] text-xl" />
-
-                                </div>
-
-                                <p className="mt-6 text-zinc-500 font-medium">
-                                    Finding talented
-                                    photographers...
-                                </p>
-
-                            </div>
+                                 <LoadingSpinner message="Loading Bookings..." size="md" />
                         ) : (
                             <>
                                 <div

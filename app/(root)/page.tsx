@@ -22,8 +22,9 @@ import axios from "axios";
 import { heroSlides } from "@/lib/constants/heros";
 import Footer from "@/components/web/Footer";
 import TestMonies from "@/components/web/TestMonies";
-import PaymentModal from "@/components/web/PaymentModal"; // Hakikisha path ya faili hili ni sahihi
+import PaymentModal from "@/components/web/PaymentModal";
 import { AlertCircle, Check, Loader2, Sparkles } from "lucide-react";
+import LoadingSpinner from "@/components/web/LoadingSpinner";
 
 // Register GSAP plugin
 if (typeof window !== "undefined") {
@@ -65,7 +66,7 @@ export default function Home() {
         setPlans(response.data);
       } catch (err) {
         setPlans([]);
-        setErrorMessage("Imeshindikana kupakia vifurushi. Tafadhali jaribu tena.");
+        setErrorMessage("Failed to fetch subscriptions !");
       } finally {
         setFetchingPlans(false);
       }
@@ -307,15 +308,7 @@ export default function Home() {
 
     {/* Loading */}
     {fetchingPlans ? (
-      <div className="flex justify-center items-center py-20">
-        <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/30 px-6 py-4 backdrop-blur-xl shadow-xl">
-          <Loader2 className="animate-spin h-6 w-6 text-emerald-400" />
-
-          <span className="text-slate-200">
-            Loading packages...
-          </span>
-        </div>
-      </div>
+                  <LoadingSpinner message="Loading Packages..." size="md" />
 
     ) : plans.length === 0 ? (
 
