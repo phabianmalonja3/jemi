@@ -35,50 +35,48 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-
 export default function ContactPage() {
     const [formData, setFormData] = useState({
         name: "",
         email: "",
         subject: "",
-        category: "",
         message: "",
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-        setIsSubmitting(true);
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  setIsSubmitting(true);
 
-        try {
-            // TODO: Connect this to your backend API
-            await new Promise((resolve) =>
-                setTimeout(resolve, 1500)
-            );
+  try {
+    const res = await fetch(`${API_URL}/contact`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: formData.name,
+        email: formData.email,
+        subject: formData.subject,
+        message: formData.message,
+      }),
+    });
 
-            setFormData({
-                name: "",
-                email: "",
-                subject: "",
-                category: "",
-                message: "",
-            });
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error.message || "Failed to send message");
+    }
 
-        } catch (error) {
-            console.error("Contact form error:", error);
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
+    setFormData({ name: "", email: "", subject: "", message: "" });
+    // show success toast
+  } catch (err) {
+    console.error("Contact form error:", err);
+    // show error toast
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
     const contactInfo = [
         {
@@ -441,84 +439,27 @@ export default function ContactPage() {
                                     </div>
 
 
-                                    {/* Subject + Category */}
+                                    {/* Subject */}
 
-                                    <div className="grid md:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
 
-                                        <div className="space-y-2">
+                                        <Label htmlFor="subject">
+                                            Subject *
+                                        </Label>
 
-                                            <Label htmlFor="subject">
-                                                Subject *
-                                            </Label>
-
-                                            <Input
-                                                id="subject"
-                                                required
-                                                placeholder="Booking inquiry"
-                                                value={formData.subject}
-                                                onChange={(e) =>
-                                                    setFormData({
-                                                        ...formData,
-                                                        subject: e.target.value,
-                                                    })
-                                                }
-                                                className="focus-visible:ring-[#25632D]"
-                                            />
-
-                                        </div>
-
-
-                                        <div className="space-y-2">
-
-                                            <Label htmlFor="category">
-                                                Category
-                                            </Label>
-
-                                            <Select
-                                                value={formData.category}
-                                                onValueChange={(value) =>
-                                                    setFormData({
-                                                        ...formData,
-                                                        category: value,
-                                                    })
-                                                }
-                                            >
-
-                                                <SelectTrigger className="focus:ring-[#25632D]">
-
-                                                    <SelectValue
-                                                        placeholder="Select a category"
-                                                    />
-
-                                                </SelectTrigger>
-
-                                                <SelectContent>
-
-                                                    <SelectItem value="booking">
-                                                        Booking Inquiry
-                                                    </SelectItem>
-
-                                                    <SelectItem value="custom">
-                                                        Custom Tour Request
-                                                    </SelectItem>
-
-                                                    <SelectItem value="partnership">
-                                                        Partnership Opportunity
-                                                    </SelectItem>
-
-                                                    <SelectItem value="support">
-                                                        Technical Support
-                                                    </SelectItem>
-
-                                                    <SelectItem value="other">
-                                                        Other
-                                                    </SelectItem>
-
-                                                </SelectContent>
-
-                                            </Select>
-
-                                        </div>
+                                        <Input
+                                            id="subject"
+                                            required
+                                            placeholder="Booking inquiry"
+                                            value={formData.subject}
+                                            onChange={(e) =>
+                                                setFormData({
+                                                    ...formData,
+                                                    subject: e.target.value,
+                                                })
+                                            }
+                                            className="focus-visible:ring-[#25632D]"
+                                        />
 
                                     </div>
 
@@ -783,9 +724,7 @@ export default function ContactPage() {
             </div>
 
 
-            {/* =====================================================
-                FOOTER
-            ====================================================== */}
+          
 
             <Footer />
 
