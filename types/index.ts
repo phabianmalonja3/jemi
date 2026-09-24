@@ -114,6 +114,7 @@ export type User = {
   createdAt: string;
   avatar?: string;
  enabled: boolean;
+ isVerified: boolean;
 };
 // Paginated API Response
 export interface PaginatedResponse<T> {

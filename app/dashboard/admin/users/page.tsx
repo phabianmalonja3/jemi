@@ -256,8 +256,8 @@ export default function UserManagementPage() {
 
   // Stats are computed from the current page data, not all users
   // Consider fetching stats separately if needed
-  const activeUsers = users.filter(u => u.enabled).length;
-  const suspendedUsers = users.filter(u => !u.enabled).length;
+  const activeUsers = users.filter(u => u.isVerified).length;
+  const suspendedUsers = users.filter(u => !u.isVerified).length;
 
   return (
     <div className="p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
@@ -405,10 +405,10 @@ export default function UserManagementPage() {
                     <td className="px-6 py-4">
                       <span className={cn(
                         "inline-flex items-center gap-1.5 text-xs font-semibold",
-                        user.enabled ? "text-emerald-600" : "text-red-600"
+                        user.isVerified ? "text-emerald-600" : "text-red-600"
                       )}>
-                        {user.enabled ? <CheckCircle size={14} /> : <XCircle size={14} />}
-                        {user.enabled ? "ACTIVE" : "SUSPENDED"}
+                        {user.isVerified ? <CheckCircle size={14} /> : <XCircle size={14} />}
+                        {user.isVerified ? "ACTIVE" : "SUSPENDED"}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-500">
@@ -423,9 +423,9 @@ export default function UserManagementPage() {
                         <button 
                           onClick={() => handleStatusToggle(user.id, user.enabled)}
                           className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-emerald-600 transition-colors"
-                          title={user.enabled ? "Suspend User" : "Activate User"}
+                          title={user.isVerified ? "Suspend User" : "Activate User"}
                         >
-                          {user.enabled ? <EyeOff size={16} /> : <Eye size={16} />}
+                          {user.isVerified ? <EyeOff size={16} /> : <Eye size={16} />}
                         </button>
                         <button 
                           onClick={() => handleEditUser(user)}
