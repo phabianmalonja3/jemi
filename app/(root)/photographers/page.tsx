@@ -801,33 +801,6 @@ export default function PhotographersPage() {
                                         }
                                     )}
 
-                                    {/* VERIFIED FILTER */}
-
-                                    <button
-                                        onClick={() =>
-                                            setShowVerifiedOnly(
-                                                !showVerifiedOnly
-                                            )
-                                        }
-                                        className={`px-4 py-2 rounded-full text-sm transition-all flex items-center gap-2 ${
-                                            showVerifiedOnly
-                                                ? "bg-blue-500 text-white shadow-lg"
-                                                : "bg-white/10 text-white hover:bg-white/20"
-                                        }`}
-                                    >
-
-                                        <Image
-                                            src={
-                                                VERIFIED_ICON
-                                            }
-                                            alt="Verified"
-                                            width={14}
-                                            height={14}
-                                        />
-
-                                        Verified Only
-
-                                    </button>
 
                                 </div>
                             </div>
@@ -883,24 +856,7 @@ export default function PhotographersPage() {
                                     available
                                 </span>
 
-                                {showVerifiedOnly && (
-                                    <span className="ml-2 text-blue-600">
-
-                                        <Image
-                                            src={
-                                                VERIFIED_ICON
-                                            }
-                                            alt="Verified"
-                                            width={13}
-                                            height={13}
-                                            className="inline-block mr-1"
-                                        />
-
-                                        Verified only
-
-                                    </span>
-                                )}
-
+                               
                                 {searchQuery && (
                                     <span className="ml-2">
                                         matching{" "}
@@ -1100,9 +1056,24 @@ export default function PhotographersPage() {
                                                                         <FaPhone className="text-[#25632D] text-xs shrink-0" />
 
                                                                         <span className="truncate">
-                                                                            {formatPhoneNumber(
-                                                                                photographer.phone
-                                                                            )}
+                                                                           {photographer.phone &&
+  photographer.phone !== "Not provided" && (() => {
+    const cleaned = photographer.phone.replace(/\D/g, "");
+    const formattedPhone = cleaned.startsWith("255") 
+      ? "+" + cleaned 
+      : cleaned.startsWith("0") 
+        ? "+255" + cleaned.slice(1) 
+        : "+255" + cleaned;
+
+    return (
+      <a
+        href={`tel:${formattedPhone}`}
+        className="flex-1 text-center px-3 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 transition text-sm"
+      >
+        Call {`${formattedPhone}`}
+      </a>
+    );
+  })()}
                                                                         </span>
 
                                                                     </div>
@@ -1158,24 +1129,28 @@ export default function PhotographersPage() {
                                                             >
                                                                 Email
                                                             </a>
+{photographer.phone &&
+  photographer.phone !== "Not provided" && (() => {
+    const cleaned = photographer.phone.replace(/\D/g, "");
+    const formattedPhone = cleaned.startsWith("255") 
+      ? "+" + cleaned 
+      : cleaned.startsWith("0") 
+        ? "+255" + cleaned.slice(1) 
+        : "+255" + cleaned;
 
-                                                            {photographer.phone &&
-                                                                photographer.phone !==
-                                                                    "Not provided" && (
-                                                                    <a
-                                                                        href={`tel:${photographer.phone.replace(
-                                                                            /\D/g,
-                                                                            ""
-                                                                        )}`}
-                                                                        className="flex-1 text-center px-3 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 transition text-sm"
-                                                                    >
-                                                                        Call
-                                                                    </a>
-                                                                )}
+    return (
+      <a
+        href={`tel:${formattedPhone}`}
+        className="flex-1 text-center px-3 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 transition text-sm"
+      >
+        Call
+      </a>
+    );
+  })()}
 
                                                             <Button
                                                                 size="sm"
-                                                                className="flex-1 bg-[#25632D] hover:bg-[#1e5125]"
+                                                                className="flex-1 bg-[#25632D] hover:bg-[#1e5125] text-white"
                                                                 onClick={() =>
                                                                     handleViewProfile(
                                                                         photographer
@@ -1213,11 +1188,7 @@ export default function PhotographersPage() {
 
                                             <p className="text-zinc-500 max-w-md mx-auto">
 
-                                                {searchQuery
-                                                    ? `We couldn't find any photographers matching "${searchQuery}"`
-                                                    : showVerifiedOnly
-                                                    ? "No verified photographers are currently available"
-                                                    : "No photographers are currently available"}
+                                               
 
                                             </p>
 
@@ -1232,20 +1203,7 @@ export default function PhotographersPage() {
                                                 </Button>
                                             )}
 
-                                            {!searchQuery &&
-                                                showVerifiedOnly && (
-                                                    <Button
-                                                        onClick={() =>
-                                                            setShowVerifiedOnly(
-                                                                false
-                                                            )
-                                                        }
-                                                        className="mt-6 bg-blue-600 hover:bg-blue-700"
-                                                    >
-                                                        Show All
-                                                        Photographers
-                                                    </Button>
-                                                )}
+                                            
 
                                         </div>
                                     )}

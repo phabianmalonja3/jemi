@@ -5,7 +5,7 @@ import {
   Users, UserPlus, Search, Shield, Trash2, Edit2, 
   RefreshCw, Eye, EyeOff, Lock, Mail, User as UserIcon,
   Filter, CheckCircle, XCircle, AlertCircle, Loader2,
-  ChevronLeft, ChevronRight
+  ChevronLeft, ChevronRight, Ban
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -52,7 +52,7 @@ export default function UserManagementPage() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [filterRole, setFilterRole] = useState<"ALL" | "ADMIN" | "PHOTOGRAPHER">("ALL");
-  const [filterStatus, setFilterStatus] = useState<"ALL" | "ACTIVE" | "SUSPENDED">("ALL");
+  const [filterStatus, setFilterStatus] = useState<"ALL" | "ACTIVE" | "BLOCKED">("ALL");
   
   // Pagination state
   const [pagination, setPagination] = useState({
@@ -92,10 +92,6 @@ export default function UserManagementPage() {
         `/admin/users?${params.toString()}`
       );
 
-      // Set users from response content
-
-
-      console.log(response.data.content);
       setUsers(response.data.content);
       setPagination({
         page: response.data.number,
@@ -103,8 +99,6 @@ export default function UserManagementPage() {
         totalPages: response.data.totalPages,
         totalElements: response.data.totalElements
       });
-
-      console.log("Fetched users with pagination:", response.data);
     } catch (error: any) {
       console.error("Error fetching users:", error);
       toast.error(error.response?.data?.message || "Failed to load users");
@@ -128,7 +122,7 @@ export default function UserManagementPage() {
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
       fetchUsers(0, pagination.size);
-    }, 500); // Debounce search
+    }, 500);
 
     return () => clearTimeout(debounceTimer);
   }, [searchTerm, filterRole]);
@@ -225,26 +219,28 @@ export default function UserManagementPage() {
     ), { duration: 5000 });
   };
 
-  const handleStatusToggle = async (userId: string, currentEnabledStatus: boolean) => {
+  // Function ya Handle Block / Unblock kutumia isBlocked field
+  const handleBlockToggle = async (userId: string, currentBlockedStatus: boolean) => {
     const token = localStorage.getItem("token");
     if (!token) {
       toast.error("Authentication required");
       return;
     }
 
-    const nextEnabledStatus = !currentEnabledStatus;
+    const nextBlockedStatus = !currentBlockedStatus;
 
     try {
+      // Badilisha endpoint kulingana na API yako ya backend (mfano: /admin/block-account au patch ya user)
       await apiClient.patch(
-        `/admin/suspend-account/${userId}`, 
-        { enabled: nextEnabledStatus }
+        `/admin/${userId}/suspend`, 
+        { isBlocked: nextBlockedStatus }
       );
 
       await fetchUsers(pagination.page, pagination.size);
-      toast.success(`User ${nextEnabledStatus ? "activated" : "suspended"} successfully`);
-    } catch (error: any) {
-      console.error("Error toggling user status:", error);
-      toast.error(error.response?.data?.message || "Failed to update user status");
+      toast.success(`User ${nextBlockedStatus ? "blocked" : "unblocked"} successfully`);
+    }	catch (error: any) {
+      console.error("Error toggling block status:", error);
+      toast.error(error.response?.data?.message || "Failed to update block status");
     }
   };
 
@@ -254,10 +250,9 @@ export default function UserManagementPage() {
     setIsModalOpen(true);
   };
 
-  // Stats are computed from the current page data, not all users
-  // Consider fetching stats separately if needed
-  const activeUsers = users.filter(u => u.isVerified).length;
-  const suspendedUsers = users.filter(u => !u.isVerified).length;
+  // Hesapiana takwimu za ukurasa wa sasa
+  const activeUsers = users.filter(u => !u.isBlocked).length;
+  const blockedUsers = users.filter(u => u.isBlocked).length;
 
   return (
     <div className="p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
@@ -328,7 +323,7 @@ export default function UserManagementPage() {
         </div>
       </div>
 
-      {/* Stats - Show paginated stats or total if available */}
+      {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
         <div className="bg-white border border-slate-200 rounded-xl p-4">
           <p className="text-xs text-slate-500 font-medium">Current Page</p>
@@ -340,8 +335,8 @@ export default function UserManagementPage() {
           <p className="text-2xl font-bold text-emerald-600">{activeUsers}</p>
         </div>
         <div className="bg-white border border-slate-200 rounded-xl p-4">
-          <p className="text-xs text-slate-500 font-medium">Suspended (Page)</p>
-          <p className="text-2xl font-bold text-red-600">{suspendedUsers}</p>
+          <p className="text-xs text-slate-500 font-medium">Blocked (Page)</p>
+          <p className="text-2xl font-bold text-red-600">{blockedUsers}</p>
         </div>
       </div>
 
@@ -360,12 +355,13 @@ export default function UserManagementPage() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {isLoading ? (
-
-                <div className="center">
-                  <LoadingSpinner message="Loading Users List..." size="md" />
-                </div>
-
-               
+                <tr>
+                  <td colSpan={5} className="px-6 py-12 text-center">
+                    <div className="flex justify-center items-center">
+                      <LoadingSpinner message="Loading Users List..." size="md" />
+                    </div>
+                  </td>
+                </tr>
               ) : users.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-12 text-center">
@@ -384,7 +380,7 @@ export default function UserManagementPage() {
                   >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-linear-to-br from-emerald-100 to-emerald-50 flex items-center justify-center font-bold text-emerald-700">
+                        <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center font-bold text-emerald-700">
                           {user.name?.charAt(0) || "U"}
                         </div>
                         <div>
@@ -405,10 +401,10 @@ export default function UserManagementPage() {
                     <td className="px-6 py-4">
                       <span className={cn(
                         "inline-flex items-center gap-1.5 text-xs font-semibold",
-                        user.isVerified ? "text-emerald-600" : "text-red-600"
+                        !user.isBlocked ? "text-emerald-600" : "text-red-600"
                       )}>
-                        {user.isVerified ? <CheckCircle size={14} /> : <XCircle size={14} />}
-                        {user.isVerified ? "ACTIVE" : "SUSPENDED"}
+                        {!user.isBlocked ? <CheckCircle size={14} /> : <Ban size={14} />}
+                        {!user.isBlocked ? "ACTIVE" : "BLOCKED"}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-500">
@@ -420,12 +416,16 @@ export default function UserManagementPage() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-1">
+                        {/* Kitufe cha Block / Unblock kinatumia isBlocked */}
                         <button 
-                          onClick={() => handleStatusToggle(user.id, user.enabled)}
-                          className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-emerald-600 transition-colors"
-                          title={user.isVerified ? "Suspend User" : "Activate User"}
+                          onClick={() => handleBlockToggle(user.id, user.isBlocked)}
+                          className={cn(
+                            "p-2 rounded-lg transition-colors",
+                            user.isBlocked ? "text-red-500 hover:bg-red-50" : "text-slate-400 hover:bg-slate-100 hover:text-emerald-600"
+                          )}
+                          title={user.isBlocked ? "Unblock User" : "Block User"}
                         >
-                          {user.isVerified ? <EyeOff size={16} /> : <Eye size={16} />}
+                          {user.isBlocked ? <Eye size={16} /> : <Ban size={16} />}
                         </button>
                         <button 
                           onClick={() => handleEditUser(user)}
@@ -481,7 +481,6 @@ export default function UserManagementPage() {
             
             <div className="flex items-center gap-1">
               {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-                // Show pages around current page
                 let pageNum = i;
                 if (pagination.totalPages > 5) {
                   const start = Math.max(0, Math.min(pagination.page - 2, pagination.totalPages - 5));
@@ -557,7 +556,6 @@ function UserModal({
   });
   const [showPassword, setShowPassword] = useState(false);
 
-  // Reset form when modal opens or user changes
   useEffect(() => {
     if (isOpen) {
       setFormData({
@@ -586,11 +584,9 @@ function UserModal({
     
     let success = false;
     if (isEditMode && user) {
-      // For edit, remove password if empty
       const { password, ...updateData } = formData;
       success = await onUpdateUser(user.id, updateData);
     } else {
-      // For create, require password
       if (!formData.password) {
         toast.error("Password is required for new users");
         setIsSubmitting(false);
@@ -609,7 +605,6 @@ function UserModal({
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
-          {/* Backdrop */}
           <motion.div 
             initial={{ opacity: 0 }} 
             animate={{ opacity: 1 }} 
@@ -618,14 +613,12 @@ function UserModal({
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
           />
 
-          {/* Modal */}
           <motion.div 
             initial={{ opacity: 0, scale: 0.95, y: 20 }} 
             animate={{ opacity: 1, scale: 1, y: 0 }} 
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             className="bg-white w-full max-w-md rounded-2xl shadow-2xl relative z-10"
           >
-            {/* Header */}
             <div className="p-6 border-b border-slate-100">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-emerald-50 rounded-xl">
@@ -642,9 +635,7 @@ function UserModal({
               </div>
             </div>
 
-            {/* Form */}
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              {/* Name */}
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-700">Full Name</label>
                 <div className="relative">
@@ -660,7 +651,6 @@ function UserModal({
                 </div>
               </div>
 
-              {/* Email */}
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-700">Email Address</label>
                 <div className="relative">
@@ -676,7 +666,6 @@ function UserModal({
                 </div>
               </div>
 
-              {/* Password - Only for new users */}
               {!isEditMode && (
                 <div className="space-y-1.5">
                   <div className="flex justify-between items-center">
@@ -707,13 +696,9 @@ function UserModal({
                       {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
                   </div>
-                  <p className="text-[10px] text-slate-400">
-                    Min 8 characters with letters, numbers, and symbols
-                  </p>
                 </div>
               )}
 
-              {/* Role Selection */}
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-700">System Role</label>
                 <div className="grid grid-cols-2 gap-2">
@@ -735,7 +720,6 @@ function UserModal({
                 </div>
               </div>
 
-              {/* Actions */}
               <div className="flex gap-3 pt-4">
                 <button 
                   type="button" 
