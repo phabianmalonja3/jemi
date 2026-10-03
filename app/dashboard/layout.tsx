@@ -8,7 +8,7 @@ import { Toaster } from "sonner";
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthProvider>
-      <div className="min-h-screen bg-slate-50 ">
+      <div className="min-h-screen bg-slate-50">
         {/* Sidebar sasa itasoma isOnline na Role yenyewe ndani ya component yake */}
         <Sidebar  />
 
