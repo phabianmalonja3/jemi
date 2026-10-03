@@ -46,7 +46,6 @@ import axios from "axios";
 const ADMIN_LINKS = [
   { icon: LayoutDashboard, label: "Overview", href: "/dashboard" },
   { icon: Users, label: "User Management", href: "/dashboard/admin/users" },
-  { icon: ServerIcon, label: "Server Health", href: "/dashboard/admin/server" },
   { icon: ArrowLeftRight, label: "Transactions", href: "/dashboard/admin/transactions" },
   { icon: Calendar, label: "Bookings", href: "/dashboard/admin/bookings" },
   { icon: Users2Icon, label: "Teams", href: "/dashboard/admin/team" },
@@ -54,12 +53,13 @@ const ADMIN_LINKS = [
   { icon: Star, label: "Reviews", href: "/dashboard/admin/reviews" },
   { icon: Bell, label: "Notifications", href: "/dashboard/admin/notifications" },
   { icon: Monitor, label: "Sessions", href: "/dashboard/admin/sessions" },
- 
+  { icon: ServerIcon, label: "Server Health", href: "/dashboard/admin/server" },
+
   {
-  icon: Radio,
-  label: "Online",
-  href: "/dashboard/admin/online",
-},
+    icon: Radio,
+    label: "Online",
+    href: "/dashboard/admin/online",
+  },
 
   { icon: Cog, label: "Settings", href: "/dashboard/admin/profile" },
 ];
@@ -215,13 +215,13 @@ export function Sidebar() {
             </button>
           </div>
 
-         
-          
+
+
 
           {/* Navigation */}
           <nav className="flex-1 overflow-y-auto no-scrollbar space-y-6">
             <div>
-              
+
               {ADMIN_LINKS.map((link) => (
                 <SidebarItem
                   key={link.href}

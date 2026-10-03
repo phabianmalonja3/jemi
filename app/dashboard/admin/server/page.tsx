@@ -4,6 +4,7 @@ import { apiClient } from '@/lib/api';
 import { useEffect, useState } from 'react';
 import { CpuChipIcon, ServerIcon, CircleStackIcon, GlobeAltIcon, CommandLineIcon } from '@heroicons/react/24/outline';
 import LoadingSpinner from '@/components/web/LoadingSpinner';
+import { Server } from 'lucide-react';
 
 export default function ServerMetricsDashboard() {
   const [stats, setStats] = useState<any>(null);
@@ -26,8 +27,8 @@ export default function ServerMetricsDashboard() {
     return () => clearInterval(interval);
   }, []);
 
-  if (loading && !stats) return <LoadingSpinner message="Loading Server Details..." size="md" />;
-  if (!stats) return <div className="p-6 text-red-600">Error loading server metrics</div>;
+  // if (loading && !stats) return <LoadingSpinner message="Loading Server Details..." size="md" />;
+  // if (!stats) return <div className="p-6 text-red-600">Error loading server metrics</div>;
 
   const formatBytes = (bytes: number) => {
     if (!bytes) return '0 B';
@@ -45,8 +46,20 @@ export default function ServerMetricsDashboard() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* OS & Host Metadata Bar */}
+    <div >
+    
+
+       {loading ?  <div className="flex justify-center items-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-b-emerald-600"></div>
+          <span className="ml-3 text-gray-500">Loading sessions...</span>
+        </div> : <div>
+          
+          <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold flex items-center gap-2">
+          <Server className="w-7 h-7 text-emerald-600" />
+          Operation System
+        </h1>
+      </div>
       {stats?.os && (
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-wrap items-center justify-between gap-4 text-sm">
           <div className="flex items-center gap-2">
@@ -181,6 +194,8 @@ export default function ServerMetricsDashboard() {
           </div>
         )}
       </div>
+          </div>}
+      
     </div>
   );
 }

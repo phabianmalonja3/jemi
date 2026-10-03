@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
 import LoadingSpinner from "@/components/web/LoadingSpinner";
+import { Calendar } from "lucide-react";
 
 interface Booking {
   id: string;
@@ -62,8 +63,12 @@ export default function AdminBookingsPage() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Booking Management </h1>
-
+       <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold flex items-center gap-2">
+          <Calendar className="w-7 h-7 text-emerald-600" />
+          Bookings 
+        </h1>
+      </div>
       {/* Search and Refresh Section */}
       <div className="flex gap-4 mb-6">
         <input

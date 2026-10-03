@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Bell, CheckCircle, Info, AlertTriangle, Trash2 } from "lucide-react";
+import { Bell, CheckCircle, Info, AlertTriangle, Trash2, BellIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BellAlertIcon } from "@heroicons/react/24/outline";
 
 // Mock data (Hii baadaye itatoka kwenye API yako ya Spring Boot)
 const INITIAL_NOTIFICATIONS = [
@@ -25,10 +26,11 @@ export default function NotificationsPage() {
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Notifications</h1>
-          <p className="text-slate-500 text-sm">Manage and view your system updates.</p>
-        </div>
+        <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
+        <BellIcon className="w-7 h-7 text-emerald-600" />
+        Notification System
+      </h1>
+
         <button 
           onClick={() => setNotifications([])}
           className="text-rose-500 text-sm flex items-center gap-2 hover:bg-rose-50 px-3 py-2 rounded-lg transition"

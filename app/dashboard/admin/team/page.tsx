@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { FaTheaterMasks } from "react-icons/fa";
 import { toast } from "sonner";
 
 // Define the Team Member interface based on your entity and DTO structure
@@ -285,14 +286,10 @@ export default function TeamManager() {
     <div className="space-y-6">
       {/* FORM SECTION */}
       <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">
-            Manage Team Members
-          </h2>
-          <p className="text-sm text-gray-500 mt-1">
-            Add and configure leadership or staff profiles displayed on the platform.
-          </p>
-        </div>
+        <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
+        <FaTheaterMasks className="w-7 h-7 text-emerald-600" />
+        Subscribers Management
+      </h1>
 
         {/* SUCCESS MESSAGE */}
         {successMessage && (

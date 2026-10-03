@@ -224,7 +224,7 @@ export default function AdminSubscribersPage() {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
-        <UserIcon className="w-7 h-7 text-blue-600" />
+        <UserIcon className="w-7 h-7 text-emerald-600" />
         Subscribers Management
       </h1>
 

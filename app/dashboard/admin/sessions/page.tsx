@@ -121,7 +121,7 @@ export default function AdminSessionsPage() {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
-        <ComputerDesktopIcon className="w-7 h-7 text-blue-600" />
+        <ComputerDesktopIcon className="w-7 h-7 text-emerald-600" />
         Session Management
       </h1>
 
