@@ -134,7 +134,7 @@ function OtpClientPage() {
                         </h1>
                         <p className="text-slate-500 text-xs mt-2 leading-relaxed">
                             We’ve sent a 6-digit confirmation code to <br />
-                            <span className="font-semibold text-slate-700">{email}</span>
+                          
                         </p>
                     </div>
 
