@@ -204,7 +204,7 @@ const NavBar = () => {
             />
 
             <div className="mx-2 font-bold text-2xl text-[#25632D]">
-              Jemigraph
+              jemigraph Tour
             </div>
           </Link>
 

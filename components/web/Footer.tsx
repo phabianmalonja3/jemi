@@ -50,7 +50,7 @@ function Footer() {
             "
           >
             <h3 className="text-3xl font-bold tracking-tight">
-              Jemigraph
+              jemigraph Tour
             </h3>
 
             <p className="mt-4 max-w-md text-sm leading-7 text-white/70 sm:text-base">
@@ -227,7 +227,8 @@ function Footer() {
 
             <p className="mt-4 text-sm leading-6 text-white/60">
               Book your photography experience directly
-              from the Jemigraph mobile app.
+              from the Jemigraph
+               mobile app.
             </p>
 
             <div className="mt-6 flex flex-col gap-3">
@@ -403,7 +404,7 @@ function Footer() {
           "
         >
           <p>
-            © {new Date().getFullYear()} Jemigraph Photograph Tours.
+            © {new Date().getFullYear()} Jemigraph  Tours.
             All rights reserved.
           </p>
 
