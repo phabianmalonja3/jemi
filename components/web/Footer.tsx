@@ -4,6 +4,7 @@ import {
   FaFacebook,
   FaInstagram,
   FaTwitter,
+  FaYoutube,
 } from "react-icons/fa";
 
 function Footer() {
@@ -59,78 +60,104 @@ function Footer() {
             </p>
 
             {/* Social Media */}
-            <div className="mt-7">
-              <h4 className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-white/80">
-                Follow Us
-              </h4>
+         <div className="mt-7">
+  <h4 className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-white/80">
+    Follow Us
+  </h4>
 
-              <div className="flex gap-3">
+  <div className="flex gap-3">
 
-                <a
-                  href="https://instagram.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Instagram"
-                  className="
-                    flex h-11 w-11 items-center justify-center
-                    rounded-full
-                    border border-white/10
-                    bg-white/[0.08]
-                    backdrop-blur-xl
-                    shadow-lg
-                    transition-all duration-300
-                    hover:-translate-y-1
-                    hover:border-emerald-300/30
-                    hover:bg-emerald-400/20
-                  "
-                >
-                  <FaInstagram className="text-lg" />
-                </a>
+    {/* Instagram */}
+    <a
+      href="https://instagram.com/"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Instagram"
+      className="
+        flex h-11 w-11 items-center justify-center
+        rounded-full
+        border border-white/10
+        bg-white/[0.08]
+        backdrop-blur-xl
+        shadow-lg
+        transition-all duration-300
+        hover:-translate-y-1
+        hover:border-emerald-300/30
+        hover:bg-emerald-400/20
+      "
+    >
+      <FaInstagram className="text-lg" />
+    </a>
 
-                <a
-                  href="https://facebook.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Facebook"
-                  className="
-                    flex h-11 w-11 items-center justify-center
-                    rounded-full
-                    border border-white/10
-                    bg-white/[0.08]
-                    backdrop-blur-xl
-                    shadow-lg
-                    transition-all duration-300
-                    hover:-translate-y-1
-                    hover:border-emerald-300/30
-                    hover:bg-emerald-400/20
-                  "
-                >
-                  <FaFacebook className="text-lg" />
-                </a>
+    {/* Facebook */}
+    <a
+      href="https://facebook.com/"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Facebook"
+      className="
+        flex h-11 w-11 items-center justify-center
+        rounded-full
+        border border-white/10
+        bg-white/[0.08]
+        backdrop-blur-xl
+        shadow-lg
+        transition-all duration-300
+        hover:-translate-y-1
+        hover:border-emerald-300/30
+        hover:bg-emerald-400/20
+      "
+    >
+      <FaFacebook className="text-lg" />
+    </a>
 
-                <a
-                  href="https://twitter.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Twitter"
-                  className="
-                    flex h-11 w-11 items-center justify-center
-                    rounded-full
-                    border border-white/10
-                    bg-white/[0.08]
-                    backdrop-blur-xl
-                    shadow-lg
-                    transition-all duration-300
-                    hover:-translate-y-1
-                    hover:border-emerald-300/30
-                    hover:bg-emerald-400/20
-                  "
-                >
-                  <FaTwitter className="text-lg" />
-                </a>
+    {/* Twitter */}
+    <a
+      href="https://twitter.com/"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Twitter"
+      className="
+        flex h-11 w-11 items-center justify-center
+        rounded-full
+        border border-white/10
+        bg-white/[0.08]
+        backdrop-blur-xl
+        shadow-lg
+        transition-all duration-300
+        hover:-translate-y-1
+        hover:border-emerald-300/30
+        hover:bg-emerald-400/20
+      "
+    >
+      <FaTwitter className="text-lg" />
+    </a>
 
-              </div>
-            </div>
+    {/* YouTube */}
+    <a
+      href="https://www.youtube.com/@jemigraphtour"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="YouTube"
+      className="
+        flex h-11 w-11 items-center justify-center
+        rounded-full
+        border border-white/10
+        bg-white/[0.08]
+        backdrop-blur-xl
+        shadow-lg
+        transition-all duration-300
+        hover:-translate-y-1
+        hover:border-red-300/30
+        hover:bg-red-500/20
+      "
+    >
+      <FaYoutube className="text-lg" />
+    </a>
+
+  </div>
+</div>
+
           </div>
 
           {/* =================================================
