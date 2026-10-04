@@ -126,22 +126,17 @@ function OtpClientPage() {
                     </div>
 
                     <div className="text-center mb-6">
-                        <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-50 rounded-2xl mb-4 text-emerald-600 shadow-inner">
-                            <ShieldCheck size={32} />
-                        </div>
+                      
                         <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-                            Security Verification
+                            OTP Verification
                         </h1>
-                        <p className="text-slate-500 text-xs mt-2 leading-relaxed">
-                            We’ve sent a 6-digit confirmation code to <br />
-                          
-                        </p>
+                        
                     </div>
 
                     {/* Ujumbe wa muda wa kuisha kwa OTP (Dakika 10) */}
-                    <div className="bg-amber-50 border border-amber-200/60 rounded-xl p-3 mb-6">
+                    <div className="bg-white border border-emerald-600 rounded-xl p-3 mb-6">
                         <p className="text-[11px] text-amber-700 font-medium text-center flex items-center justify-center gap-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+
                             This verification code will expire in 10 minutes.
                         </p>
                     </div>

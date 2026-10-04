@@ -128,31 +128,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     };
   }, [user, logout]);
 
-  const login = useCallback(async (email: string, password: string) => {
-    setIsLoading(true);
-    try {
-      const response = await axios.post(`${BASE_URL}/auth/login`, { email, password });
+const login = useCallback(async (email: string, password: string) => {
+  setIsLoading(true);
 
-      const { accessToken, user } = response.data;
-      
-      localStorage.setItem("is_login", "true");
-      localStorage.setItem("token", accessToken);
-      
-      await setAuthSession(accessToken, user);
-      setUser(user);
-      
-      return { success: true, user };
-    } catch (error: any) {
-      console.error("Login failed:", error.response?.data?.message || error.message);
-      
-      return { 
-        success: false, 
-        message: error.response?.data?.message || "Invalid email or password" 
-      };
-    } finally {
-      setIsLoading(false);
-    }
-  }, [BASE_URL]);
+  try {
+    const response = await axios.post(
+      `${BASE_URL}/auth/login`,
+      {
+        email,
+        password,
+      }
+    );
+
+
+
+    return {
+      success: true,
+      message:
+        response.data?.message ||
+        "OTP sent successfully. Please verify your code.",
+    };
+
+  } catch (error: any) {
+    console.error(
+      "Login failed:",
+      error.response?.data?.message ||
+        error.message
+    );
+
+    return {
+      success: false,
+      message:
+        error.response?.data?.message ||
+        "Invalid email or password",
+    };
+
+  } finally {
+    setIsLoading(false);
+  }
+}, [BASE_URL]);
+
 
   const verifyAdminOtp = useCallback(async (email: string, code: string) => {
     setIsLoading(true);
