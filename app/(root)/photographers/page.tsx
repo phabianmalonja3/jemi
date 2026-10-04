@@ -9,7 +9,6 @@ import {
     FaCamera,
     FaEnvelope,
     FaStar,
-    FaAward,
     FaCalendarAlt,
     FaSearch,
     FaTimes,
@@ -19,14 +18,15 @@ import {
     FaChevronDown,
     FaPhone,
     FaMapMarkerAlt,
+    FaInstagram,
+    FaImage,
+    FaClock,
+    FaMoneyBillWave,
+    FaCheckCircle,
+    FaPhoneAlt,
 } from "react-icons/fa";
 
-import {
-    useEffect,
-    useRef,
-    useState,
-    useCallback,
-} from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -38,36 +38,68 @@ if (typeof window !== "undefined") {
     gsap.registerPlugin(ScrollTrigger);
 }
 
-
 const VERIFIED_ICON = "/icons/verification.svg";
+
+/* ============================================================
+   TYPES
+============================================================ */
+
+interface GalleryItem {
+    id: string;
+    fileType: "IMAGE" | "VIDEO" | string;
+    fileUrl: string;
+}
+
+interface Package {
+    id: string;
+    name: string;
+    level: string;
+    duration: number;
+    price: number;
+    features: string[];
+}
 
 interface Photographer {
     id: string;
-    name?: string;
+
+    name?: string | null;
+    displayName?: string | null;
+
     email: string;
     phone?: string | null;
+
     bio?: string | null;
+
+    address?: string | null;
+
     profileImage?: string | null;
+    profileImageUrl?: string | null;
+
+    latitude?: number | null;
+    longitude?: number | null;
 
     isVerified: boolean;
     isBusy?: boolean;
     isOnline?: boolean;
 
     averageRating?: number;
+    rating?: number;
     totalReviews?: number;
 
-    rating?: number;
-    specialty?: string;
+    role?: string;
+
+    instagram?: string | null;
+    facebook?: string | null;
+    twitter?: string | null;
+    linkedin?: string | null;
+    website?: string | null;
+
+    gallery?: GalleryItem[];
+
+    packages?: Package[];
+
+    /* UI helper fields */
     location?: string;
-    quote?: string;
-    experience?: string;
-    sessions?: number;
-
-    achievements?: string[];
-
-    instagram?: string;
-    facebook?: string;
-    twitter?: string;
 }
 
 interface PageableResponse {
@@ -78,135 +110,189 @@ interface PageableResponse {
     number: number;
 }
 
-// ============================================================
-// HELPERS
-// ============================================================
+/* ============================================================
+   HELPERS
+============================================================ */
 
+const API_URL =
+    process.env.NEXT_PUBLIC_API_URL || "";
+
+/**
+ * Return photographer display name.
+ */
 const getDisplayName = (
     photographer: Photographer
 ): string => {
     if (
-        photographer.name &&
-        photographer.name.trim() !== ""
+        photographer.displayName &&
+        photographer.displayName.trim()
     ) {
-        return photographer.name;
+        return photographer.displayName.trim();
     }
-
-    const emailName =
-        photographer.email.split("@")[0];
 
     if (
-        emailName &&
-        emailName !== "photographer" &&
-        emailName !== "admin"
+        photographer.name &&
+        photographer.name.trim()
     ) {
-        return emailName
-            .split(".")
-            .map(
-                (word) =>
-                    word.charAt(0).toUpperCase() +
-                    word.slice(1)
-            )
-            .join(" ");
+        return photographer.name.trim();
     }
 
-    return "Jemigraph Pro";
+    if (photographer.email) {
+        const emailName =
+            photographer.email.split("@")[0];
+
+        if (emailName) {
+            return emailName
+                .split(/[._-]/)
+                .map(
+                    (word) =>
+                        word.charAt(0).toUpperCase() +
+                        word.slice(1)
+                )
+                .join(" ");
+        }
+    }
+
+    return "Photographer";
 };
 
+/**
+ * Return real rating from backend.
+ */
 const getDisplayRating = (
     photographer: Photographer
 ): number => {
     if (
-        photographer.averageRating &&
+        typeof photographer.averageRating ===
+            "number" &&
         photographer.averageRating > 0
     ) {
         return photographer.averageRating;
     }
 
+    if (
+        typeof photographer.rating ===
+            "number" &&
+        photographer.rating > 0
+    ) {
+        return photographer.rating;
+    }
+
     return 0;
 };
 
-const getSessionCount = (
-    photographer: Photographer
-): number => {
-    return photographer.totalReviews || 0;
+/**
+ * Format Tanzania phone number.
+ */
+const formatTanzaniaPhone = (
+    phone?: string | null
+): string => {
+    if (!phone) {
+        return "";
+    }
+
+    const cleaned = phone.replace(/\D/g, "");
+
+    if (!cleaned) {
+        return "";
+    }
+
+    if (cleaned.startsWith("255")) {
+        return `+${cleaned}`;
+    }
+
+    if (cleaned.startsWith("0")) {
+        return `+255${cleaned.slice(1)}`;
+    }
+
+    return `+255${cleaned}`;
 };
 
-const getPhotographerDetails = (
+/**
+ * Get full media URL.
+ *
+ * Example:
+ * /uploads/media/image.jpg
+ *
+ * becomes:
+ * https://api-domain.com/uploads/media/image.jpg
+ */
+const getMediaUrl = (
+    fileUrl?: string | null
+): string => {
+    if (!fileUrl) {
+        return "/default_user.svg";
+    }
+
+    if (
+        fileUrl.startsWith("http://") ||
+        fileUrl.startsWith("https://")
+    ) {
+        return fileUrl;
+    }
+
+    return `${API_URL}${fileUrl}`;
+};
+
+/**
+ * Get package price.
+ */
+const formatPrice = (
+    price?: number
+): string => {
+    if (
+        typeof price !== "number"
+    ) {
+        return "Price not available";
+    }
+
+    return new Intl.NumberFormat(
+        "en-TZ"
+    ).format(price);
+};
+
+/**
+ * Enhance backend data without inventing information.
+ */
+const normalizePhotographer = (
     photographer: Photographer
 ): Photographer => {
-    const quotes = [
-        "Photography is the story I fail to put into words.",
-        "Capturing moments, creating memories that last a lifetime.",
-        "Every picture tells a story, let me help you tell yours.",
-        "The best thing about a picture is that it never changes.",
-    ];
-
-    const hash = photographer.id
-        .split("")
-        .reduce(
-            (acc, char) =>
-                acc + char.charCodeAt(0),
-            0
-        );
-
-    const rating =
-        getDisplayRating(photographer);
-
-    const sessions =
-        getSessionCount(photographer);
-
-    const experienceYears =
-        3 + (hash % 10);
-
     return {
         ...photographer,
 
-        name: getDisplayName(photographer),
+        name: getDisplayName(
+            photographer
+        ),
 
-        rating,
+        location:
+            photographer.address ||
+            "Tanzania",
 
-        specialty:
-            "Professional Photographer",
+        rating:
+            getDisplayRating(
+                photographer
+            ),
 
-        location: "Tanzania",
+        totalReviews:
+            photographer.totalReviews || 0,
 
-        profileImage:
-            photographer.profileImage,
-
-        bio: photographer.bio || "",
-
-        quote:
-            quotes[hash % quotes.length],
-
-        experience:
-            `${experienceYears}+ Years`,
-
-        sessions,
+        bio:
+            photographer.bio || "",
 
         phone:
-            photographer.phone ||
-            "Not provided",
+            photographer.phone || null,
 
-        achievements: [
-            "International Photography Award Winner",
-            `${Math.floor(
-                rating * 20
-            )}+ Satisfied Clients`,
-            "Master of Light & Composition",
-        ],
+        gallery:
+            photographer.gallery || [],
 
-        instagram: `https://instagram.com/${photographer.email.split("@")[0]}`,
-
-        facebook: `https://facebook.com/${photographer.email.split("@")[0]}`,
-
-        twitter: `https://twitter.com/${photographer.email.split("@")[0]}`,
+        packages:
+            photographer.packages || [],
     };
 };
 
-// ============================================================
-// PAGE
-// ============================================================
+/* ============================================================
+   PAGE
+============================================================ */
 
 export default function PhotographersPage() {
     const [
@@ -255,27 +341,27 @@ export default function PhotographersPage() {
             | "location"
         >("all");
 
-    const [
-        showVerifiedOnly,
-        setShowVerifiedOnly,
-    ] = useState(true);
+    const [showVerifiedOnly] =
+        useState(true);
 
-    const heroRef = useRef<HTMLElement | null>(
-        null
-    );
+    const heroRef =
+        useRef<HTMLElement | null>(
+            null
+        );
 
-    const teamRef = useRef<HTMLElement | null>(
-        null
-    );
+    const teamRef =
+        useRef<HTMLElement | null>(
+            null
+        );
 
     const gridRef =
         useRef<HTMLDivElement | null>(
             null
         );
 
-    // ============================================================
-    // FETCH PHOTOGRAPHERS
-    // ============================================================
+    /* ============================================================
+       FETCH PHOTOGRAPHERS
+    ============================================================ */
 
     const fetchPhotographers = async (
         page: number = 0
@@ -286,7 +372,15 @@ export default function PhotographersPage() {
 
             const response =
                 await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL}/photographers?page=${page}&size=12`
+                    `${API_URL}/photographers?page=${page}&size=20`,
+                    {
+                        method: "GET",
+                        headers: {
+                            "Content-Type":
+                                "application/json",
+                        },
+                        cache: "no-store",
+                    }
                 );
 
             if (!response.ok) {
@@ -298,42 +392,52 @@ export default function PhotographersPage() {
             const data: PageableResponse =
                 await response.json();
 
-            let filteredContent =
-                data.content;
+            console.log(
+                "Fetched photographers:",
+                data
+            );
+
+            let content =
+                data.content || [];
 
             if (showVerifiedOnly) {
-                filteredContent =
-                    data.content.filter(
+                content =
+                    content.filter(
                         (photographer) =>
                             photographer.isVerified ===
                             true
                     );
             }
 
-            const enhancedPhotographers =
-                filteredContent.map(
-                    getPhotographerDetails
+            const normalized =
+                content.map(
+                    normalizePhotographer
                 );
 
             setPhotographersData({
                 ...data,
-                content:
-                    filteredContent,
+                content,
             });
 
             setPhotographers(
-                enhancedPhotographers
+                normalized
             );
 
+            /*
+             * Backend already gives pagination.
+             *
+             * Do not calculate pages from filtered
+             * content because that can produce wrong
+             * pagination when backend pagination is used.
+             */
             setTotalPages(
-                Math.ceil(
-                    filteredContent.length /
-                        data.size
-                ) || 1
+                data.totalPages || 1
             );
         } catch (err: any) {
+            console.error(err);
+
             setError(
-                err.message ||
+                err?.message ||
                     "Something went wrong."
             );
         } finally {
@@ -350,9 +454,9 @@ export default function PhotographersPage() {
         showVerifiedOnly,
     ]);
 
-    // ============================================================
-    // SEARCH
-    // ============================================================
+    /* ============================================================
+       SEARCH
+    ============================================================ */
 
     const filteredPhotographers =
         useCallback(() => {
@@ -381,6 +485,11 @@ export default function PhotographersPage() {
                                             .includes(
                                                 query
                                             ) ||
+                                        photographer.displayName
+                                            ?.toLowerCase()
+                                            .includes(
+                                                query
+                                            ) ||
                                         false
                                     );
 
@@ -403,6 +512,11 @@ export default function PhotographersPage() {
 
                                 case "location":
                                     return (
+                                        photographer.address
+                                            ?.toLowerCase()
+                                            .includes(
+                                                query
+                                            ) ||
                                         photographer.location
                                             ?.toLowerCase()
                                             .includes(
@@ -419,6 +533,11 @@ export default function PhotographersPage() {
                                             .includes(
                                                 query
                                             ) ||
+                                        photographer.displayName
+                                            ?.toLowerCase()
+                                            .includes(
+                                                query
+                                            ) ||
                                         photographer.email
                                             .toLowerCase()
                                             .includes(
@@ -429,7 +548,7 @@ export default function PhotographersPage() {
                                             .includes(
                                                 query
                                             ) ||
-                                        photographer.location
+                                        photographer.address
                                             ?.toLowerCase()
                                             .includes(
                                                 query
@@ -451,9 +570,9 @@ export default function PhotographersPage() {
     const displayedPhotographers =
         filteredPhotographers();
 
-    // ============================================================
-    // ANIMATIONS
-    // ============================================================
+    /* ============================================================
+       ANIMATIONS
+    ============================================================ */
 
     useEffect(() => {
         if (
@@ -529,9 +648,9 @@ export default function PhotographersPage() {
         displayedPhotographers,
     ]);
 
-    // ============================================================
-    // ACTIONS
-    // ============================================================
+    /* ============================================================
+       ACTIONS
+    ============================================================ */
 
     const handleViewProfile = (
         photographer: Photographer
@@ -539,7 +658,30 @@ export default function PhotographersPage() {
         setSelectedPhotographer(
             photographer
         );
+
+        /*
+         * Prevent background page scrolling
+         * while modal is open.
+         */
+        document.body.style.overflow =
+            "hidden";
     };
+
+    const closeProfile = () => {
+        setSelectedPhotographer(
+            null
+        );
+
+        document.body.style.overflow =
+            "";
+    };
+
+    useEffect(() => {
+        return () => {
+            document.body.style.overflow =
+                "";
+        };
+    }, []);
 
     const clearSearch = () => {
         setSearchQuery("");
@@ -566,49 +708,14 @@ export default function PhotographersPage() {
             }
         };
 
-    const formatPhoneNumber = (
-        phone: string
-    ) => {
-        if (
-            !phone ||
-            phone === "Not provided"
-        ) {
-            return phone;
-        }
-
-        const cleaned =
-            phone.replace(
-                /\D/g,
-                ""
-            );
-
-        if (
-            cleaned.length === 10
-        ) {
-            return `(${cleaned.slice(
-                0,
-                3
-            )}) ${cleaned.slice(
-                3,
-                6
-            )}-${cleaned.slice(
-                6,
-                10
-            )}`;
-        }
-
-        return phone;
-    };
-
-    // ============================================================
-    // ERROR
-    // ============================================================
+    /* ============================================================
+       ERROR
+    ============================================================ */
 
     if (error) {
         return (
             <div className="flex flex-col items-center justify-center min-h-screen bg-zinc-50 dark:bg-black">
                 <div className="text-center space-y-4">
-
                     <div className="w-20 h-20 mx-auto bg-red-100 rounded-full flex items-center justify-center">
                         <FaCamera className="text-3xl text-red-500" />
                     </div>
@@ -627,15 +734,14 @@ export default function PhotographersPage() {
                     >
                         Try Again
                     </Button>
-
                 </div>
             </div>
         );
     }
 
-    // ============================================================
-    // RETURN
-    // ============================================================
+    /* ============================================================
+       RETURN
+    ============================================================ */
 
     return (
         <>
@@ -649,9 +755,6 @@ export default function PhotographersPage() {
                     ref={heroRef}
                     className="relative overflow-hidden bg-[#25632D]"
                 >
-
-                    {/* Pattern */}
-
                     <div className="absolute inset-0 opacity-10">
                         <div
                             className="absolute inset-0"
@@ -664,8 +767,6 @@ export default function PhotographersPage() {
                         />
                     </div>
 
-                    {/* Floating Camera */}
-
                     <div className="absolute top-20 left-10 text-white/5 text-7xl animate-pulse">
                         <FaCamera />
                     </div>
@@ -675,17 +776,13 @@ export default function PhotographersPage() {
                     </div>
 
                     <div className="relative max-w-6xl mx-auto px-6 py-24 md:py-32 hero-content opacity-0">
-
                         <div className="text-center">
-
                             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight">
-
                                 Find Your Perfect
 
                                 <span className="block text-[#D8F3DC]">
                                     Photographer
                                 </span>
-
                             </h1>
 
                             <p className="text-lg md:text-xl text-white/80 mb-10 max-w-2xl mx-auto">
@@ -698,11 +795,8 @@ export default function PhotographersPage() {
                             {/* SEARCH */}
 
                             <div className="max-w-3xl mx-auto">
-
                                 <div className="bg-white/10 backdrop-blur-md rounded-2xl p-1 shadow-2xl">
-
                                     <div className="relative">
-
                                         <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-white/70" />
 
                                         <Input
@@ -733,14 +827,12 @@ export default function PhotographersPage() {
                                                 <FaTimes />
                                             </button>
                                         )}
-
                                     </div>
                                 </div>
 
                                 {/* FILTERS */}
 
                                 <div className="flex flex-wrap gap-2 justify-center mt-4">
-
                                     {[
                                         {
                                             id: "all",
@@ -792,7 +884,6 @@ export default function PhotographersPage() {
                                                     }`}
                                                 >
                                                     <Icon className="text-xs" />
-
                                                     {
                                                         filter.label
                                                     }
@@ -800,12 +891,8 @@ export default function PhotographersPage() {
                                             );
                                         }
                                     )}
-
-
                                 </div>
                             </div>
-
-                            {/* SCROLL */}
 
                             <motion.div
                                 animate={{
@@ -824,7 +911,6 @@ export default function PhotographersPage() {
                             >
                                 <FaChevronDown className="text-white/50 text-2xl" />
                             </motion.div>
-
                         </div>
                     </div>
                 </section>
@@ -835,11 +921,8 @@ export default function PhotographersPage() {
 
                 {!loading && (
                     <div className="max-w-6xl mx-auto px-6 pt-8 w-full">
-
                         <div className="flex justify-between items-center flex-wrap gap-4">
-
                             <div className="text-sm text-zinc-600 dark:text-zinc-400">
-
                                 <span className="font-semibold text-[#25632D]">
                                     {
                                         displayedPhotographers.length
@@ -856,7 +939,6 @@ export default function PhotographersPage() {
                                     available
                                 </span>
 
-                               
                                 {searchQuery && (
                                     <span className="ml-2">
                                         matching{" "}
@@ -865,7 +947,6 @@ export default function PhotographersPage() {
                                         </span>
                                     </span>
                                 )}
-
                             </div>
 
                             {searchQuery &&
@@ -877,12 +958,11 @@ export default function PhotographersPage() {
                                         onClick={
                                             clearSearch
                                         }
-                                        className="text-[#25632D] hover:text-[#1e5125]"
+                                        className="text-[#25632D]"
                                     >
                                         Clear Search
                                     </Button>
                                 )}
-
                         </div>
                     </div>
                 )}
@@ -895,11 +975,12 @@ export default function PhotographersPage() {
                     ref={teamRef}
                     className="py-12 px-6"
                 >
-
                     <div className="max-w-6xl mx-auto">
-
                         {loading ? (
-                                 <LoadingSpinner message="Loading Bookings..." size="md" />
+                            <LoadingSpinner
+                                message="Loading Photographers..."
+                                size="md"
+                            />
                         ) : (
                             <>
                                 <div
@@ -908,306 +989,291 @@ export default function PhotographersPage() {
                                     }
                                     className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
                                 >
-
                                     {displayedPhotographers.map(
                                         (
                                             photographer
-                                        ) => (
-                                            <div
-                                                key={
-                                                    photographer.id
-                                                }
-                                                className="photographer-card opacity-0 group"
-                                            >
+                                        ) => {
+                                            const phone =
+                                                formatTanzaniaPhone(
+                                                    photographer.phone
+                                                );
 
-                                                <div className="bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+                                            const rating =
+                                                getDisplayRating(
+                                                    photographer
+                                                );
 
-                                                    {/* IMAGE */}
+                                            const image =
+                                                photographer.profileImage ||
+                                                photographer.profileImageUrl;
 
-                                                    <div className="relative h-80 overflow-hidden bg-zinc-200">
+                                            return (
+                                                <div
+                                                    key={
+                                                        photographer.id
+                                                    }
+                                                    className="photographer-card opacity-0 group"
+                                                >
+                                                    <div className="bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
 
-                                                        <Image
-                                                            src={
-                                                                photographer.profileImage
-                                                                    ? `${process.env.NEXT_PUBLIC_API_URL}${photographer.profileImage}`
-                                                                    : "/default_user.svg"
-                                                            }
-                                                            fill
-                                                            className="object-cover"
-                                                            alt={
-                                                                photographer.name?.toString() ||
-                                                                "Photographer"
-                                                            }
-                                                            unoptimized
-                                                        />
+                                                        {/* IMAGE */}
 
-                                                        {/* DARK OVERLAY */}
-
-                                                        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-                                                        {/* STATUS */}
-
-                                                        <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
-
-                                                            <span
-                                                                className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 backdrop-blur-sm ${
-                                                                    !photographer.isBusy &&
-                                                                    photographer.isOnline
-                                                                        ? "bg-green-500 text-white"
-                                                                        : photographer.isBusy
-                                                                        ? "bg-red-500 text-white"
-                                                                        : "bg-gray-500/90 text-white"
-                                                                }`}
-                                                            >
-
-                                                                {!photographer.isBusy &&
-                                                                photographer.isOnline ? (
-                                                                    <>
-                                                                        <FaWifi className="text-xs" />
-                                                                        Available
-                                                                    </>
-                                                                ) : photographer.isBusy ? (
-                                                                    "Booked"
-                                                                ) : (
-                                                                    "Offline"
-                                                                )}
-
-                                                            </span>
-
-                                                         
-
-                                                        </div>
-
-                                                        {/* RATING */}
-
-                                                        <div className="absolute bottom-4 left-4 z-10 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1">
-
-                                                            <FaStar className="text-yellow-400 text-sm" />
-
-                                                            <span className="text-white text-sm font-semibold">
-                                                                {photographer.rating?.toFixed(
-                                                                    1
-                                                                )}
-                                                            </span>
-
-                                                            <span className="text-white/70 text-xs">
-                                                                (
-                                                                {
-                                                                    photographer.totalReviews
-                                                                }{" "}
-                                                                sessions)
-                                                            </span>
-
-                                                        </div>
-
-                                                    </div>
-
-                                                    {/* CARD CONTENT */}
-
-                                                    <div className="p-6">
-
-                                                        <div className="flex items-center justify-between mb-2">
-
-                                                            <h3 className="text-xl font-bold text-zinc-900 dark:text-white truncate">
-                                                                {
-                                                                    photographer.name
+                                                        <div className="relative h-80 overflow-hidden bg-zinc-200">
+                                                            <Image
+                                                                src={
+                                                                    getMediaUrl(
+                                                                        image
+                                                                    )
                                                                 }
-                                                            </h3>
+                                                                fill
+                                                                className="object-cover"
+                                                                alt={
+                                                                    photographer.name ||
+                                                                    "Photographer"
+                                                                }
+                                                                unoptimized
+                                                            />
 
-                                                            {/* VERIFIED SVG */}
+                                                            <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                                                            {photographer.isVerified && (
-                                                                <Image
-                                                                    src={
-                                                                        VERIFIED_ICON
-                                                                    }
-                                                                    alt="Verified"
-                                                                    width={
-                                                                        40
-                                                                    }
-                                                                    height={
-                                                                        40
-                                                                    }
-                                                                    className="shrink-0 ml-2"
-                                                                />
-                                                            )}
+                                                            {/* STATUS */}
 
-                                                        </div>
-
-                                                        <div className="space-y-1.5 mb-4">
-
-                                                            <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
-
-                                                                <FaEnvelope className="text-[#25632D] text-xs shrink-0" />
-
-                                                                <span className="truncate">
-                                                                    {
-                                                                        photographer.email
-                                                                    }
+                                                            <div className="absolute top-4 right-4 z-10">
+                                                                <span
+                                                                    className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 backdrop-blur-sm ${
+                                                                        !photographer.isBusy &&
+                                                                        photographer.isOnline
+                                                                            ? "bg-green-500 text-white"
+                                                                            : photographer.isBusy
+                                                                            ? "bg-red-500 text-white"
+                                                                            : "bg-gray-500/90 text-white"
+                                                                    }`}
+                                                                >
+                                                                    {!photographer.isBusy &&
+                                                                    photographer.isOnline ? (
+                                                                        <>
+                                                                            <FaWifi className="text-xs" />
+                                                                            Available
+                                                                        </>
+                                                                    ) : photographer.isBusy ? (
+                                                                        "Booked"
+                                                                    ) : (
+                                                                        "Offline"
+                                                                    )}
                                                                 </span>
-
                                                             </div>
 
-                                                            {photographer.phone &&
-                                                                photographer.phone !==
-                                                                    "Not provided" && (
+                                                            {/* RATING */}
+
+                                                            <div className="absolute bottom-4 left-4 z-10 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1">
+                                                                <FaStar className="text-yellow-400 text-sm" />
+
+                                                                <span className="text-white text-sm font-semibold">
+                                                                    {rating.toFixed(
+                                                                        1
+                                                                    )}
+                                                                </span>
+
+                                                                <span className="text-white/70 text-xs">
+                                                                    (
+                                                                    {
+                                                                        photographer.totalReviews
+                                                                    }{" "}
+                                                                    reviews)
+                                                                </span>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* CARD CONTENT */}
+
+                                                        <div className="p-6">
+                                                            <div className="flex items-center justify-between mb-2">
+                                                                <h3 className="text-xl font-bold text-zinc-900 dark:text-white truncate">
+                                                                    {
+                                                                        photographer.name
+                                                                    }
+                                                                </h3>
+
+                                                                {photographer.isVerified && (
+                                                                    <Image
+                                                                        src={
+                                                                            VERIFIED_ICON
+                                                                        }
+                                                                        alt="Verified"
+                                                                        width={
+                                                                            32
+                                                                        }
+                                                                        height={
+                                                                            32
+                                                                        }
+                                                                        className="shrink-0 ml-2"
+                                                                    />
+                                                                )}
+                                                            </div>
+
+                                                            {/* EMAIL */}
+
+                                                            <div className="space-y-2 mb-4">
+                                                                <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
+                                                                    <FaEnvelope className="text-[#25632D] text-xs shrink-0" />
+
+                                                                    <span className="truncate">
+                                                                        {
+                                                                            photographer.email
+                                                                        }
+                                                                    </span>
+                                                                </div>
+
+                                                                {/* PHONE */}
+
+                                                                {phone && (
                                                                     <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
+                                                                        <FaPhoneAlt className="text-[#25632D] text-xs shrink-0" />
 
-                                                                        <FaPhone className="text-[#25632D] text-xs shrink-0" />
-
-                                                                        <span className="truncate">
-                                                                           {photographer.phone &&
-  photographer.phone !== "Not provided" && (() => {
-    const cleaned = photographer.phone.replace(/\D/g, "");
-    const formattedPhone = cleaned.startsWith("255") 
-      ? "+" + cleaned 
-      : cleaned.startsWith("0") 
-        ? "+255" + cleaned.slice(1) 
-        : "+255" + cleaned;
-
-    return (
-      <a
-        href={`tel:${formattedPhone}`}
-        className="flex-1 text-center px-3 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 transition text-sm"
-      >
-        Call {`${formattedPhone}`}
-      </a>
-    );
-  })()}
-                                                                        </span>
-
+                                                                        <a
+                                                                            href={`tel:${phone}`}
+                                                                            className="hover:text-[#25632D]"
+                                                                        >
+                                                                            {
+                                                                                phone
+                                                                            }
+                                                                        </a>
                                                                     </div>
                                                                 )}
 
-                                                        </div>
+                                                                {/* ADDRESS */}
 
-                                                        <p className="text-zinc-600 dark:text-zinc-400 text-sm mb-4 line-clamp-2">
-                                                            {
-                                                                photographer.bio
-                                                            }
-                                                        </p>
+                                                                {photographer.address && (
+                                                                    <div className="flex items-start gap-2 text-sm text-zinc-500 dark:text-zinc-400">
+                                                                        <FaMapMarkerAlt className="text-[#25632D] text-xs shrink-0 mt-1" />
 
-                                                        <div className="grid grid-cols-2 gap-4 mb-4 pb-4 border-b border-zinc-200 dark:border-zinc-700">
-
-                                                            <div>
-
-                                                                <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                                                                    Experience
-                                                                </p>
-
-                                                                <p className="font-semibold text-zinc-900 dark:text-white">
-                                                                    {
-                                                                        photographer.experience
-                                                                    }
-                                                                </p>
-
+                                                                        <span className="line-clamp-2">
+                                                                            {
+                                                                                photographer.address
+                                                                            }
+                                                                        </span>
+                                                                    </div>
+                                                                )}
                                                             </div>
 
-                                                            <div>
+                                                            {/* BIO */}
 
-                                                                <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                                                                    Sessions
-                                                                </p>
-
-                                                                <p className="font-semibold text-zinc-900 dark:text-white">
-                                                                    {
-                                                                        photographer.sessions
-                                                                    }+
-                                                                </p>
-
-                                                            </div>
-
-                                                        </div>
-
-                                                        {/* ACTIONS */}
-
-                                                        <div className="flex gap-2 mb-4">
-
-                                                            <a
-                                                                href={`mailto:${photographer.email}`}
-                                                                className="flex-1 text-center px-3 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-[#EAF4EC] dark:hover:bg-[#25632D]/20 hover:text-[#25632D] transition text-sm"
-                                                            >
-                                                                Email
-                                                            </a>
-{photographer.phone &&
-  photographer.phone !== "Not provided" && (() => {
-    const cleaned = photographer.phone.replace(/\D/g, "");
-    const formattedPhone = cleaned.startsWith("255") 
-      ? "+" + cleaned 
-      : cleaned.startsWith("0") 
-        ? "+255" + cleaned.slice(1) 
-        : "+255" + cleaned;
-
-    return (
-      <a
-        href={`tel:${formattedPhone}`}
-        className="flex-1 text-center px-3 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 transition text-sm"
-      >
-        Call
-      </a>
-    );
-  })()}
-
-                                                            <Button
-                                                                size="sm"
-                                                                className="flex-1 bg-[#25632D] hover:bg-[#1e5125] text-white"
-                                                                onClick={() =>
-                                                                    handleViewProfile(
-                                                                        photographer
-                                                                    )
+                                                            <p className="text-zinc-600 dark:text-zinc-400 text-sm mb-5 line-clamp-2">
+                                                                {
+                                                                    photographer.bio
                                                                 }
-                                                            >
-                                                                View Profile
-                                                            </Button>
+                                                            </p>
 
+                                                            {/* PACKAGE */}
+
+                                                            {photographer.packages &&
+                                                                photographer.packages.length >
+                                                                    0 && (
+                                                                    <div className="mb-5 p-4 rounded-xl bg-[#EAF4EC] dark:bg-[#25632D]/20">
+                                                                        <div className="flex items-center justify-between">
+                                                                            <div>
+                                                                                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                                                                                    Starting Package
+                                                                                </p>
+
+                                                                                <p className="font-bold text-[#25632D]">
+                                                                                    {
+                                                                                        photographer
+                                                                                            .packages[0]
+                                                                                            .name
+                                                                                    }
+                                                                                </p>
+                                                                            </div>
+
+                                                                            <div className="text-right">
+                                                                                <p className="text-xs text-zinc-500">
+                                                                                    Price
+                                                                                </p>
+
+                                                                                <p className="font-bold text-zinc-900 dark:text-white">
+                                                                                    TSh{" "}
+                                                                                    {formatPrice(
+                                                                                        photographer
+                                                                                            .packages[0]
+                                                                                            .price
+                                                                                    )}
+                                                                                </p>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+
+                                                            {/* ACTIONS */}
+
+                                                            <div className="flex gap-2">
+                                                                <a
+                                                                    href={`mailto:${photographer.email}`}
+                                                                    className="flex-1 text-center px-3 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-[#EAF4EC] hover:text-[#25632D] transition text-sm"
+                                                                >
+                                                                    Email
+                                                                </a>
+
+                                                                {phone && (
+                                                                    <a
+                                                                        href={`tel:${phone}`}
+                                                                        className="flex-1 text-center px-3 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-blue-50 hover:text-blue-600 transition text-sm"
+                                                                    >
+                                                                        Call
+                                                                    </a>
+                                                                )}
+
+                                                                <Button
+                                                                    size="sm"
+                                                                    className="flex-1 bg-[#25632D] hover:bg-[#1e5125] text-white"
+                                                                    onClick={() =>
+                                                                        handleViewProfile(
+                                                                            photographer
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    View Profile
+                                                                </Button>
+                                                            </div>
                                                         </div>
-
                                                     </div>
                                                 </div>
-                                            </div>
-                                        )
+                                            );
+                                        }
                                     )}
-
                                 </div>
 
                                 {/* NO RESULTS */}
 
-                                {!loading &&
-                                    displayedPhotographers.length ===
-                                        0 && (
-                                        <div className="text-center py-24">
-
-                                            <div className="w-24 h-24 mx-auto bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-6">
-                                                <FaSearch className="text-4xl text-zinc-400" />
-                                            </div>
-
-                                            <h3 className="text-2xl font-semibold text-zinc-900 dark:text-white mb-2">
-                                                No photographers
-                                                found
-                                            </h3>
-
-                                            <p className="text-zinc-500 max-w-md mx-auto">
-
-                                               
-
-                                            </p>
-
-                                            {searchQuery && (
-                                                <Button
-                                                    onClick={
-                                                        clearSearch
-                                                    }
-                                                    className="mt-6 bg-[#25632D] hover:bg-[#1e5125]"
-                                                >
-                                                    Clear Search
-                                                </Button>
-                                            )}
-
-                                            
-
+                                {displayedPhotographers.length ===
+                                    0 && (
+                                    <div className="text-center py-24">
+                                        <div className="w-24 h-24 mx-auto bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-6">
+                                            <FaSearch className="text-4xl text-zinc-400" />
                                         </div>
-                                    )}
 
+                                        <h3 className="text-2xl font-semibold text-zinc-900 dark:text-white mb-2">
+                                            No photographers
+                                            found
+                                        </h3>
+
+                                        <p className="text-zinc-500 max-w-md mx-auto">
+                                            Try changing
+                                            your search
+                                            criteria.
+                                        </p>
+
+                                        {searchQuery && (
+                                            <Button
+                                                onClick={
+                                                    clearSearch
+                                                }
+                                                className="mt-6 bg-[#25632D]"
+                                            >
+                                                Clear Search
+                                            </Button>
+                                        )}
+                                    </div>
+                                )}
                             </>
                         )}
 
@@ -1220,7 +1286,6 @@ export default function PhotographersPage() {
                             displayedPhotographers.length >
                                 0 && (
                                 <div className="flex justify-center gap-2 mt-12">
-
                                     <Button
                                         variant="outline"
                                         onClick={() =>
@@ -1244,7 +1309,6 @@ export default function PhotographersPage() {
                                     </Button>
 
                                     <div className="flex items-center gap-2">
-
                                         {Array.from(
                                             {
                                                 length: Math.min(
@@ -1310,7 +1374,6 @@ export default function PhotographersPage() {
                                                 );
                                             }
                                         )}
-
                                     </div>
 
                                     <Button
@@ -1336,10 +1399,8 @@ export default function PhotographersPage() {
                                     >
                                         Next
                                     </Button>
-
                                 </div>
                             )}
-
                     </div>
                 </section>
 
@@ -1348,7 +1409,6 @@ export default function PhotographersPage() {
                 ================================================== */}
 
                 <AnimatePresence>
-
                     {selectedPhotographer && (
                         <motion.div
                             initial={{
@@ -1361,55 +1421,54 @@ export default function PhotographersPage() {
                                 opacity: 0,
                             }}
                             className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 overflow-y-auto"
-                            onClick={() =>
-                                setSelectedPhotographer(
-                                    null
-                                )
+                            onClick={
+                                closeProfile
                             }
                         >
-
                             <motion.div
                                 initial={{
-                                    scale: 0.9,
+                                    scale: 0.95,
                                     opacity: 0,
+                                    y: 20,
                                 }}
                                 animate={{
                                     scale: 1,
                                     opacity: 1,
+                                    y: 0,
                                 }}
                                 exit={{
-                                    scale: 0.9,
+                                    scale: 0.95,
                                     opacity: 0,
+                                    y: 20,
                                 }}
-                                className="bg-white dark:bg-zinc-900 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+                                transition={{
+                                    duration: 0.2,
+                                }}
+                                className="bg-white dark:bg-zinc-900 rounded-2xl max-w-5xl w-full max-h-[92vh] overflow-y-auto"
                                 onClick={(e) =>
                                     e.stopPropagation()
                                 }
                             >
-
-                                {/* MODAL IMAGE */}
+                                {/* ==================================================
+                                    MODAL HEADER
+                                ================================================== */}
 
                                 <div className="relative">
-
                                     <button
-                                        onClick={() =>
-                                            setSelectedPhotographer(
-                                                null
-                                            )
+                                        onClick={
+                                            closeProfile
                                         }
-                                        className="absolute top-4 right-4 z-10 bg-black/50 hover:bg-black/70 rounded-full p-2 text-white transition"
+                                        className="absolute top-4 right-4 z-20 bg-black/60 hover:bg-black/80 rounded-full p-3 text-white transition"
                                     >
                                         <FaTimes />
                                     </button>
 
-                                    <div className="relative h-96 bg-[#25632D]">
-
+                                    <div className="relative h-80 md:h-96 bg-[#25632D]">
                                         <Image
-                                            src={
-                                                selectedPhotographer.profileImage
-                                                    ? `${process.env.NEXT_PUBLIC_API_URL}${selectedPhotographer.profileImage}`
-                                                    : "/default_user.svg"
-                                            }
+                                            src={getMediaUrl(
+                                                selectedPhotographer.profileImage ||
+                                                    selectedPhotographer.profileImageUrl
+                                            )}
                                             alt={
                                                 selectedPhotographer.name ||
                                                 "Photographer"
@@ -1419,19 +1478,15 @@ export default function PhotographersPage() {
                                             className="object-cover"
                                         />
 
-                                        <div className="absolute inset-0 bg-black/40" />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-                                        <div className="absolute bottom-6 left-6 text-white">
-
-                                            <div className="flex items-center gap-2">
-
-                                                <h2 className="text-3xl font-bold mb-2">
+                                        <div className="absolute bottom-8 left-6 md:left-8 right-6 text-white">
+                                            <div className="flex items-center gap-3">
+                                                <h2 className="text-3xl md:text-4xl font-bold">
                                                     {
                                                         selectedPhotographer.name
                                                     }
                                                 </h2>
-
-                                                {/* VERIFIED SVG */}
 
                                                 {selectedPhotographer.isVerified && (
                                                     <Image
@@ -1440,265 +1495,520 @@ export default function PhotographersPage() {
                                                         }
                                                         alt="Verified"
                                                         width={
-                                                            24
+                                                            30
                                                         }
                                                         height={
-                                                            24
+                                                            30
                                                         }
-                                                        className="mb-2"
                                                     />
                                                 )}
-
                                             </div>
 
-                                            <div className="text-lg text-white/80">
+                                            <p className="text-white/80 mt-2">
                                                 Professional
                                                 Photographer
+                                            </p>
+
+                                            <div className="flex flex-wrap items-center gap-3 mt-4">
+                                                <span className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm text-sm flex items-center gap-2">
+                                                    <FaStar className="text-yellow-400" />
+
+                                                    {getDisplayRating(
+                                                        selectedPhotographer
+                                                    ).toFixed(
+                                                        1
+                                                    )}
+
+                                                    <span className="text-white/70">
+                                                        (
+                                                        {
+                                                            selectedPhotographer.totalReviews
+                                                        }{" "}
+                                                        reviews)
+                                                    </span>
+                                                </span>
+
+                                                <span
+                                                    className={`px-3 py-1 rounded-full text-sm ${
+                                                        !selectedPhotographer.isBusy &&
+                                                        selectedPhotographer.isOnline
+                                                            ? "bg-green-500"
+                                                            : selectedPhotographer.isBusy
+                                                            ? "bg-red-500"
+                                                            : "bg-gray-500"
+                                                    }`}
+                                                >
+                                                    {!selectedPhotographer.isBusy &&
+                                                    selectedPhotographer.isOnline
+                                                        ? "Available"
+                                                        : selectedPhotographer.isBusy
+                                                        ? "Booked"
+                                                        : "Offline"}
+                                                </span>
                                             </div>
-
                                         </div>
-
                                     </div>
+                                </div>
 
-                                    {/* MODAL BODY */}
+                                {/* ==================================================
+                                    MODAL BODY
+                                ================================================== */}
 
-                                    <div className="p-8">
+                                <div className="p-6 md:p-8">
+                                    <div className="grid lg:grid-cols-3 gap-8">
 
-                                        <div className="grid md:grid-cols-2 gap-8 mb-8">
+                                        {/* LEFT / MAIN */}
 
-                                            <div>
+                                        <div className="lg:col-span-2 space-y-8">
 
-                                                <h3 className="text-xl font-bold mb-3 text-zinc-900 dark:text-white">
+                                            {/* BIO */}
+
+                                            <section>
+                                                <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-3">
                                                     Biography
                                                 </h3>
 
-                                                <div className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                                                    {
-                                                        selectedPhotographer.bio
-                                                    }
-                                                </div>
+                                                <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed whitespace-pre-line">
+                                                    {selectedPhotographer.bio ||
+                                                        "No biography provided."}
+                                                </p>
+                                            </section>
 
-                                                <div className="mt-4 p-4 bg-[#EAF4EC] dark:bg-[#25632D]/20 rounded-lg italic">
+                                            {/* CONTACT DETAILS */}
 
-                                                    <p className="text-[#25632D] dark:text-green-300">
-
-                                                        "
-
-                                                        {
-                                                            selectedPhotographer.quote
-                                                        }
-
-                                                        "
-
-                                                    </p>
-
-                                                </div>
-
-                                            </div>
-
-                                            <div>
-
-                                                <h3 className="text-xl font-bold mb-3 text-zinc-900 dark:text-white">
+                                            <section>
+                                                <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-4">
+                                                    Contact
                                                     Details
                                                 </h3>
 
-                                                <div className="space-y-3">
+                                                <div className="grid sm:grid-cols-2 gap-4">
 
-                                                    <div className="flex items-center gap-3">
+                                                    <div className="flex items-start gap-3 p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800">
+                                                        <FaEnvelope className="text-[#25632D] mt-1" />
 
-                                                        <FaEnvelope className="text-[#25632D]" />
+                                                        <div className="min-w-0">
+                                                            <p className="text-xs text-zinc-500">
+                                                                Email
+                                                            </p>
 
-                                                        <span className="text-zinc-700 dark:text-zinc-300">
-                                                            {
-                                                                selectedPhotographer.email
-                                                            }
-                                                        </span>
-
+                                                            <a
+                                                                href={`mailto:${selectedPhotographer.email}`}
+                                                                className="text-sm font-medium text-zinc-800 dark:text-white break-all hover:text-[#25632D]"
+                                                            >
+                                                                {
+                                                                    selectedPhotographer.email
+                                                                }
+                                                            </a>
+                                                        </div>
                                                     </div>
 
-                                                    {selectedPhotographer.phone &&
-                                                        selectedPhotographer.phone !==
-                                                            "Not provided" && (
-                                                            <div className="flex items-center gap-3">
+                                                    {selectedPhotographer.phone && (
+                                                        <div className="flex items-start gap-3 p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800">
+                                                            <FaPhone className="text-[#25632D] mt-1" />
 
-                                                                <FaPhone className="text-[#25632D]" />
+                                                            <div>
+                                                                <p className="text-xs text-zinc-500">
+                                                                    Phone
+                                                                </p>
 
-                                                                <span className="text-zinc-700 dark:text-zinc-300">
-                                                                    {formatPhoneNumber(
+                                                                <a
+                                                                    href={`tel:${formatTanzaniaPhone(
+                                                                        selectedPhotographer.phone
+                                                                    )}`}
+                                                                    className="text-sm font-medium text-zinc-800 dark:text-white hover:text-[#25632D]"
+                                                                >
+                                                                    {formatTanzaniaPhone(
                                                                         selectedPhotographer.phone
                                                                     )}
-                                                                </span>
-
+                                                                </a>
                                                             </div>
-                                                        )}
-
-                                                    <div className="flex items-center gap-3">
-
-                                                        <FaCalendarAlt className="text-[#25632D]" />
-
-                                                        <span className="text-zinc-700 dark:text-zinc-300">
-                                                            {
-                                                                selectedPhotographer.experience
-                                                            }{" "}
-                                                            Experience
-                                                        </span>
-
-                                                    </div>
-
-                                                    <div className="flex items-center gap-3">
-
-                                                        <FaStar className="text-yellow-400" />
-
-                                                        <span className="text-zinc-700 dark:text-zinc-300">
-                                                            {
-                                                                selectedPhotographer.rating?.toFixed(
-                                                                    1
-                                                                )
-                                                            }{" "}
-                                                            Rating (
-                                                            {
-                                                                selectedPhotographer.sessions
-                                                            }
-                                                            +
-                                                            sessions)
-                                                        </span>
-
-                                                    </div>
-
-                                                    {/* VERIFIED */}
-
-                                                    {selectedPhotographer.isVerified && (
-                                                        <div className="flex items-center gap-3">
-
-                                                            <Image
-                                                                src={
-                                                                    VERIFIED_ICON
-                                                                }
-                                                                alt="Verified"
-                                                                width={
-                                                                    18
-                                                                }
-                                                                height={
-                                                                    18
-                                                                }
-                                                            />
-
-                                                            <span className="font-medium text-blue-600 dark:text-blue-400">
-                                                                Verified
-                                                                Photographer
-                                                            </span>
-
                                                         </div>
                                                     )}
 
+                                                    {selectedPhotographer.address && (
+                                                        <div className="flex items-start gap-3 p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800 sm:col-span-2">
+                                                            <FaMapMarkerAlt className="text-[#25632D] mt-1" />
+
+                                                            <div>
+                                                                <p className="text-xs text-zinc-500">
+                                                                    Address
+                                                                </p>
+
+                                                                <p className="text-sm font-medium text-zinc-800 dark:text-white">
+                                                                    {
+                                                                        selectedPhotographer.address
+                                                                    }
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </section>
+
+                                            {/* PACKAGES */}
+
+                                            <section>
+                                                <div className="flex items-center justify-between mb-4">
+                                                    <h3 className="text-xl font-bold text-zinc-900 dark:text-white">
+                                                        Photography
+                                                        Packages
+                                                    </h3>
+
+                                                    <span className="text-sm text-zinc-500">
+                                                        {
+                                                            selectedPhotographer
+                                                                .packages
+                                                                ?.length
+                                                        }{" "}
+                                                        package
+                                                        {selectedPhotographer
+                                                            .packages
+                                                            ?.length !==
+                                                        1
+                                                            ? "s"
+                                                            : ""}
+                                                    </span>
                                                 </div>
 
-                                                <h3 className="text-xl font-bold mt-6 mb-3 text-zinc-900 dark:text-white">
-                                                    Achievements
+                                                {selectedPhotographer.packages &&
+                                                selectedPhotographer.packages.length >
+                                                    0 ? (
+                                                    <div className="grid md:grid-cols-2 gap-4">
+                                                        {selectedPhotographer.packages.map(
+                                                            (
+                                                                pkg
+                                                            ) => (
+                                                                <div
+                                                                    key={
+                                                                        pkg.id
+                                                                    }
+                                                                    className="border border-zinc-200 dark:border-zinc-700 rounded-2xl p-5 hover:border-[#25632D] transition"
+                                                                >
+                                                                    <div className="flex justify-between items-start gap-3 mb-4">
+                                                                        <div>
+                                                                            <span className="inline-block text-xs px-2 py-1 rounded-full bg-[#EAF4EC] text-[#25632D] font-semibold mb-2">
+                                                                                {
+                                                                                    pkg.level
+                                                                                }
+                                                                            </span>
+
+                                                                            <h4 className="text-lg font-bold text-zinc-900 dark:text-white">
+                                                                                {
+                                                                                    pkg.name
+                                                                                }
+                                                                            </h4>
+                                                                        </div>
+
+                                                                        <FaCamera className="text-[#25632D]" />
+                                                                    </div>
+
+                                                                    <div className="flex items-center gap-2 text-sm text-zinc-500 mb-4">
+                                                                        <FaClock className="text-[#25632D]" />
+
+                                                                        {
+                                                                            pkg.duration
+                                                                        }{" "}
+                                                                        hour
+                                                                        {pkg.duration !==
+                                                                        1
+                                                                            ? "s"
+                                                                            : ""}
+                                                                    </div>
+
+                                                                    <div className="flex items-center gap-2 mb-4">
+                                                                        <FaMoneyBillWave className="text-[#25632D]" />
+
+                                                                        <span className="text-xl font-bold text-zinc-900 dark:text-white">
+                                                                            TSh{" "}
+                                                                            {formatPrice(
+                                                                                pkg.price
+                                                                            )}
+                                                                        </span>
+                                                                    </div>
+
+                                                                    {pkg.features &&
+                                                                        pkg
+                                                                            .features
+                                                                            .length >
+                                                                            0 && (
+                                                                            <div>
+                                                                                <p className="text-xs text-zinc-500 mb-2">
+                                                                                    Includes
+                                                                                </p>
+
+                                                                                <ul className="space-y-2">
+                                                                                    {pkg.features.map(
+                                                                                        (
+                                                                                            feature,
+                                                                                            index
+                                                                                        ) => (
+                                                                                            <li
+                                                                                                key={
+                                                                                                    index
+                                                                                                }
+                                                                                                className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400"
+                                                                                            >
+                                                                                                <FaCheckCircle className="text-green-500 shrink-0" />
+
+                                                                                                {
+                                                                                                    feature
+                                                                                                }
+                                                                                            </li>
+                                                                                        )
+                                                                                    )}
+                                                                                </ul>
+                                                                            </div>
+                                                                        )}
+                                                                </div>
+                                                            )
+                                                        )}
+                                                    </div>
+                                                ) : (
+                                                    <div className="p-6 rounded-xl bg-zinc-50 dark:bg-zinc-800 text-center text-zinc-500">
+                                                        No packages
+                                                        available.
+                                                    </div>
+                                                )}
+                                            </section>
+
+                                            {/* GALLERY */}
+
+                                            <section>
+                                                <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-4 flex items-center gap-2">
+                                                    <FaImage className="text-[#25632D]" />
+
+                                                    Portfolio
                                                 </h3>
 
-                                                <ul className="space-y-2">
+                                                {selectedPhotographer.gallery &&
+                                                selectedPhotographer.gallery.length >
+                                                    0 ? (
+                                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                                        {selectedPhotographer.gallery
+                                                            .filter(
+                                                                (
+                                                                    item
+                                                                ) =>
+                                                                    item.fileType ===
+                                                                        "IMAGE" ||
+                                                                    !item.fileType
+                                                            )
+                                                            .map(
+                                                                (
+                                                                    item
+                                                                ) => (
+                                                                    <div
+                                                                        key={
+                                                                            item.id
+                                                                        }
+                                                                        className="relative aspect-square rounded-xl overflow-hidden bg-zinc-100 dark:bg-zinc-800 group"
+                                                                    >
+                                                                        <Image
+                                                                            src={getMediaUrl(
+                                                                                item.fileUrl
+                                                                            )}
+                                                                            alt={`${selectedPhotographer.name} portfolio`}
+                                                                            fill
+                                                                            unoptimized
+                                                                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                                                        />
+                                                                    </div>
+                                                                )
+                                                            )}
+                                                    </div>
+                                                ) : (
+                                                    <div className="p-8 rounded-xl bg-zinc-50 dark:bg-zinc-800 text-center">
+                                                        <FaImage className="text-3xl text-zinc-400 mx-auto mb-3" />
 
-                                                    {selectedPhotographer.achievements?.map(
-                                                        (
-                                                            achievement,
-                                                            idx
-                                                        ) => (
-                                                            <li
-                                                                key={
-                                                                    idx
-                                                                }
-                                                                className="flex items-center gap-2 text-zinc-600 dark:text-zinc-400"
-                                                            >
+                                                        <p className="text-zinc-500">
+                                                            No portfolio
+                                                            images
+                                                            available.
+                                                        </p>
+                                                    </div>
+                                                )}
+                                            </section>
+                                        </div>
 
-                                                                <FaAward className="text-[#25632D] text-sm" />
+                                        {/* RIGHT SIDEBAR */}
 
-                                                                {
-                                                                    achievement
-                                                                }
+                                        <aside className="space-y-5">
 
-                                                            </li>
-                                                        )
-                                                    )}
+                                            {/* VERIFIED */}
 
-                                                </ul>
+                                            {selectedPhotographer.isVerified && (
+                                                <div className="p-5 rounded-2xl bg-[#EAF4EC] dark:bg-[#25632D]/20">
+                                                    <div className="flex items-center gap-3">
+                                                        <Image
+                                                            src={
+                                                                VERIFIED_ICON
+                                                            }
+                                                            alt="Verified"
+                                                            width={
+                                                                28
+                                                            }
+                                                            height={
+                                                                28
+                                                            }
+                                                        />
 
-                                                {/* CONTACT */}
+                                                        <div>
+                                                            <p className="font-bold text-[#25632D] dark:text-green-300">
+                                                                Verified
+                                                                Photographer
+                                                            </p>
 
-                                                <div className="mt-6 flex gap-3">
+                                                            <p className="text-xs text-zinc-500 mt-1">
+                                                                This photographer
+                                                                has been
+                                                                verified.
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
 
-                                                    <a
-                                                        href={`mailto:${selectedPhotographer.email}`}
-                                                        className="flex-1"
-                                                    >
+                                            {/* RATING */}
 
-                                                        <Button className="w-full bg-[#25632D] hover:bg-[#1e5125]">
+                                            <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-800">
+                                                <p className="text-xs text-zinc-500 mb-2">
+                                                    Rating
+                                                </p>
 
-                                                            <FaEnvelope className="mr-2" />
+                                                <div className="flex items-center gap-2">
+                                                    <FaStar className="text-yellow-400 text-xl" />
 
-                                                            Email
+                                                    <span className="text-2xl font-bold text-zinc-900 dark:text-white">
+                                                        {getDisplayRating(
+                                                            selectedPhotographer
+                                                        ).toFixed(
+                                                            1
+                                                        )}
+                                                    </span>
+                                                </div>
 
-                                                        </Button>
+                                                <p className="text-sm text-zinc-500 mt-1">
+                                                    {
+                                                        selectedPhotographer.totalReviews
+                                                    }{" "}
+                                                    reviews
+                                                </p>
+                                            </div>
 
-                                                    </a>
+                                            {/* SOCIAL */}
 
-                                                    {selectedPhotographer.phone &&
-                                                        selectedPhotographer.phone !==
-                                                            "Not provided" && (
+                                            {(selectedPhotographer.instagram ||
+                                                selectedPhotographer.facebook ||
+                                                selectedPhotographer.website) && (
+                                                <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-800">
+                                                    <p className="font-semibold text-zinc-900 dark:text-white mb-3">
+                                                        Social
+                                                        & Links
+                                                    </p>
+
+                                                    <div className="space-y-2">
+                                                        {selectedPhotographer.instagram && (
                                                             <a
-                                                                href={`tel:${selectedPhotographer.phone.replace(
-                                                                    /\D/g,
-                                                                    ""
-                                                                )}`}
-                                                                className="flex-1"
+                                                                href={
+                                                                    selectedPhotographer.instagram
+                                                                }
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="flex items-center gap-3 p-3 rounded-lg bg-white dark:bg-zinc-900 hover:bg-pink-50 hover:text-pink-600 transition"
                                                             >
+                                                                <FaInstagram />
 
-                                                                <Button className="w-full bg-blue-600 hover:bg-blue-700">
-
-                                                                    <FaPhone className="mr-2" />
-
-                                                                    Call
-
-                                                                </Button>
-
+                                                                <span className="text-sm">
+                                                                    Instagram
+                                                                </span>
                                                             </a>
                                                         )}
 
+                                                        {selectedPhotographer.facebook && (
+                                                            <a
+                                                                href={
+                                                                    selectedPhotographer.facebook
+                                                                }
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="flex items-center gap-3 p-3 rounded-lg bg-white dark:bg-zinc-900 hover:bg-blue-50 hover:text-blue-600 transition"
+                                                            >
+                                                                <span className="text-sm">
+                                                                    Facebook
+                                                                </span>
+                                                            </a>
+                                                        )}
+
+                                                        {selectedPhotographer.website && (
+                                                            <a
+                                                                href={
+                                                                    selectedPhotographer.website
+                                                                }
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="flex items-center gap-3 p-3 rounded-lg bg-white dark:bg-zinc-900 hover:bg-green-50 hover:text-green-600 transition"
+                                                            >
+                                                                <span className="text-sm">
+                                                                    Website
+                                                                </span>
+                                                            </a>
+                                                        )}
+                                                    </div>
                                                 </div>
+                                            )}
 
+                                            {/* CONTACT BUTTONS */}
+
+                                            <div className="space-y-3">
+                                                <a
+                                                    href={`mailto:${selectedPhotographer.email}`}
+                                                    className="block"
+                                                >
+                                                    <Button className="w-full bg-[#25632D] hover:bg-[#1e5125] text-white">
+                                                        <FaEnvelope className="mr-2" />
+                                                        Send Email
+                                                    </Button>
+                                                </a>
+
+                                                {selectedPhotographer.phone && (
+                                                    <a
+                                                        href={`tel:${formatTanzaniaPhone(
+                                                            selectedPhotographer.phone
+                                                        )}`}
+                                                        className="block"
+                                                    >
+                                                        <Button className="w-full bg-[#1e5125] hover:bg-[#1e5125] text-white">
+                                                            <FaPhoneAlt className="mr-2" />
+                                                            Call{" "}
+                                                            {formatTanzaniaPhone(
+                                                                selectedPhotographer.phone
+                                                            )}
+                                                        </Button>
+                                                    </a>
+                                                )}
                                             </div>
-
-                                        </div>
-
-                                        <div className="border-t border-zinc-200 dark:border-zinc-700 pt-6 flex gap-4">
-
-                                            <Button
-                                                variant="outline"
-                                                onClick={() =>
-                                                    setSelectedPhotographer(
-                                                        null
-                                                    )
-                                                }
-                                            >
-                                                Close
-                                            </Button>
-
-                                        </div>
-
+                                        </aside>
                                     </div>
 
+                                    {/* CLOSE */}
+
+                                    <div className="border-t border-zinc-200 dark:border-zinc-700 pt-6 mt-8 flex justify-end ">
+                                        <Button
+                                            variant="outline"
+                                            onClick={
+                                                closeProfile
+                                            }
+                                        >
+                                            Close
+                                        </Button>
+                                    </div>
                                 </div>
-
                             </motion.div>
-
                         </motion.div>
                     )}
-
                 </AnimatePresence>
-
             </div>
-
-            {/* FOOTER */}
 
             <Footer />
         </>
