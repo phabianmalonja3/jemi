@@ -5,13 +5,15 @@ import {
   Users, UserPlus, Search, Shield, Trash2, Edit2, 
   RefreshCw, Eye, EyeOff, Lock, Mail, User as UserIcon,
   Filter, CheckCircle, XCircle, AlertCircle, Loader2,
-  ChevronLeft, ChevronRight, Ban
+  ChevronLeft, ChevronRight, Ban,
+  Copy,
+  Check
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import axios from "axios";
-import { User, PaginatedResponse, UserFilters } from "@/types";
+import { User, PaginatedResponse, UserFilters, normalizeTanzaniaPhone } from "@/types";
 import LoadingSpinner from "@/components/web/LoadingSpinner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v0.1";
@@ -54,6 +56,20 @@ export default function UserManagementPage() {
   const [filterRole, setFilterRole] = useState<"ALL" | "ADMIN" | "PHOTOGRAPHER">("ALL");
   const [filterStatus, setFilterStatus] = useState<"ALL" | "ACTIVE" | "BLOCKED">("ALL");
   
+  const [copiedPhone, setCopiedPhone] = useState<string | null>(null);
+
+const handleCopyPhone = async (phone: string) => {
+  const normalizedPhone = normalizeTanzaniaPhone(phone);
+
+  await navigator.clipboard.writeText(normalizedPhone);
+
+  setCopiedPhone(phone);
+
+  setTimeout(() => {
+    setCopiedPhone(null);
+  }, 1500);
+};
+
   // Pagination state
   const [pagination, setPagination] = useState({
     page: 0,
@@ -63,49 +79,71 @@ export default function UserManagementPage() {
   });
 
   // Fetch users with filters and pagination
-  const fetchUsers = async (page = pagination.page, size = pagination.size) => {
-    setIsLoading(true);
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        toast.error("Authentication required");
-        return;
-      }
+ const fetchUsers = async (
+  page = pagination.page,
+  size = pagination.size
+) => {
+  setIsLoading(true);
 
-      // Build query parameters
-      const params = new URLSearchParams();
-      params.append("page", String(page));
-      params.append("size", String(size));
-      params.append("sort", "name");
-      params.append("order", "asc");
-      
-      if (searchTerm) {
-        params.append("name", searchTerm);
-      }
-      
-      if (filterRole !== "ALL") {
-        params.append("role", filterRole);
-      }
+  try {
+    const token = localStorage.getItem("token");
 
-      // Fetch from backend with all filters
-      const response = await apiClient.get<PaginatedResponse<User>>(
-        `/admin/users?${params.toString()}`
-      );
-
-      setUsers(response.data.content);
-      setPagination({
-        page: response.data.number,
-        size: response.data.size,
-        totalPages: response.data.totalPages,
-        totalElements: response.data.totalElements
-      });
-    } catch (error: any) {
-      console.error("Error fetching users:", error);
-      toast.error(error.response?.data?.message || "Failed to load users");
-    } finally {
-      setIsLoading(false);
+    if (!token) {
+      toast.error("Authentication required");
+      return;
     }
-  };
+
+    // Build query parameters
+    const params = new URLSearchParams();
+
+    params.append("page", String(page));
+    params.append("size", String(size));
+    params.append("sort", "name");
+    params.append("order", "asc");
+
+    if (searchTerm) {
+      params.append("name", searchTerm);
+    }
+
+    if (filterRole !== "ALL") {
+      params.append("role", filterRole);
+    }
+
+    // Fetch users from backend
+    const response = await apiClient.get<PaginatedResponse<User>>(
+      `/admin/users?${params.toString()}`
+    );
+
+    console.log("Fetched users:", response.data.content);
+
+    // Normalize phone numbers
+    const normalizedUsers = response.data.content.map((user) => ({
+      ...user,
+      phone: normalizeTanzaniaPhone(user.phone),
+    }));
+
+    console.log("Normalized users:", normalizedUsers);
+
+    setUsers(normalizedUsers);
+
+    setPagination({
+      page: response.data.number,
+      size: response.data.size,
+      totalPages: response.data.totalPages,
+      totalElements: response.data.totalElements,
+    });
+  } catch (error: any) {
+    console.error("Error fetching users:", error);
+
+    toast.error(
+      error.response?.data?.message ||
+        "Failed to load users"
+    );
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   // Fetch on component mount
   useEffect(() => {
@@ -341,179 +379,295 @@ export default function UserManagementPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-200">
-                <th className="px-6 py-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">User</th>
-                <th className="px-6 py-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Role</th>
-                <th className="px-6 py-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Joined</th>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {isLoading ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center">
-                    <div className="flex justify-center items-center">
-                      <LoadingSpinner message="Loading Users List..." size="md" />
-                    </div>
-                  </td>
-                </tr>
-              ) : users.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center">
-                    <Users className="mx-auto text-slate-300 mb-3" size={48} />
-                    <p className="text-slate-500 font-medium">No users found</p>
-                    <p className="text-slate-400 text-sm mt-1">Try adjusting your search or filters</p>
-                  </td>
-                </tr>
-              ) : (
-                users.map((user) => (
-                  <motion.tr 
-                    key={user.id} 
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="hover:bg-slate-50/50 transition-colors group"
-                  >
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center font-bold text-emerald-700">
-                          {user.name?.charAt(0) || "U"}
-                        </div>
-                        <div>
-                          <p className="font-semibold text-slate-900">{user.name}</p>
-                          <p className="text-slate-500 text-xs">{user.email}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={cn(
-                        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold",
-                        user.role === "ADMIN" ? "bg-rose-50 text-rose-700" : "bg-blue-50 text-blue-700"
-                      )}>
-                        <Shield size={12} />
-                        {user.role}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={cn(
-                        "inline-flex items-center gap-1.5 text-xs font-semibold",
-                        !user.isBlocked ? "text-emerald-600" : "text-red-600"
-                      )}>
-                        {!user.isBlocked ? <CheckCircle size={14} /> : <Ban size={14} />}
-                        {!user.isBlocked ? "ACTIVE" : "BLOCKED"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-slate-500">
-                      {new Date(user.createdAt).toLocaleDateString('en-US', { 
-                        year: 'numeric', 
-                        month: 'short', 
-                        day: 'numeric' 
-                      })}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        {/* Kitufe cha Block / Unblock kinatumia isBlocked */}
-                        <button 
-                          onClick={() => handleBlockToggle(user.id, user.isBlocked)}
-                          className={cn(
-                            "p-2 rounded-lg transition-colors",
-                            user.isBlocked ? "text-red-500 hover:bg-red-50" : "text-slate-400 hover:bg-slate-100 hover:text-emerald-600"
-                          )}
-                          title={user.isBlocked ? "Unblock User" : "Block User"}
-                        >
-                          {user.isBlocked ? <Eye size={16} /> : <Ban size={16} />}
-                        </button>
-                        <button 
-                          onClick={() => handleEditUser(user)}
-                          className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-blue-600 transition-colors"
-                          title="Edit User"
-                        >
-                          <Edit2 size={16} />
-                        </button>
-                        <button 
-                          onClick={() => handleDeleteUser(user.id)}
-                          className="p-2 hover:bg-red-50 rounded-lg text-slate-400 hover:text-red-600 transition-colors"
-                          title="Delete User"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </motion.tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+     <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+  <div className="overflow-x-auto">
+    <table className="w-full text-left">
+      <thead>
+        <tr className="bg-slate-50 border-b border-slate-200">
+          <th className="px-6 py-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+            User
+          </th>
 
-        {/* Pagination Controls */}
-        <div className="px-6 py-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-sm text-slate-600">
-            <span>Showing</span>
-            <select
-              value={pagination.size}
-              onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-              className="border border-slate-200 rounded-lg px-2 py-1 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-            >
-              <option value={5}>5</option>
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value={50}>50</option>
-            </select>
-            <span>per page</span>
-            <span className="hidden sm:inline">
-              • {pagination.totalElements} total users
-            </span>
-          </div>
+          <th className="px-6 py-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+            Phone
+          </th>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => handlePageChange(pagination.page - 1)}
-              disabled={pagination.page === 0}
-              className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          <th className="px-6 py-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+            Role
+          </th>
+
+          <th className="px-6 py-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+            Status
+          </th>
+
+         
+
+
+          <th className="px-6 py-4 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+            Actions
+          </th>
+        </tr>
+      </thead>
+
+      <tbody className="divide-y divide-slate-100">
+        {isLoading ? (
+          <tr>
+            <td colSpan={6} className="px-6 py-12 text-center">
+              <div className="flex justify-center items-center">
+                <LoadingSpinner
+                  message="Loading Users List..."
+                  size="md"
+                />
+              </div>
+            </td>
+          </tr>
+        ) : users.length === 0 ? (
+          <tr>
+            <td colSpan={6} className="px-6 py-12 text-center">
+              <Users
+                className="mx-auto text-slate-300 mb-3"
+                size={48}
+              />
+              <p className="text-slate-500 font-medium">
+                No users found
+              </p>
+              <p className="text-slate-400 text-sm mt-1">
+                Try adjusting your search or filters
+              </p>
+            </td>
+          </tr>
+        ) : (
+          users.map((user) => (
+            <motion.tr
+              key={user.id}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="hover:bg-slate-50/50 transition-colors group"
             >
-              <ChevronLeft size={16} />
-            </button>
+              {/* User */}
+              <td className="px-6 py-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center font-bold text-emerald-700">
+                    {user.name?.charAt(0) || "U"}
+                  </div>
+
+                  <div>
+                    <p className="font-semibold text-slate-900">
+                      {user.name}
+                    </p>
+                    <p className="text-slate-500 text-xs">
+                      {user.email}
+                    </p>
+                  </div>
+                </div>
+              </td>
+
+    <td className="px-6 py-4 text-sm text-slate-600">
+  {user.phone ? (
+    <div className="flex items-center gap-2">
+      <span>{normalizeTanzaniaPhone(user.phone)}</span>
+
+     <button
+  type="button"
+  onClick={() => handleCopyPhone(user.phone)}
+  className="p-1.5 rounded-md bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-700 transition-colors"
+  title={copiedPhone === user.phone ? "Copied!" : "Copy phone number"}
+>
+  {copiedPhone === user.phone ? (
+    <Check size={14} className="text-emerald-700" />
+  ) : (
+    <Copy size={14} className="text-emerald-600" />
+  )}
+</button>
+
+    </div>
+  ) : (
+    <span className="text-slate-400">
+      Not provided
+    </span>
+  )}
+</td>
+
+
+
+              {/* Role */}
+              <td className="px-6 py-4">
+                <span
+                  className={cn(
+                    "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold",
+                    user.role === "ADMIN"
+                      ? "bg-rose-50 text-rose-700"
+                      : "bg-blue-50 text-blue-700"
+                  )}
+                >
+                  <Shield size={12} />
+                  {user.role}
+                </span>
+              </td>
+
+              {/* Status */}
+              <td className="px-6 py-4">
+                <span
+                  className={cn(
+                    "inline-flex items-center gap-1.5 text-xs font-semibold",
+                    !user.isBlocked
+                      ? "text-emerald-600"
+                      : "text-red-600"
+                  )}
+                >
+                  {!user.isBlocked ? (
+                    <CheckCircle size={14} />
+                  ) : (
+                    <Ban size={14} />
+                  )}
+
+                  {!user.isBlocked ? "ACTIVE" : "BLOCKED"}
+                </span>
+              </td>
+
             
-            <div className="flex items-center gap-1">
-              {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-                let pageNum = i;
-                if (pagination.totalPages > 5) {
-                  const start = Math.max(0, Math.min(pagination.page - 2, pagination.totalPages - 5));
-                  pageNum = start + i;
-                }
-                
-                return (
+              {/* Actions */}
+              <td className="px-6 py-4 text-right">
+                <div className="flex items-center justify-end gap-1">
                   <button
-                    key={pageNum}
-                    onClick={() => handlePageChange(pageNum)}
+                    onClick={() =>
+                      handleBlockToggle(
+                        user.id,
+                        user.isBlocked
+                      )
+                    }
                     className={cn(
-                      "w-8 h-8 rounded-lg text-sm font-medium transition-all",
-                      pagination.page === pageNum
-                        ? "bg-emerald-600 text-white"
-                        : "hover:bg-slate-100 text-slate-600"
+                      "p-2 rounded-lg transition-colors",
+                      user.isBlocked
+                        ? "text-red-500 hover:bg-red-50"
+                        : "text-slate-400 hover:bg-slate-100 hover:text-emerald-600"
                     )}
+                    title={
+                      user.isBlocked
+                        ? "Unblock User"
+                        : "Block User"
+                    }
                   >
-                    {pageNum + 1}
+                    {user.isBlocked ? (
+                      <Eye size={16} />
+                    ) : (
+                      <Ban size={16} />
+                    )}
                   </button>
-                );
-              })}
-            </div>
 
-            <button
-              onClick={() => handlePageChange(pagination.page + 1)}
-              disabled={pagination.page >= pagination.totalPages - 1}
-              className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-            >
-              <ChevronRight size={16} />
-            </button>
-          </div>
-        </div>
+                  <button
+                    onClick={() => handleEditUser(user)}
+                    className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-blue-600 transition-colors"
+                    title="Edit User"
+                  >
+                    <Edit2 size={16} />
+                  </button>
+
+                  <button
+                    onClick={() => handleDeleteUser(user.id)}
+                    className="p-2 hover:bg-red-50 rounded-lg text-slate-400 hover:text-red-600 transition-colors"
+                    title="Delete User"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </td>
+            </motion.tr>
+          ))
+        )}
+      </tbody>
+    </table>
+  </div>
+
+  {/* Pagination Controls */}
+  <div className="px-6 py-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div className="flex items-center gap-2 text-sm text-slate-600">
+      <span>Showing</span>
+
+      <select
+        value={pagination.size}
+        onChange={(e) =>
+          handlePageSizeChange(Number(e.target.value))
+        }
+        className="border border-slate-200 rounded-lg px-2 py-1 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+      >
+        <option value={5}>5</option>
+        <option value={10}>10</option>
+        <option value={20}>20</option>
+        <option value={50}>50</option>
+      </select>
+
+      <span>per page</span>
+
+      <span className="hidden sm:inline">
+        • {pagination.totalElements} total users
+      </span>
+    </div>
+
+    <div className="flex items-center gap-2">
+      <button
+        onClick={() =>
+          handlePageChange(pagination.page - 1)
+        }
+        disabled={pagination.page === 0}
+        className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+      >
+        <ChevronLeft size={16} />
+      </button>
+
+      <div className="flex items-center gap-1">
+        {Array.from(
+          {
+            length: Math.min(5, pagination.totalPages),
+          },
+          (_, i) => {
+            let pageNum = i;
+
+            if (pagination.totalPages > 5) {
+              const start = Math.max(
+                0,
+                Math.min(
+                  pagination.page - 2,
+                  pagination.totalPages - 5
+                )
+              );
+
+              pageNum = start + i;
+            }
+
+            return (
+              <button
+                key={pageNum}
+                onClick={() => handlePageChange(pageNum)}
+                className={cn(
+                  "w-8 h-8 rounded-lg text-sm font-medium transition-all",
+                  pagination.page === pageNum
+                    ? "bg-emerald-600 text-white"
+                    : "hover:bg-slate-100 text-slate-600"
+                )}
+              >
+                {pageNum + 1}
+              </button>
+            );
+          }
+        )}
       </div>
+
+      <button
+        onClick={() =>
+          handlePageChange(pagination.page + 1)
+        }
+        disabled={
+          pagination.page >= pagination.totalPages - 1
+        }
+        className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+      >
+        <ChevronRight size={16} />
+      </button>
+    </div>
+  </div>
+</div>
+
 
       {/* Modal */}
       <UserModal 

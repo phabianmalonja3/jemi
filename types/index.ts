@@ -116,6 +116,8 @@ export type User = {
  enabled: boolean;
  isVerified: boolean;
  isBlocked: boolean;
+ 
+phone:string;
 };
 // Paginated API Response
 export interface PaginatedResponse<T> {
@@ -270,6 +272,29 @@ export const DEFAULT_PACKAGES: Package[] = [
         isActive: true
     }
 ];
+
+export const normalizeTanzaniaPhone = (phone: string): string => {
+    if (!phone) return "";
+
+    // Remove spaces, hyphens, brackets, etc.
+    let cleaned = phone.replace(/\D/g, "");
+
+    // Already starts with 255
+    if (cleaned.startsWith("255")) {
+        return `+${cleaned}`;
+    }
+
+    // Starts with 0 -> replace 0 with +255
+    if (cleaned.startsWith("0")) {
+        return `+255${cleaned.slice(1)}`;
+    }
+
+    // No 0 -> add +255
+    return `+255${cleaned}`;
+};
+
+
+
 
 // Default time slots
 export const DEFAULT_TIME_SLOTS: TimeSlot[] = [
