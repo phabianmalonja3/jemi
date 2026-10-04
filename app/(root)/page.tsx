@@ -2,34 +2,45 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import {
-  FaCamera,
-  FaMapMarkerAlt,
-  FaCalendarAlt,
-  FaStar,
-  FaUsers,
-  FaArrowRight,
-  FaChevronLeft,
-  FaChevronRight,
-} from "react-icons/fa";
-import { Suspense, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+import axios from "axios";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import axios from "axios";
+import { motion } from "framer-motion";
 
-import { heroSlides } from "@/lib/constants/heros";
+import {
+  FaArrowRight,
+  FaCamera,
+  FaMapMarkerAlt,
+  FaStar,
+  FaUsers,
+} from "react-icons/fa";
+
+import {
+  AlertCircle,
+  Check,
+  Sparkles,
+} from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+
 import Footer from "@/components/web/Footer";
-import TestMonies from "@/components/web/TestMonies";
-import PaymentModal from "@/components/web/PaymentModal";
-import { AlertCircle, Check, Loader2, Sparkles } from "lucide-react";
 import LoadingSpinner from "@/components/web/LoadingSpinner";
+import PaymentModal from "@/components/web/PaymentModal";
+import TestMonies from "@/components/web/TestMonies";
 
-// Register GSAP plugin
+// ============================================================
+// GSAP
+// ============================================================
+
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
+
+// ============================================================
+// TYPES
+// ============================================================
 
 interface SubscriptionPlan {
   id: string;
@@ -39,482 +50,1178 @@ interface SubscriptionPlan {
   durationInDays: number;
 }
 
+// ============================================================
+// HOME COMPONENT
+// ============================================================
+
 export default function Home() {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [isMobile, setIsMobile] = useState(false);
+  // ==========================================================
+  // REFS
+  // ==========================================================
+
+  const heroRef = useRef<HTMLElement | null>(null);
+  const statsRef = useRef<HTMLElement | null>(null);
+
+  // ==========================================================
+  // STATES
+  // ==========================================================
+
   const [isLoading, setIsLoading] = useState(true);
-  const heroRef = useRef(null);
-  const statsRef = useRef(null);
 
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [fetchingPlans, setFetchingPlans] = useState(true);
-  
-  // State za kudhibiti Modal ya Malipo
+
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
+
+  const [selectedPlan, setSelectedPlan] =
+    useState<SubscriptionPlan | null>(null);
 
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://172.20.10.2:8080";
+  // ==========================================================
+  // API URL
+  // ==========================================================
 
-  // Kupokea Vifurushi (Plans) kutoka Backend kupitia Axios
+  const API_URL =
+    process.env.NEXT_PUBLIC_API_URL ||
+    "http://172.20.10.2:8080";
+
+  // ==========================================================
+  // STATS
+  // ==========================================================
+
+  const stats = [
+    {
+      number: "500+",
+      label: "Happy Clients",
+      icon: FaUsers,
+    },
+    {
+      number: "50+",
+      label: "Tour Locations",
+      icon: FaMapMarkerAlt,
+    },
+    {
+      number: "1000+",
+      label: "Photo Sessions",
+      icon: FaCamera,
+    },
+    {
+      number: "98%",
+      label: "5-Star Reviews",
+      icon: FaStar,
+    },
+  ];
+
+  // ==========================================================
+  // FETCH SUBSCRIPTION PLANS
+  // ==========================================================
+
   useEffect(() => {
-    async function fetchPlans() {
+    const fetchPlans = async () => {
       try {
-        const response = await axios.get(`${API_URL}/subscription-plans`);
+        setFetchingPlans(true);
+        setErrorMessage("");
+
+        const response = await axios.get<SubscriptionPlan[]>(
+          `${API_URL}/subscription-plans`
+        );
+
         setPlans(response.data);
-      } catch (err) {
+      } catch (error) {
+        console.error(
+          "Failed to fetch subscription plans:",
+          error
+        );
+
         setPlans([]);
-        setErrorMessage("Failed to fetch subscriptions !");
+
+        setErrorMessage(
+          "Failed to fetch subscriptions!"
+        );
       } finally {
         setFetchingPlans(false);
       }
-    }
+    };
 
     fetchPlans();
   }, [API_URL]);
 
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
+  // ==========================================================
+  // INITIAL LOADING
+  // ==========================================================
 
-    const timer = setTimeout(() => setIsLoading(false), 500);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
+
     return () => {
-      window.removeEventListener("resize", checkMobile);
       clearTimeout(timer);
     };
   }, []);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-    }, 6000);
-    return () => clearInterval(interval);
-  }, [heroSlides.length]);
+  // ==========================================================
+  // GSAP ANIMATIONS
+  // ==========================================================
 
   useEffect(() => {
     if (isLoading) return;
 
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        ".hero-title",
-        { y: 120, opacity: 0, rotationX: -15 },
-        { y: 0, opacity: 1, rotationX: 0, duration: 1.2, ease: "power3.out", delay: 0.2 }
-      );
-      gsap.fromTo(
-        ".hero-subtitle",
-        { y: 60, opacity: 0 },
-        { y: 0, opacity: 1, duration: 1, ease: "power3.out", delay: 0.5 }
-      );
-      gsap.fromTo(
-        ".hero-button",
-        { scale: 0.8, opacity: 0 },
-        { scale: 1, opacity: 1, duration: 0.8, delay: 0.8, ease: "back.out(1.2)" }
-      );
+    const context = gsap.context(() => {
+      // ------------------------------------------------------
+      // HERO BADGE
+      // ------------------------------------------------------
+
       gsap.fromTo(
         ".hero-badge",
-        { scale: 0, opacity: 0 },
-        { scale: 1, opacity: 1, duration: 0.6, delay: 0.1, ease: "back.out(1.5)" }
+        {
+          scale: 0,
+          opacity: 0,
+        },
+        {
+          scale: 1,
+          opacity: 1,
+          duration: 0.6,
+          delay: 0.1,
+          ease: "back.out(1.5)",
+        }
       );
 
-      gsap.from(".stat-item", {
-        scrollTrigger: {
-          trigger: statsRef.current,
-          start: "top 85%",
-          toggleActions: "play none none reverse",
+      // ------------------------------------------------------
+      // HERO TITLE
+      // ------------------------------------------------------
+
+      gsap.fromTo(
+        ".hero-title",
+        {
+          y: 100,
+          opacity: 0,
+          rotationX: -15,
         },
-        y: 50,
-        opacity: 0,
-        duration: 0.8,
-        stagger: 0.15,
-        ease: "power2.out",
-      });
+        {
+          y: 0,
+          opacity: 1,
+          rotationX: 0,
+          duration: 1.2,
+          delay: 0.2,
+          ease: "power3.out",
+        }
+      );
+
+      // ------------------------------------------------------
+      // HERO SUBTITLE
+      // ------------------------------------------------------
+
+      gsap.fromTo(
+        ".hero-subtitle",
+        {
+          y: 50,
+          opacity: 0,
+        },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 1,
+          delay: 0.5,
+          ease: "power3.out",
+        }
+      );
+
+      // ------------------------------------------------------
+      // HERO BUTTON
+      // ------------------------------------------------------
+
+      gsap.fromTo(
+        ".hero-button",
+        {
+          scale: 0.8,
+          opacity: 0,
+        },
+        {
+          scale: 1,
+          opacity: 1,
+          duration: 0.8,
+          delay: 0.8,
+          ease: "back.out(1.2)",
+        }
+      );
+
+      // ------------------------------------------------------
+      // STATS
+      // ------------------------------------------------------
+
+      if (statsRef.current) {
+        gsap.from(".stat-item", {
+          scrollTrigger: {
+            trigger: statsRef.current,
+            start: "top 85%",
+            toggleActions:
+              "play none none reverse",
+          },
+          y: 50,
+          opacity: 0,
+          duration: 0.8,
+          stagger: 0.15,
+          ease: "power2.out",
+        });
+      }
     });
 
-    return () => ctx.revert();
+    return () => {
+      context.revert();
+    };
   }, [isLoading]);
 
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+  // ==========================================================
+  // SELECT PLAN
+  // ==========================================================
+
+  const handleSelectPlan = (
+    plan: SubscriptionPlan
+  ) => {
+    setSelectedPlan(plan);
+    setIsModalOpen(true);
   };
 
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
+  // ==========================================================
+  // PAYMENT SUCCESS
+  // ==========================================================
+
+  const handleSuccessfulPayment = (
+    message: string
+  ) => {
+    setSuccessMessage(message);
   };
 
-  const stats = [
-    { number: "500+", label: "Happy Clients", icon: FaUsers },
-    { number: "50+", label: "Tour Locations", icon: FaMapMarkerAlt },
-    { number: "1000+", label: "Photo Sessions", icon: FaCamera },
-    { number: "98%", label: "5-Star Reviews", icon: FaStar },
-  ];
+  // ==========================================================
+  // RETURN
+  // ==========================================================
 
   return (
-    <>
-      <Suspense
-        fallback={
-          <div className="flex items-center justify-center min-h-screen bg-linear-to-b from-zinc-50 to-white dark:from-black dark:to-zinc-900">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto"></div>
-              <p className="mt-4 text-zinc-600 dark:text-zinc-400">Loading...</p>
-            </div>
-          </div>
-        }
-      ></Suspense>
+    <main className="min-h-screen overflow-x-hidden bg-gradient-to-b from-zinc-50 via-white to-zinc-50 dark:from-black dark:via-zinc-900 dark:to-black">
 
-      <div className="flex flex-col min-h-screen bg-gradient-to-b from-zinc-50 via-white to-zinc-50 dark:from-black dark:via-zinc-900 dark:to-black overflow-x-hidden">
-        {/* Hero Section */}
- <section
-  ref={heroRef}
-  className="relative w-full min-h-screen flex items-center justify-center overflow-hidden bg-black"
->
-  <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
-    
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+      {/* ======================================================
+          LOADING
+      ====================================================== */}
 
-      {/* Video */}
-      <div className="w-full order-1 lg:order-2">
-        <div className="relative w-full overflow-hidden rounded-2xl shadow-2xl">
-          <video
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            className="w-full h-auto max-h-[70vh] object-contain"
-          >
-            <source src="/videos/hero.mp4" type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        </div>
-      </div>
-
-      {/* Hero Content */}
-      <div className="relative z-10 text-center lg:text-left order-2 lg:order-1">
-
-        {/* Badge */}
-        <div className="hero-badge">
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-full px-4 py-2 mb-6 border border-white/20">
-            <FaCamera className="text-emerald-400 text-sm" />
-
-            <span className="text-white text-sm font-medium tracking-wide">
-              Photography
-            </span>
-          </div>
-        </div>
-
-        {/* Title */}
-        <h1 className="hero-title text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
-          Capture Your
-          <br />
-
-          <span className="bg-gradient-to-r from-emerald-400 to-emerald-300 bg-clip-text text-transparent">
-            Perfect Moments
-          </span>
-        </h1>
-
-        {/* Subtitle */}
-        <motion.p
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="hero-subtitle text-base sm:text-lg md:text-xl text-gray-200 mb-8 max-w-2xl mx-auto lg:mx-0"
-        >
-          Creating beautiful memories through professional photography
-          and unforgettable experiences.
-        </motion.p>
-
-        {/* Booking Button */}
-        <div className="hero-button flex justify-center lg:justify-start px-4 lg:px-0">
-         <Link href="/photographers" className="w-full sm:w-auto">
-  <Button className="w-full sm:w-auto bg-gradient-to-r from-emerald-600 to-emerald-500 text-white h-12 md:h-14 px-10 rounded-full shadow-xl">
-    See Our Professional Photographers
-    <FaArrowRight className="ml-2" />
-  </Button>
-</Link>
-
-        </div>
-
-      </div>
-
-    </div>
-  </div>
-</section>
-
-
-        {/* Stats Section */}
-        <section ref={statsRef} className="py-16 md:py-24 px-4 bg-white dark:bg-black">
-          <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              {stats.map((stat, index) => (
-                <div key={index} className="stat-item text-center">
-                  <div className="w-16 h-16 bg-emerald-50 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <stat.icon className="text-2xl text-emerald-600" />
-                  </div>
-                  <h3 className="text-2xl md:text-4xl font-extrabold text-zinc-900 dark:text-white">{stat.number}</h3>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">{stat.label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Subscription Packages Section */}
-  <div 
-  className="relative min-h-screen overflow-hidden py-12 px-4 sm:px-6 lg:px-8"
-  style={{ backgroundColor: "#102d17" }}
->
-  {/* Glassmorphism Background Effects */}
-  <div className="pointer-events-none absolute inset-0 overflow-hidden">
-    <div className="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-emerald-500/20 blur-3xl" />
-    <div className="absolute -right-32 top-1/3 h-96 w-96 rounded-full bg-green-400/10 blur-3xl" />
-    <div className="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-emerald-600/10 blur-3xl" />
-  </div>
-
-  <div className="relative z-10 max-w-7xl mx-auto">
-
-    {/* Header */}
-    <div className="text-center max-w-3xl mx-auto mb-16">
-
-      <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white">
-        Choose Your{" "}
-        <span className="bg-gradient-to-r from-emerald-300 to-green-400 bg-clip-text text-transparent">
-          Subscription Package
-        </span>
-      </h1>
-
-      <p className="mt-4 text-base sm:text-lg text-slate-300">
-        Pay easily through your mobile phone and continue enjoying our
-        services seamlessly.
-      </p>
-
-      {/* Error */}
-      {errorMessage && (
-        <div className="mt-6 rounded-2xl border border-red-400/20 bg-red-500/15 backdrop-blur-xl px-5 py-4 text-sm text-red-200 shadow-xl">
-          {errorMessage}
-        </div>
+      {isLoading && (
+        <LoadingSpinner
+          size="lg"
+        />
       )}
 
-      {/* Success */}
-      {successMessage && (
-        <div className="mt-6 rounded-2xl border border-emerald-400/20 bg-emerald-500/15 backdrop-blur-xl px-5 py-4 text-sm text-emerald-200 shadow-xl">
-          {successMessage}
+      {/* ======================================================
+          HERO SECTION
+      ====================================================== */}
+
+      <section
+        ref={heroRef}
+        className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-black"
+      >
+
+        {/* ----------------------------------------------------
+            HERO BACKGROUND
+        ---------------------------------------------------- */}
+
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+
+          <motion.div
+            animate={{
+              scale: [1, 1.15, 1],
+              opacity: [0.15, 0.25, 0.15],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            className="absolute -left-40 -top-40 h-96 w-96 rounded-full bg-emerald-500/20 blur-3xl"
+          />
+
+          <motion.div
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.1, 0.2, 0.1],
+            }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            className="absolute -bottom-40 -right-40 h-96 w-96 rounded-full bg-green-400/20 blur-3xl"
+          />
+
         </div>
-      )}
-    </div>
 
-    {/* Loading */}
-    {fetchingPlans ? (
-                  <LoadingSpinner message="Loading Packages..." size="md" />
+        {/* ----------------------------------------------------
+            HERO CONTAINER
+        ---------------------------------------------------- */}
 
-    ) : plans.length === 0 ? (
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 md:py-20 lg:px-8">
 
-      /* Empty State */
-      <div className="mx-auto max-w-xl rounded-3xl border border-white/10 bg-black/30 p-8 text-center shadow-2xl backdrop-blur-xl">
+          <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16">
 
-        <AlertCircle className="mx-auto h-12 w-12 text-slate-400 mb-4" />
+            {/* ==================================================
+                HERO VIDEO
+            ================================================== */}
 
-        <h3 className="text-lg font-semibold text-white">
-          No Packages Available
-        </h3>
-
-        <p className="mt-2 text-sm leading-6 text-slate-300">
-          There are currently no active subscription packages available.
-          Please check back later or contact support.
-        </p>
-
-      </div>
-
-    ) : (
-
-      /* Plans */
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 lg:gap-8">
-
-        {plans.map((plan) => {
-
-          const isPopular = plan.name === "QUARTERLY";
-
-          return (
-            <div
-              key={plan.id}
-              className={`
-                group relative overflow-hidden
-                rounded-3xl
-                p-[1px]
-                transition-all duration-500
-                hover:-translate-y-2
-                hover:shadow-2xl
-                ${
-                  isPopular
-                    ? "bg-gradient-to-b from-emerald-300/80 via-emerald-500/40 to-transparent"
-                    : "bg-gradient-to-b from-white/20 via-white/10 to-transparent"
-                }
-              `}
+            <motion.div
+              initial={{
+                opacity: 0,
+                scale: 0.92,
+                x: 60,
+              }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+                x: 0,
+              }}
+              transition={{
+                duration: 1.2,
+                delay: 0.2,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+              className="order-1 w-full lg:order-2"
             >
 
-              {/* Card */}
-              <div
-                className={`
-                  relative h-full rounded-3xl
-                  bg-black/40
-                  backdrop-blur-2xl
-                  border border-white/[0.08]
-                  p-8
-                  flex flex-col justify-between
-                  shadow-2xl
-                  ${
-                    isPopular
-                      ? "shadow-emerald-950/60"
-                      : "shadow-black/40"
-                  }
-                `}
+              <motion.div
+                whileHover={{
+                  scale: 1.015,
+                }}
+                transition={{
+                  duration: 0.4,
+                }}
+                className="relative w-full overflow-hidden rounded-3xl border border-white/10 bg-zinc-900 shadow-2xl"
               >
 
-                {/* Decorative Glow */}
-                <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-emerald-400/10 blur-3xl transition-all duration-500 group-hover:bg-emerald-400/20" />
+                <video
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  className="h-auto max-h-[70vh] w-full object-contain"
+                >
 
-                {/* Popular Badge */}
-                {isPopular && (
-                  <div className="absolute -top-0 left-1/2 -translate-x-1/2">
-                    <span className="inline-flex items-center gap-1 rounded-b-xl bg-gradient-to-r from-emerald-500 to-green-500 px-5 py-2 text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-emerald-900/30">
-                      <Sparkles className="h-3 w-3" />
-                      Most Popular
-                    </span>
-                  </div>
-                )}
+                  <source
+                    src="/videos/hero.mp4"
+                    type="video/mp4"
+                  />
 
-                <div className={isPopular ? "pt-5" : ""}>
+                  Your browser does not support the video
+                  tag.
 
-                  {/* Plan Name */}
-                  <h3 className="text-xl font-bold uppercase tracking-wider text-white">
-                    {plan.name}
-                  </h3>
+                </video>
 
-                  {/* Description */}
-                  <p className="mt-4 text-sm leading-6 text-slate-300">
-                    {plan.description}
-                  </p>
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
 
-                  {/* Price */}
-                  <div className="mt-7">
+              </motion.div>
 
-                    <span className="text-4xl font-extrabold tracking-tight text-white">
-                      TZS {plan.price.toLocaleString()}
-                    </span>
+            </motion.div>
 
-                    <span className="ml-1 text-sm font-medium text-slate-400">
-                      / {plan.durationInDays} days
-                    </span>
+            {/* ==================================================
+                HERO CONTENT
+            ================================================== */}
 
-                  </div>
+            <div className="relative z-10 order-2 text-center lg:order-1 lg:text-left">
 
-                  {/* Features */}
-                  <ul className="mt-7 space-y-4">
+              {/* ------------------------------------------------
+                  BADGE
+              ------------------------------------------------ */}
 
-                    <li className="flex items-start gap-3">
-                      <div className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500/20">
-                        <Check className="h-3.5 w-3.5 text-emerald-400" />
-                      </div>
+              <div className="hero-badge">
 
-                      <p className="text-sm text-slate-300">
-                        Access for {plan.durationInDays} days
-                      </p>
-                    </li>
+                <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 backdrop-blur-md">
 
-                    <li className="flex items-start gap-3">
-                      <div className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500/20">
-                        <Check className="h-3.5 w-3.5 text-emerald-400" />
-                      </div>
+                  <FaCamera className="text-sm text-emerald-400" />
 
-                      <p className="text-sm text-slate-300">
-                        Full system capabilities
-                      </p>
-                    </li>
-
-                  </ul>
-
-                </div>
-
-                {/* Choose Button */}
-                <div className="mt-8">
-
-                  <button
-                    onClick={() => {
-                      setSelectedPlan(plan);
-                      setIsModalOpen(true);
-                    }}
-                    className="
-                      group/btn
-                      relative
-                      w-full
-                      overflow-hidden
-                      rounded-2xl
-                      border border-emerald-400/20
-                      bg-gradient-to-r
-                      from-emerald-600
-                      to-green-500
-                      py-3.5
-                      font-semibold
-                      text-white
-                      shadow-lg
-                      shadow-emerald-950/30
-                      transition-all
-                      duration-300
-                      hover:from-emerald-500
-                      hover:to-green-400
-                      hover:shadow-emerald-500/20
-                      hover:scale-[1.02]
-                      active:scale-[0.98]
-                    "
-                  >
-                    <span className="relative z-10">
-                      Choose Plan
-                    </span>
-
-                    {/* Button shine */}
-                    <span className="
-                      absolute
-                      inset-0
-                      -translate-x-full
-                      bg-gradient-to-r
-                      from-transparent
-                      via-white/20
-                      to-transparent
-                      transition-transform
-                      duration-700
-                      group-hover/btn:translate-x-full
-                    " />
-
-                  </button>
+                  <span className="text-sm font-medium tracking-wide text-white">
+                    Professional Photography
+                  </span>
 
                 </div>
 
               </div>
+
+              {/* ------------------------------------------------
+                  TITLE
+              ------------------------------------------------ */}
+
+              <h1 className="hero-title mb-6 text-4xl font-bold leading-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
+
+                Capture Your
+
+                <br />
+
+                <span className="bg-gradient-to-r from-emerald-400 to-green-300 bg-clip-text text-transparent">
+                  Perfect Moments
+                </span>
+
+              </h1>
+
+              {/* ------------------------------------------------
+                  SUBTITLE
+              ------------------------------------------------ */}
+
+              <p className="hero-subtitle mx-auto mb-8 max-w-2xl text-base text-gray-300 sm:text-lg md:text-xl lg:mx-0">
+
+                Creating beautiful memories through
+                professional photography and
+                unforgettable experiences.
+
+              </p>
+
+              {/* ------------------------------------------------
+                  BUTTON
+              ------------------------------------------------ */}
+
+              <div className="hero-button flex justify-center px-4 lg:justify-start lg:px-0">
+
+                <Link
+                  href="/photographers"
+                  className="w-full sm:w-auto"
+                >
+
+                  <motion.div
+                    whileHover={{
+                      scale: 1.04,
+                    }}
+                    whileTap={{
+                      scale: 0.97,
+                    }}
+                  >
+
+                    <Button className="h-12 w-full rounded-full bg-gradient-to-r from-emerald-600 to-green-500 px-8 text-white shadow-xl shadow-emerald-950/40 transition-all duration-300 hover:from-emerald-500 hover:to-green-400 sm:w-auto md:h-14 md:px-10">
+
+                      See Our Professional
+                      Photographers
+
+                      <motion.span
+                        animate={{
+                          x: [0, 5, 0],
+                        }}
+                        transition={{
+                          duration: 1.5,
+                          repeat: Infinity,
+                        }}
+                      >
+                        <FaArrowRight className="ml-2" />
+                      </motion.span>
+
+                    </Button>
+
+                  </motion.div>
+
+                </Link>
+
+              </div>
+
             </div>
-          );
-        })}
 
-      </div>
-    )}
-  </div>
-</div>
+          </div>
 
+        </div>
+
+      </section>
+
+      {/* ======================================================
+          CINEMATIC IMAGE SECTION
+      ====================================================== */}
+
+      <section className="relative overflow-hidden bg-white px-4 py-16 dark:bg-black md:py-24">
+
+        <div className="mx-auto max-w-6xl">
+
+          <motion.div
+            initial={{
+              opacity: 0,
+              y: 50,
+            }}
+            whileInView={{
+              opacity: 1,
+              y: 0,
+            }}
+            viewport={{
+              once: true,
+              amount: 0.25,
+            }}
+            transition={{
+              duration: 1,
+              ease: [0.22, 1, 0.36, 1],
+            }}
+            className="relative h-[300px] w-full overflow-hidden rounded-3xl shadow-2xl md:h-[450px] lg:h-[550px]"
+          >
+
+            {/* IMAGE */}
+
+            <motion.div
+              initial={{
+                scale: 1.08,
+              }}
+              whileInView={{
+                scale: 1,
+              }}
+              viewport={{
+                once: true,
+                amount: 0.25,
+              }}
+              transition={{
+                duration: 2.5,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+              className="absolute inset-0"
+            >
+
+              <Image
+                src="/images/photographers.png"
+                alt="Professional photographer"
+                fill
+                priority
+                className="object-cover"
+              />
+
+            </motion.div>
+
+            {/* OVERLAYS */}
+
+            <div className="pointer-events-none absolute inset-0 bg-black/30" />
+
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+
+            {/* CONTENT */}
+
+            <div className="absolute inset-0 flex items-center justify-center px-6 text-center">
+
+              <motion.div
+                initial={{
+                  opacity: 0,
+                  y: 30,
+                }}
+                whileInView={{
+                  opacity: 1,
+                  y: 0,
+                }}
+                viewport={{
+                  once: true,
+                }}
+                transition={{
+                  duration: 1,
+                  delay: 0.5,
+                }}
+              >
+
+                <h2 className="text-3xl font-bold text-white md:text-5xl lg:text-6xl">
+                  Capture Every Moment
+                </h2>
+
+                <p className="mx-auto mt-4 max-w-2xl text-sm text-white/80 md:text-lg">
+                  Professional photography that turns
+                  your special moments into memories
+                  that last forever.
+                </p>
+
+              </motion.div>
+
+            </div>
+
+          </motion.div>
+
+        </div>
+
+      </section>
+
+      {/* ======================================================
+          STATS SECTION
+      ====================================================== */}
+
+      <section
+        ref={statsRef}
+        className="bg-white px-4 py-16 dark:bg-black md:py-24"
+      >
+
+        <div className="mx-auto max-w-6xl">
+
+          <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
+
+            {stats.map((stat, index) => {
+
+              const Icon = stat.icon;
+
+              return (
+                <motion.div
+                  key={stat.label}
+                  initial={{
+                    opacity: 0,
+                    y: 40,
+                  }}
+                  whileInView={{
+                    opacity: 1,
+                    y: 0,
+                  }}
+                  viewport={{
+                    once: true,
+                    amount: 0.3,
+                  }}
+                  transition={{
+                    duration: 0.7,
+                    delay: index * 0.12,
+                  }}
+                  whileHover={{
+                    y: -8,
+                  }}
+                  className="stat-item text-center"
+                >
+
+                  <motion.div
+                    whileHover={{
+                      scale: 1.08,
+                      rotate: 3,
+                    }}
+                    transition={{
+                      duration: 0.3,
+                    }}
+                    className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-900/30"
+                  >
+
+                    <Icon className="text-2xl text-emerald-600" />
+
+                  </motion.div>
+
+                  <h3 className="text-2xl font-extrabold text-zinc-900 dark:text-white md:text-4xl">
+                    {stat.number}
+                  </h3>
+
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                    {stat.label}
+                  </p>
+
+                </motion.div>
+              );
+            })}
+
+          </div>
+
+        </div>
+
+      </section>
+
+      {/* ======================================================
+          SUBSCRIPTION SECTION
+      ====================================================== */}
+
+      <section
+        className="relative min-h-screen overflow-hidden px-4 py-20 sm:px-6 lg:px-8"
+        style={{
+          backgroundColor: "#102d17",
+        }}
+      >
+
+        {/* ----------------------------------------------------
+            BACKGROUND EFFECTS
+        ---------------------------------------------------- */}
+
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+
+          <motion.div
+            animate={{
+              scale: [1, 1.15, 1],
+              opacity: [0.2, 0.3, 0.2],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            className="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-emerald-500/20 blur-3xl"
+          />
+
+          <motion.div
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.1, 0.2, 0.1],
+            }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            className="absolute -right-32 top-1/3 h-96 w-96 rounded-full bg-green-400/10 blur-3xl"
+          />
+
+          <motion.div
+            animate={{
+              scale: [1, 1.1, 1],
+            }}
+            transition={{
+              duration: 9,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            className="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-emerald-600/10 blur-3xl"
+          />
+
+        </div>
+
+        {/* ----------------------------------------------------
+            SUBSCRIPTION CONTAINER
+        ---------------------------------------------------- */}
+
+        <div className="relative z-10 mx-auto max-w-7xl">
+
+          {/* ==================================================
+              HEADER
+          ================================================== */}
+
+          <motion.div
+            initial={{
+              opacity: 0,
+              y: 40,
+            }}
+            whileInView={{
+              opacity: 1,
+              y: 0,
+            }}
+            viewport={{
+              once: true,
+              amount: 0.3,
+            }}
+            transition={{
+              duration: 0.8,
+            }}
+            className="mx-auto mb-16 max-w-3xl text-center"
+          >
+
+            <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
+
+              Choose Your{" "}
+
+              <span className="bg-gradient-to-r from-emerald-300 to-green-400 bg-clip-text text-transparent">
+                Subscription Package
+              </span>
+
+            </h2>
+
+            <p className="mt-4 text-base text-slate-300 sm:text-lg">
+              Pay easily through your mobile phone
+              and continue enjoying our services
+              seamlessly.
+            </p>
+
+            {/* ERROR MESSAGE */}
+
+            {errorMessage && (
+              <motion.div
+                initial={{
+                  opacity: 0,
+                  y: -10,
+                }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                }}
+                className="mt-6 rounded-2xl border border-red-400/20 bg-red-500/15 px-5 py-4 text-sm text-red-200 shadow-xl backdrop-blur-xl"
+              >
+                {errorMessage}
+              </motion.div>
+            )}
+
+            {/* SUCCESS MESSAGE */}
+
+            {successMessage && (
+              <motion.div
+                initial={{
+                  opacity: 0,
+                  y: -10,
+                }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                }}
+                className="mt-6 rounded-2xl border border-emerald-400/20 bg-emerald-500/15 px-5 py-4 text-sm text-emerald-200 shadow-xl backdrop-blur-xl"
+              >
+                {successMessage}
+              </motion.div>
+            )}
+
+          </motion.div>
+
+          {/* ==================================================
+              PLANS
+          ================================================== */}
+
+          {fetchingPlans ? (
+
+            <LoadingSpinner
+              message="Loading Packages..."
+              size="md"
+            />
+
+          ) : plans.length === 0 ? (
+
+            /* ==================================================
+                EMPTY STATE
+            ================================================== */
+
+            <motion.div
+              initial={{
+                opacity: 0,
+                scale: 0.95,
+              }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+              }}
+              className="mx-auto max-w-xl rounded-3xl border border-white/10 bg-black/30 p-8 text-center shadow-2xl backdrop-blur-xl"
+            >
+
+              <AlertCircle className="mx-auto mb-4 h-12 w-12 text-slate-400" />
+
+              <h3 className="text-lg font-semibold text-white">
+                No Packages Available
+              </h3>
+
+              <p className="mt-2 text-sm leading-6 text-slate-300">
+                There are currently no active
+                subscription packages available.
+                Please check back later or contact
+                support.
+              </p>
+
+            </motion.div>
+
+          ) : (
+
+            /* ==================================================
+                PLAN CARDS
+            ================================================== */
+
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{
+                once: true,
+                amount: 0.15,
+              }}
+              variants={{
+                hidden: {},
+
+                visible: {
+                  transition: {
+                    staggerChildren: 0.15,
+                  },
+                },
+              }}
+              className="grid grid-cols-1 gap-8 lg:grid-cols-3"
+            >
+
+              {plans.map((plan) => {
+
+                const isPopular =
+                  plan.name.toUpperCase() ===
+                  "QUARTERLY";
+
+                return (
+                  <motion.div
+                    key={plan.id}
+                    variants={{
+                      hidden: {
+                        opacity: 0,
+                        y: 60,
+                        scale: 0.95,
+                      },
+
+                      visible: {
+                        opacity: 1,
+                        y: 0,
+                        scale: 1,
+                        transition: {
+                          duration: 0.7,
+                          ease: [
+                            0.22,
+                            1,
+                            0.36,
+                            1,
+                          ],
+                        },
+                      },
+                    }}
+                    whileHover={{
+                      y: -10,
+                      scale: 1.015,
+                    }}
+                    className={`
+                      group relative overflow-hidden
+                      rounded-3xl p-[1px]
+                      transition-all duration-500
+                      ${
+                        isPopular
+                          ? "bg-gradient-to-b from-emerald-300/80 via-emerald-500/40 to-transparent"
+                          : "bg-gradient-to-b from-white/20 via-white/10 to-transparent"
+                      }
+                    `}
+                  >
+
+                    {/* ------------------------------------------------
+                        CARD
+                    ------------------------------------------------ */}
+
+                    <div
+                      className={`
+                        relative flex h-full flex-col
+                        justify-between rounded-3xl
+                        border border-white/[0.08]
+                        bg-black/40 p-8
+                        shadow-2xl backdrop-blur-2xl
+                        ${
+                          isPopular
+                            ? "shadow-emerald-950/60"
+                            : "shadow-black/40"
+                        }
+                      `}
+                    >
+
+                      {/* CARD GLOW */}
+
+                      <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-emerald-400/10 blur-3xl transition-all duration-500 group-hover:bg-emerald-400/20" />
+
+                      {/* POPULAR BADGE */}
+
+                      {isPopular && (
+                        <motion.div
+                          initial={{
+                            opacity: 0,
+                            y: -15,
+                          }}
+                          animate={{
+                            opacity: 1,
+                            y: 0,
+                          }}
+                          transition={{
+                            delay: 0.5,
+                          }}
+                          className="absolute left-1/2 top-0 -translate-x-1/2"
+                        >
+
+                          <span className="inline-flex items-center gap-1 rounded-b-xl bg-gradient-to-r from-emerald-500 to-green-500 px-5 py-2 text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-emerald-900/30">
+
+                            <Sparkles className="h-3 w-3" />
+
+                            Most Popular
+
+                          </span>
+
+                        </motion.div>
+                      )}
+
+                      {/* ------------------------------------------------
+                          PLAN CONTENT
+                      ------------------------------------------------ */}
+
+                      <div
+                        className={
+                          isPopular
+                            ? "pt-5"
+                            : ""
+                        }
+                      >
+
+                        {/* PLAN NAME */}
+
+                        <h3 className="text-xl font-bold uppercase tracking-wider text-white">
+                          {plan.name}
+                        </h3>
+
+                        {/* DESCRIPTION */}
+
+                        <p className="mt-4 text-sm leading-6 text-slate-300">
+                          {plan.description}
+                        </p>
+
+                        {/* PRICE */}
+
+                        <div className="mt-7">
+
+                          <span className="text-4xl font-extrabold tracking-tight text-white">
+
+                            TZS{" "}
+
+                            {plan.price.toLocaleString()}
+
+                          </span>
+
+                          <span className="ml-1 text-sm font-medium text-slate-400">
+
+                            / {plan.durationInDays} days
+
+                          </span>
+
+                        </div>
+
+                        {/* FEATURES */}
+
+                        <ul className="mt-7 space-y-4">
+
+                          <li className="flex items-start gap-3">
+
+                            <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20">
+
+                              <Check className="h-3.5 w-3.5 text-emerald-400" />
+
+                            </div>
+
+                            <p className="text-sm text-slate-300">
+                              Access for{" "}
+                              {plan.durationInDays}{" "}
+                              days
+                            </p>
+
+                          </li>
+
+                          <li className="flex items-start gap-3">
+
+                            <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20">
+
+                              <Check className="h-3.5 w-3.5 text-emerald-400" />
+
+                            </div>
+
+                            <p className="text-sm text-slate-300">
+                              Full system
+                              capabilities
+                            </p>
+
+                          </li>
+
+                        </ul>
+
+                      </div>
+
+                      {/* ------------------------------------------------
+                          CHOOSE PLAN BUTTON
+                      ------------------------------------------------ */}
+
+                      <div className="mt-8">
+
+                        <motion.button
+                          type="button"
+                          whileHover={{
+                            scale: 1.02,
+                          }}
+                          whileTap={{
+                            scale: 0.98,
+                          }}
+                          onClick={() =>
+                            handleSelectPlan(plan)
+                          }
+                          className="
+                            group/btn
+                            relative
+                            w-full
+                            overflow-hidden
+                            rounded-2xl
+                            border
+                            border-emerald-400/20
+                            bg-gradient-to-r
+                            from-emerald-600
+                            to-green-500
+                            py-3.5
+                            font-semibold
+                            text-white
+                            shadow-lg
+                            shadow-emerald-950/30
+                            transition-all
+                            duration-300
+                            hover:from-emerald-500
+                            hover:to-green-400
+                            hover:shadow-emerald-500/20
+                          "
+                        >
+
+                          <span className="relative z-10">
+                            Choose Plan
+                          </span>
+
+                          {/* BUTTON SHINE */}
+
+                          <span
+                            className="
+                              absolute
+                              inset-0
+                              -translate-x-full
+                              bg-gradient-to-r
+                              from-transparent
+                              via-white/20
+                              to-transparent
+                              transition-transform
+                              duration-700
+                              group-hover/btn:translate-x-full
+                            "
+                          />
+
+                        </motion.button>
+
+                      </div>
+
+                    </div>
+
+                  </motion.div>
+                );
+              })}
+
+            </motion.div>
+          )}
+
+        </div>
+
+      </section>
+
+      {/* ======================================================
+          TESTIMONIALS
+      ====================================================== */}
+
+      <motion.section
+        initial={{
+          opacity: 0,
+          y: 50,
+        }}
+        whileInView={{
+          opacity: 1,
+          y: 0,
+        }}
+        viewport={{
+          once: true,
+          amount: 0.15,
+        }}
+        transition={{
+          duration: 0.8,
+        }}
+      >
         <TestMonies />
-        <Footer />
+      </motion.section>
 
-        {/* Modal ya Malipo */}
-        <PaymentModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          selectedPlan={selectedPlan}
-          onSuccessfulPayment={(msg) => {
-            setSuccessMessage(msg);
-          }}
-        />
-      </div>
-    </>
+      {/* ======================================================
+          FOOTER
+      ====================================================== */}
+
+      <Footer />
+
+      {/* ======================================================
+          PAYMENT MODAL
+      ====================================================== */}
+
+      <PaymentModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+        }}
+        selectedPlan={selectedPlan}
+        onSuccessfulPayment={
+          handleSuccessfulPayment
+        }
+      />
+
+    </main>
   );
 }

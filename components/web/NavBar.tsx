@@ -403,9 +403,6 @@ const NavBar = () => {
 
           </div>
 
-          {/* ================================================== */}
-          {/* MOBILE MENU BUTTON                                 */}
-          {/* ================================================== */}
 
           <button
             type="button"
@@ -461,33 +458,16 @@ const NavBar = () => {
 
             <div className="h-px bg-slate-100 my-2" />
 
-            {/* ================================================= */}
-            {/* FIND PHOTOGRAPHER                                */}
-            {/* ================================================= */}
-
-            <Link
-              href="/booking"
-              onClick={() =>
-                setMobileMenuOpen(false)
-              }
-              className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-full font-bold text-[12px] uppercase tracking-widest transition-all"
-            >
-              <FaCamera />
-
-              Find Photographer
-            </Link>
-
-            {/* ================================================= */}
-            {/* AUTHENTICATION                                    */}
-            {/* ================================================= */}
+          
+     
 
             {isLoading ? (
-              <div className="h-12 rounded-2xl bg-slate-100 animate-pulse" />
+              <div className="h-12 rounded-2xl bg-white animate-pulse" />
             ) : isAuthenticated ? (
               <>
 
                 {/* USER INFO */}
-                <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                <div className="flex items-center gap-3 p-3 rounded-2xl bg-white border border-slate-100">
 
                   <Avatar className="h-10 w-10">
 
