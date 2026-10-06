@@ -52,6 +52,9 @@ export default function AdminOnlinePhotographersPage() {
 
       const data = response.data;
 
+
+      console.log("Fetched online photographers:", data);
+
       setPhotographers(Array.isArray(data) ? data : data.content || []);
     } catch (error) {
       console.error(error);

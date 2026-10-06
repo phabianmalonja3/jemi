@@ -42,7 +42,7 @@ export default function RootLayout({
 
           {children}
 
-          <FloatingSocials />
+          {/* <FloatingSocials /> */}
           <ScrollIndicator />
           <Toaster position="top-center" expand richColors />
         </Providers>

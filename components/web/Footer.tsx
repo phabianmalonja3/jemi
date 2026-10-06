@@ -1,3 +1,4 @@
+
 import Image from "next/image";
 import React from "react";
 import {
@@ -39,7 +40,6 @@ function Footer() {
           ================================================== */}
           <div
             className="
-              lg:col-span-2
               rounded-3xl
               border border-white/10
               bg-white/[0.06]
@@ -47,117 +47,117 @@ function Footer() {
               backdrop-blur-2xl
               shadow-2xl
               shadow-black/20
+              lg:col-span-2
             "
           >
             <h3 className="text-3xl font-bold tracking-tight">
-              jemigraph Tour
+              Jemigrapher 
             </h3>
 
             <p className="mt-4 max-w-md text-sm leading-7 text-white/70 sm:text-base">
-              Professional photography tours capturing your
-              most beautiful moments and turning unforgettable
-              experiences into timeless memories.
+              Professional photography experiences connecting clients with
+              photographers and turning unforgettable moments into timeless
+              memories.
             </p>
 
             {/* Social Media */}
-         <div className="mt-7">
-  <h4 className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-white/80">
-    Follow Us
-  </h4>
+            <div className="mt-7">
+              <h4 className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-white/80">
+                Follow Us
+              </h4>
 
-  <div className="flex gap-3">
+              <div className="flex gap-3">
 
-    {/* Instagram */}
-    <a
-      href="https://instagram.com/"
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="Instagram"
-      className="
-        flex h-11 w-11 items-center justify-center
-        rounded-full
-        border border-white/10
-        bg-white/[0.08]
-        backdrop-blur-xl
-        shadow-lg
-        transition-all duration-300
-        hover:-translate-y-1
-        hover:border-emerald-300/30
-        hover:bg-emerald-400/20
-      "
-    >
-      <FaInstagram className="text-lg" />
-    </a>
+                {/* Instagram */}
+                <a
+                  href="https://instagram.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram"
+                  className="
+                    flex h-11 w-11 items-center justify-center
+                    rounded-full
+                    border border-white/10
+                    bg-white/[0.08]
+                    backdrop-blur-xl
+                    shadow-lg
+                    transition-all duration-300
+                    hover:-translate-y-1
+                    hover:border-emerald-300/30
+                    hover:bg-emerald-400/20
+                  "
+                >
+                  <FaInstagram className="text-lg" />
+                </a>
 
-    {/* Facebook */}
-    <a
-      href="https://facebook.com/"
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="Facebook"
-      className="
-        flex h-11 w-11 items-center justify-center
-        rounded-full
-        border border-white/10
-        bg-white/[0.08]
-        backdrop-blur-xl
-        shadow-lg
-        transition-all duration-300
-        hover:-translate-y-1
-        hover:border-emerald-300/30
-        hover:bg-emerald-400/20
-      "
-    >
-      <FaFacebook className="text-lg" />
-    </a>
+                {/* Facebook */}
+                <a
+                  href="https://facebook.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Facebook"
+                  className="
+                    flex h-11 w-11 items-center justify-center
+                    rounded-full
+                    border border-white/10
+                    bg-white/[0.08]
+                    backdrop-blur-xl
+                    shadow-lg
+                    transition-all duration-300
+                    hover:-translate-y-1
+                    hover:border-emerald-300/30
+                    hover:bg-emerald-400/20
+                  "
+                >
+                  <FaFacebook className="text-lg" />
+                </a>
 
-    {/* Twitter */}
-    <a
-      href="https://twitter.com/"
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="Twitter"
-      className="
-        flex h-11 w-11 items-center justify-center
-        rounded-full
-        border border-white/10
-        bg-white/[0.08]
-        backdrop-blur-xl
-        shadow-lg
-        transition-all duration-300
-        hover:-translate-y-1
-        hover:border-emerald-300/30
-        hover:bg-emerald-400/20
-      "
-    >
-      <FaTwitter className="text-lg" />
-    </a>
+                {/* Twitter */}
+                <a
+                  href="https://twitter.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Twitter"
+                  className="
+                    flex h-11 w-11 items-center justify-center
+                    rounded-full
+                    border border-white/10
+                    bg-white/[0.08]
+                    backdrop-blur-xl
+                    shadow-lg
+                    transition-all duration-300
+                    hover:-translate-y-1
+                    hover:border-emerald-300/30
+                    hover:bg-emerald-400/20
+                  "
+                >
+                  <FaTwitter className="text-lg" />
+                </a>
 
-    {/* YouTube */}
-    <a
-      href="https://www.youtube.com/@jemigraphtour"
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="YouTube"
-      className="
-        flex h-11 w-11 items-center justify-center
-        rounded-full
-        border border-white/10
-        bg-white/[0.08]
-        backdrop-blur-xl
-        shadow-lg
-        transition-all duration-300
-        hover:-translate-y-1
-        hover:border-red-300/30
-        hover:bg-red-500/20
-      "
-    >
-      <FaYoutube className="text-lg" />
-    </a>
+                {/* YouTube */}
+                <a
+                  href="https://www.youtube.com/@jemigraphtour"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="YouTube"
+                  className="
+                    flex h-11 w-11 items-center justify-center
+                    rounded-full
+                    border border-white/10
+                    bg-white/[0.08]
+                    backdrop-blur-xl
+                    shadow-lg
+                    transition-all duration-300
+                    hover:-translate-y-1
+                    hover:border-red-300/30
+                    hover:bg-red-500/20
+                  "
+                >
+                  <FaYoutube className="text-lg" />
+                </a>
 
-  </div>
-</div>
-
+              </div>
+            </div>
           </div>
 
           {/* =================================================
@@ -186,10 +186,10 @@ function Footer() {
                 </p>
 
                 <a
-                  href="mailto:info@jemigraph.co.tz"
+                  href="mailto:help@jemigraph.co.tz"
                   className="text-sm text-white/75 transition-colors hover:text-emerald-300"
                 >
-                  info@jemigraph.co.tz
+                  help@jemigraph.co.tz
                 </a>
               </div>
 
@@ -199,8 +199,8 @@ function Footer() {
                 </p>
 
                 <p className="text-sm leading-6 text-white/60">
-                  Professional photography experiences
-                  and unforgettable tours.
+                  Professional photography services and
+                  unforgettable experiences.
                 </p>
               </div>
 
@@ -227,8 +227,7 @@ function Footer() {
 
             <p className="mt-4 text-sm leading-6 text-white/60">
               Book your photography experience directly
-              from the Jemigraph
-               mobile app.
+              from the Jemigrapher mobile app.
             </p>
 
             <div className="mt-6 flex flex-col gap-3">
@@ -333,7 +332,7 @@ function Footer() {
             >
               <Image
                 src="/images/qr-code.png"
-                alt="Scan QR code to download Jemigraph app"
+                alt="Scan QR code to download Jemigrapher app"
                 width={110}
                 height={110}
                 className="rounded-xl"
@@ -342,12 +341,12 @@ function Footer() {
 
             <div>
               <h4 className="font-semibold text-white">
-                Download Jemigraph App
+                Download Jemigrapher App
               </h4>
 
               <p className="mt-1 max-w-sm text-sm leading-6 text-white/60">
                 Scan the QR code to quickly download the
-                Jemigraph app and start your photography
+                Jemigrapher app and start your photography
                 journey.
               </p>
             </div>
@@ -385,32 +384,79 @@ function Footer() {
         </div>
 
         {/* =====================================================
-            COPYRIGHT GLASS LINE
+            COPYRIGHT + LEGAL LINKS
         ====================================================== */}
         <div
           className="
             mt-10
             flex flex-col
-            items-center
-            justify-between
-            gap-3
+            gap-5
             border-t border-white/10
             pt-6
             text-center
-            text-xs
-            text-white/40
             sm:flex-row
+            sm:items-center
+            sm:justify-between
             sm:text-left
           "
         >
-          <p>
-            © {new Date().getFullYear()} Jemigraph  Tours.
+
+          {/* Copyright */}
+          <p className="text-xs text-white">
+            © {new Date().getFullYear()} Jemigrapher.
             All rights reserved.
           </p>
 
-          <p className="text-white/30">
+          {/* Legal Links */}
+          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 sm:justify-end">
+
+            <a
+              href="/policy/jemigraph"
+              className="
+                text-xs
+                text-white
+                transition-colors
+                hover:text-emerald-300
+              "
+            >
+              Privacy Policy
+            </a>
+
+            <span className="text-white">•</span>
+
+            <a
+              href="/policy/terms-and-conditions"
+              className="
+                text-xs
+                text-white
+                transition-colors
+                hover:text-emerald-300
+              "
+            >
+              Terms & Conditions
+            </a>
+
+            <span className="text-white">•</span>
+
+            <a
+              href="/policy/refund-policies"
+              className="
+                text-xs
+                text-white
+                transition-colors
+                hover:text-emerald-300
+              "
+            >
+              Refund Policy
+            </a>
+
+          </div>
+
+          {/* Tagline */}
+          <p className="text-xs text-white sm:text-right">
             Capturing moments. Creating memories.
           </p>
+
         </div>
 
       </div>
