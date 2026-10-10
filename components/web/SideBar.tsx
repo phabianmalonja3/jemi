@@ -68,7 +68,7 @@ const SidebarItem = ({ icon: Icon, label, href, active, isCollapsed, onClick }: 
   <Link href={href || "#"} onClick={onClick} className="relative group">
     <div
       className={cn(
-        "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 mb-1",
+        "flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200 mb-1",
         active
           ? "bg-emerald-600 text-white shadow-md"
           : "text-slate-600 hover:bg-emerald-50 hover:text-emerald-700"

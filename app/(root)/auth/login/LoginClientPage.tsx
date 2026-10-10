@@ -280,7 +280,7 @@ function LoginClientPage() {
                 }}
                 className="relative z-10 w-full max-w-md"
             >
-                <div className="bg-white/90 backdrop-blur-xl shadow-2xl rounded-3xl p-8 border border-white/60">
+                <div className="bg-white/90 backdrop-blur-xl shadow-2xl rounded-md p-8 border border-white/60">
 
                     {/* =================================================
                         LOGO
@@ -355,7 +355,7 @@ function LoginClientPage() {
                             <div className="relative">
                                 <Input
                                     id="email"
-                                    className="h-12 pl-11 text-base border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all rounded-xl bg-white/80"
+                                    className="h-12 pl-11 text-base border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all rounded-md "
                                     type="email"
                                     placeholder="Enter Your Email"
                                     value={loginEmail}
@@ -404,7 +404,7 @@ function LoginClientPage() {
 
                                 <Link
                                     href="/auth/forgot-password"
-                                    className="text-[10px] text-emerald-600 font-bold hover:text-emerald-700 transition-colors hover:underline"
+                                    className="text-[10px] text-[#25632D]  transition-colors hover:underline"
                                 >
                                     Forgot Password?
                                 </Link>
@@ -415,7 +415,7 @@ function LoginClientPage() {
 
                                 <Input
                                     id="password"
-                                    className="h-12 pl-11 pr-11 text-base border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all rounded-xl bg-white/80"
+                                    className="h-12 pl-11 pr-11 text-base border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all rounded-md bg-white"
                                     type={
                                         showPassword
                                             ? "text"
@@ -502,11 +502,11 @@ function LoginClientPage() {
                             <Button
                                 type="submit"
                                 disabled={isLoading}
-                                className="w-full h-12 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 font-bold text-base rounded-xl shadow-lg shadow-emerald-600/25 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="w-full h-12 bg-gradient-to-r bg-[#25632D] hover:bg-[#1f5225] font-bold text-base rounded-md shadow-lg shadow-emerald-600/25 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {isLoading ? (
                                     <div className="flex items-center gap-2">
-                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-md animate-spin" />
 
                                         <span className="text-sm">
                                             Authenticating...

@@ -953,7 +953,7 @@ export default function Home() {
                     }}
                     className={`
                       group relative overflow-hidden
-                      rounded-3xl p-[1px]
+                      rounded-md p-[1px]
                       transition-all duration-500
                       ${
                         isPopular
@@ -970,7 +970,7 @@ export default function Home() {
                     <div
                       className={`
                         relative flex h-full flex-col
-                        justify-between rounded-3xl
+                        justify-between rounded-md
                         border border-white/[0.08]
                         bg-black/40 p-8
                         shadow-2xl backdrop-blur-2xl
@@ -1115,12 +1115,12 @@ export default function Home() {
                           onClick={() =>
                             handleSelectPlan(plan)
                           }
-                          className="
+                          className="1
                             group/btn
                             relative
                             w-full
                             overflow-hidden
-                            rounded-2xl
+                            rounded-md
                             border
                             border-emerald-400/20
                             bg-gradient-to-r

@@ -335,7 +335,7 @@ function Footer() {
                 alt="Scan QR code to download Jemigrapher app"
                 width={110}
                 height={110}
-                className="rounded-xl"
+                className="rounded-md"
               />
             </a>
 

@@ -245,20 +245,19 @@ const NavBar = () => {
 
               {/* Loading */}
               {isLoading ? (
-                <div className="w-24 h-9 rounded-full bg-slate-100 animate-pulse" />
+                <div className="w-34 h-9 rounded-md bg-slate-100 animate-pulse" />
               ) : !isAuthenticated ? (
                 /* ================================================== */
                 /* NON AUTHENTICATED                                  */
                 /* ================================================== */
 
-                <Link
-                  href="/auth/login"
-                  className="flex items-center gap-2 bg-[#25632D] hover:bg-[#1f5225] text-white px-5 py-2.5 rounded-full font-bold text-[11px] tracking-widest transition-all"
-                >
-                  <FaLock />
-
-                  LOGIN
-                </Link>
+           <Link
+  href="/auth/login"
+  className="flex items-center gap-2 bg-[#25632D] hover:bg-[#1f5225] text-white px-5 py-2.5 rounded-md font-bold text-[11px] tracking-widest transition-all"
+>
+  <FaLock />
+  LOGIN
+</Link>
               ) : (
                 /* ================================================== */
                 /* AUTHENTICATED                                      */
@@ -577,7 +576,7 @@ const NavBar = () => {
                 onClick={() =>
                   setMobileMenuOpen(false)
                 }
-                className="flex items-center justify-center gap-2 bg-[#25632D] text-white px-6 py-3 rounded-2xl font-bold text-[12px] tracking-widest"
+                className="flex items-center justify-center gap-2 bg-[#25632D] text-white px-6 py-3 rounded font-bold text-[12px] tracking-widest"
               >
                 <FaLock />
 
