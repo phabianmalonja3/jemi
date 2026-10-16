@@ -430,13 +430,7 @@ export default function Home() {
 
             <div className="relative z-10 order-2 text-center lg:order-1 lg:text-left">
 
-              {/* ------------------------------------------------
-                  BADGE
              
-
-              {/* ------------------------------------------------
-                  TITLE
-              ------------------------------------------------ */}
 
               <h1 className="hero-title mb-6 text-4xl font-bold leading-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
 

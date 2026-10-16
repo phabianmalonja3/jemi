@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, {
@@ -18,8 +17,10 @@ import {
   ShieldCheck,
   AlertCircle,
   Clock,
+  Bug,
 } from "lucide-react";
 import axios from "axios";
+import { toast } from "sonner";
 
 interface Plan {
   id: string | number;
@@ -46,7 +47,7 @@ interface PaymentModalProps {
 
 const API_URL = (
   process.env.NEXT_PUBLIC_API_URL ||
-  "http://127.0.0.1:8000/api/v0.1"
+  "https://api.jemigraph.co.tz/api/v0.1"
 ).replace(/\/+$/, "");
 
 const PARTNERS_ENDPOINT = `${API_URL}/payments/partners`;
@@ -199,28 +200,81 @@ function normalizePhoneNumber(value: string): string | null {
 }
 
 function getErrorMessage(err: any): string {
-  if (err?.response?.data) {
-    const data = err.response.data;
+  const data = err?.response?.data;
 
+  if (data) {
     if (typeof data === "string") return data;
+
+    if (Array.isArray(data.errors)) {
+      return data.errors
+        .map((item: any) =>
+          typeof item === "string"
+            ? item
+            : `${item.field ? `${item.field}: ` : ""}${
+                item.defaultMessage ??
+                item.message ??
+                JSON.stringify(item)
+              }`
+        )
+        .join("; ");
+    }
+
+    if (
+      data.errors &&
+      typeof data.errors === "object" &&
+      !Array.isArray(data.errors)
+    ) {
+      return Object.entries(data.errors)
+        .map(([field, message]) => `${field}: ${String(message)}`)
+        .join("; ");
+    }
 
     return (
       data.message ??
-      data.error ??
+      data.error_description ??
       data.detail ??
-      "Payment request failed. Please try again."
+      data.error ??
+      `Backend returned HTTP ${err.response.status}`
     );
   }
 
   if (err?.code === "ECONNABORTED") {
-    return "The request timed out. Please check your connection and try again.";
+    return "Request timed out. Please check the backend logs.";
   }
 
   if (!err?.response && err?.request) {
-    return "Unable to reach the server. Please check your internet connection.";
+    return "Cannot reach the backend. Check the API URL, server and network.";
   }
 
   return err?.message || "An unexpected error occurred.";
+}
+
+function getBackendErrorDetails(err: any): string {
+  if (err?.response) {
+    return JSON.stringify(
+      {
+        httpStatus: err.response.status,
+        statusText: err.response.statusText,
+        url: err.config?.url,
+        method: err.config?.method?.toUpperCase(),
+        response: err.response.data,
+      },
+      null,
+      2
+    );
+  }
+
+  return JSON.stringify(
+    {
+      message: err?.message,
+      code: err?.code,
+      url: err?.config?.url,
+      method: err?.config?.method?.toUpperCase(),
+      networkError: !err?.response,
+    },
+    null,
+    2
+  );
 }
 
 function getPaymentStatus(data: any): string {
@@ -281,12 +335,13 @@ export default function PaymentModal({
   const [loading, setLoading] = useState(false);
 
   const [error, setError] = useState("");
+  const [backendErrorDetails, setBackendErrorDetails] = useState("");
   const [logoErrors, setLogoErrors] = useState<string[]>([]);
+  const [showDebugDetails, setShowDebugDetails] = useState(false);
 
   const [transactionId, setTransactionId] = useState<string | null>(null);
   const [paymentStatus, setPaymentStatus] = useState("");
   const [paymentMessage, setPaymentMessage] = useState("");
-  const [paymentStatusData, setPaymentStatusData] = useState<any>(null);
   const [pollAttempt, setPollAttempt] = useState(0);
   const [pollVersion, setPollVersion] = useState(0);
 
@@ -301,9 +356,16 @@ export default function PaymentModal({
     Boolean(transactionId) &&
     ["PENDING", "PROCESSING", "TIMEOUT"].includes(paymentStatus);
 
+  /*
+   * ============================================================
+   * FETCH PAYMENT PARTNERS
+   * ============================================================
+   */
+
   const fetchPartners = useCallback(async () => {
     setPartnersLoading(true);
     setError("");
+    setBackendErrorDetails("");
 
     try {
       const response = await axios.get(PARTNERS_ENDPOINT, {
@@ -325,12 +387,13 @@ export default function PaymentModal({
       if (availablePartners.length === 0) {
         setError("No payment providers are currently available.");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to fetch payment partners:", err);
 
       setPartners([]);
       setSelectedProvider("");
       setError(getErrorMessage(err));
+      setBackendErrorDetails(getBackendErrorDetails(err));
     } finally {
       setPartnersLoading(false);
     }
@@ -342,7 +405,12 @@ export default function PaymentModal({
     void fetchPartners();
   }, [isOpen, fetchPartners]);
 
-  // Poll the backend until payment reaches a final status.
+  /*
+   * ============================================================
+   * PAYMENT STATUS POLLING
+   * ============================================================
+   */
+
   useEffect(() => {
     if (!isOpen || !transactionId || !paymentPending) return;
 
@@ -364,13 +432,16 @@ export default function PaymentModal({
         const data = response.data?.data ?? response.data;
         const status = getPaymentStatus(data);
 
-        setPaymentStatusData(data);
+        setBackendErrorDetails("");
+        setError("");
+
         setPollAttempt(attempts + 1);
 
         if (isPaymentSuccessful(status)) {
           setPaymentStatus("SUCCESS");
           setPaymentMessage(
-            data?.message ?? "Your payment has been confirmed successfully."
+            data?.message ??
+              "Your payment has been confirmed successfully."
           );
 
           if (handledTransactionRef.current !== transactionId) {
@@ -398,14 +469,26 @@ export default function PaymentModal({
           return;
         }
 
-        // Any non-final status continues polling.
+        // Unknown or non-final statuses continue polling.
         setPaymentStatus("PENDING");
-      } catch (err) {
+
+        setPaymentMessage(
+          data?.message ??
+            (status
+              ? `Payment status: ${status}. Waiting for confirmation.`
+              : "Waiting for payment confirmation.")
+        );
+      } catch (err: any) {
         if (cancelled) return;
 
         console.error("Payment status check failed:", err);
 
-        // A temporary network failure does not mean the payment failed.
+        setBackendErrorDetails(getBackendErrorDetails(err));
+        setError(
+          `Could not check payment status: ${getErrorMessage(err)}`
+        );
+
+        // A temporary request error does not prove the payment failed.
         setPaymentStatus("PENDING");
       }
 
@@ -444,21 +527,40 @@ export default function PaymentModal({
     onSuccessfulPayment,
   ]);
 
+  /*
+   * ============================================================
+   * RESET PAYMENT
+   * ============================================================
+   */
+
   const resetPayment = () => {
     setTransactionId(null);
     setPaymentStatus("");
     setPaymentMessage("");
-    setPaymentStatusData(null);
     setPollAttempt(0);
     setError("");
+    setBackendErrorDetails("");
+    setShowDebugDetails(false);
     setPollVersion((value) => value + 1);
     handledTransactionRef.current = null;
   };
+
+  /*
+   * ============================================================
+   * CLOSE MODAL
+   * ============================================================
+   */
 
   const handleClose = () => {
     if (loading) return;
     onClose();
   };
+
+  /*
+   * ============================================================
+   * INITIATE PAYMENT
+   * ============================================================
+   */
 
   const handlePaySubmit = async (
     event: React.FormEvent<HTMLFormElement>
@@ -468,6 +570,8 @@ export default function PaymentModal({
     if (requestInProgressRef.current || paymentPending) return;
 
     setError("");
+    setBackendErrorDetails("");
+    setShowDebugDetails(false);
 
     if (!selectedPlan) {
       setError("Please select a subscription plan.");
@@ -504,6 +608,13 @@ export default function PaymentModal({
         provider: selectedPartner.provider,
       };
 
+      console.info("Initiating payment:", {
+        endpoint: INITIATION_ENDPOINT,
+        planId: selectedPlan.id,
+        provider: selectedPartner.provider,
+        // Do not log email or phone number in production.
+      });
+
       const response = await axios.post(
         INITIATION_ENDPOINT,
         requestBody,
@@ -518,30 +629,59 @@ export default function PaymentModal({
       const responseData = response.data;
       const newTransactionId = getTransactionId(responseData);
 
+      console.info("Payment initiation response:", responseData);
+
       if (!newTransactionId) {
+        setBackendErrorDetails(
+          JSON.stringify(
+            {
+              endpoint: INITIATION_ENDPOINT,
+              httpStatus: response.status,
+              message: "The API did not return a transaction ID.",
+              response: responseData,
+            },
+            null,
+            2
+          )
+        );
+
         throw new Error(
-          "The server did not return a transaction ID. Please check the payment API response."
+          "The server did not return a transaction ID. Check the Backend Debug Details."
         );
       }
 
       handledTransactionRef.current = null;
+
       setTransactionId(newTransactionId);
       setPaymentStatus("PENDING");
       setPaymentMessage(
         responseData?.message ??
           `Payment request sent to ${phoneForApi}. Please check your phone and confirm the payment.`
       );
-      setPaymentStatusData(null);
       setPollAttempt(0);
       setError("");
+      setBackendErrorDetails("");
+      setShowDebugDetails(false);
     } catch (err: any) {
       console.error("Payment initiation failed:", err);
+
       setError(getErrorMessage(err));
+
+      // Preserve the response body and HTTP status for debugging.
+      if (!backendErrorDetails) {
+        setBackendErrorDetails(getBackendErrorDetails(err));
+      }
     } finally {
       requestInProgressRef.current = false;
       setLoading(false);
     }
   };
+
+  /*
+   * ============================================================
+   * RENDER
+   * ============================================================
+   */
 
   if (!isOpen || !selectedPlan) return null;
 
@@ -564,6 +704,8 @@ export default function PaymentModal({
         aria-labelledby="payment-modal-title"
         className="relative my-auto w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl sm:p-6"
       >
+        {/* CLOSE BUTTON */}
+
         <button
           type="button"
           onClick={handleClose}
@@ -573,6 +715,8 @@ export default function PaymentModal({
         >
           <X className="h-6 w-6" />
         </button>
+
+        {/* PLAN INFORMATION */}
 
         <div className="mb-6 pr-8">
           <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-green-50 text-[#357738]">
@@ -599,17 +743,75 @@ export default function PaymentModal({
           </p>
         </div>
 
+        {/* ERROR MESSAGE */}
+
         {error && (
           <div
             role="alert"
             className="mb-4 flex gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
           >
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-            <span>{error}</span>
+            <span className="break-words">{error}</span>
           </div>
         )}
 
-        {/* Payment status */}
+        {/* BACKEND DEBUG DETAILS */}
+
+        {backendErrorDetails && (
+          <div className="mb-5 rounded-lg border border-amber-300 bg-amber-50 p-3">
+            <button
+              type="button"
+              onClick={() =>
+                setShowDebugDetails((value) => !value)
+              }
+              className="flex w-full items-center justify-between gap-2 text-left text-sm font-semibold text-amber-900"
+              aria-expanded={showDebugDetails}
+            >
+              <span className="flex items-center gap-2">
+                <Bug className="h-4 w-4" />
+                Backend Debug Details
+              </span>
+
+              <span>{showDebugDetails ? "−" : "+"}</span>
+            </button>
+
+            {showDebugDetails && (
+              <div className="mt-3">
+                <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-words rounded-md border border-amber-200 bg-white p-3 text-xs text-slate-800">
+                  {backendErrorDetails}
+                </pre>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (navigator.clipboard?.writeText) {
+                      void navigator.clipboard
+                        .writeText(backendErrorDetails)
+                        .then(() =>
+                          toast.success(
+                            "Backend error details copied"
+                          )
+                        )
+                        .catch(() =>
+                          toast.error("Unable to copy details")
+                        );
+                    } else {
+                      toast.error(
+                        "Clipboard is not available in this browser."
+                      );
+                    }
+                  }}
+                  className="mt-2 rounded-md bg-amber-800 px-3 py-2 text-xs font-semibold text-white hover:bg-amber-900"
+                >
+                  Copy error details
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* PAYMENT STATUS */}
+
         {transactionId && (
           <div
             role="status"
@@ -665,6 +867,8 @@ export default function PaymentModal({
                   <button
                     type="button"
                     onClick={() => {
+                      setError("");
+                      setBackendErrorDetails("");
                       setPaymentStatus("PENDING");
                       setPollVersion((value) => value + 1);
                     }}
@@ -699,9 +903,12 @@ export default function PaymentModal({
           </div>
         )}
 
-        {/* Hide the form while a payment is pending or after success. */}
+        {/* PAYMENT FORM */}
+
         {!transactionId && (
           <form onSubmit={handlePaySubmit} className="space-y-5">
+            {/* PAYMENT PROVIDERS */}
+
             <section>
               <div className="mb-3 flex items-center justify-between gap-2">
                 <label className="text-sm font-semibold text-slate-700">
@@ -732,8 +939,11 @@ export default function PaymentModal({
               ) : partners.length > 0 ? (
                 <div className="grid grid-cols-2 gap-3">
                   {partners.map((partner) => {
-                    const selected = selectedProvider === partner.code;
-                    const logoFailed = logoErrors.includes(partner.code);
+                    const selected =
+                      selectedProvider === partner.code;
+                    const logoFailed = logoErrors.includes(
+                      partner.code
+                    );
 
                     return (
                       <button
@@ -743,6 +953,7 @@ export default function PaymentModal({
                         onClick={() => {
                           setSelectedProvider(partner.code);
                           setError("");
+                          setBackendErrorDetails("");
                         }}
                         aria-pressed={selected}
                         className={`relative flex min-h-[112px] flex-col items-center justify-center gap-2 rounded-xl border-2 p-3 transition ${
@@ -802,6 +1013,8 @@ export default function PaymentModal({
               )}
             </section>
 
+            {/* EMAIL */}
+
             <div>
               <label
                 htmlFor="payment-email"
@@ -818,7 +1031,9 @@ export default function PaymentModal({
                   type="email"
                   required
                   value={email}
-                  onChange={(event) => setEmail(event.target.value)}
+                  onChange={(event) =>
+                    setEmail(event.target.value)
+                  }
                   placeholder="user@example.com"
                   autoComplete="email"
                   disabled={loading}
@@ -826,6 +1041,8 @@ export default function PaymentModal({
                 />
               </div>
             </div>
+
+            {/* PHONE NUMBER */}
 
             <div>
               <label
@@ -844,7 +1061,9 @@ export default function PaymentModal({
                   inputMode="tel"
                   required
                   value={phoneNumber}
-                  onChange={(event) => setPhoneNumber(event.target.value)}
+                  onChange={(event) =>
+                    setPhoneNumber(event.target.value)
+                  }
                   placeholder="0712345678"
                   autoComplete="tel"
                   disabled={loading}
@@ -856,6 +1075,8 @@ export default function PaymentModal({
                 Enter the mobile number linked to your selected payment provider.
               </p>
             </div>
+
+            {/* SUBMIT */}
 
             <button
               type="submit"
