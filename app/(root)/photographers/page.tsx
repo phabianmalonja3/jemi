@@ -751,176 +751,67 @@ export default function PhotographersPage() {
                     HERO
                 ================================================== */}
 
-                <section
-                    ref={heroRef}
-                    className="relative overflow-hidden bg-[#25632D]"
-                >
-                    <div className="absolute inset-0 opacity-10">
-                        <div
-                            className="absolute inset-0"
-                            style={{
-                                backgroundImage:
-                                    "radial-gradient(circle at 2px 2px, white 1px, transparent 1px)",
-                                backgroundSize:
-                                    "40px 40px",
-                            }}
+               <section
+    ref={heroRef}
+    className="relative overflow-hidden bg-gradient-to-br from-[#25632D] via-[#1E5125] to-[#103B19] text-white"
+>
+    {/* Decorative background effects */}
+   
+
+    <div className="relative z-10 max-w-6xl mx-auto px-6 py-24 md:py-10 hero-content">
+        <div className="text-center">
+            <div className="max-w-3xl mx-auto">
+                {/* <div className="bg-white/15 backdrop-blur-md rounded-2xl p-2 shadow-2xl border border-white/20"> */}
+                    <div className="relative">
+                        <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-white/80 z-10" />
+
+                        <Input
+                            type="text"
+                            placeholder={getSearchPlaceholder()}
+                            value={searchQuery}
+                            onChange={(e) =>
+                                setSearchQuery(e.target.value)
+                            }
+                            className="w-full pl-12 pr-12 py-6 text-base
+                            bg-white/10 border-white/30 text-white
+                            placeholder:text-white/70 rounded-xl
+                            focus-visible:ring-2 focus-visible:ring-white
+                            focus-visible:border-white"
                         />
-                    </div>
 
-                    <div className="absolute top-20 left-10 text-white/5 text-7xl animate-pulse">
-                        <FaCamera />
-                    </div>
-
-                    <div className="absolute bottom-20 right-10 text-white/5 text-9xl animate-pulse">
-                        <FaCamera />
-                    </div>
-
-                    <div className="relative max-w-6xl mx-auto px-6 py-24 md:py-32 hero-content opacity-0">
-                        <div className="text-center">
-                            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight">
-                                Find Your Perfect
-
-                                <span className="block text-[#D8F3DC]">
-                                    Photographer
-                                </span>
-                            </h1>
-
-                            <p className="text-lg md:text-xl text-white/80 mb-10 max-w-2xl mx-auto">
-                                Connect with world-class
-                                photographers who capture
-                                life's most precious moments
-                                with creativity and passion.
-                            </p>
-
-                            {/* SEARCH */}
-
-                            <div className="max-w-3xl mx-auto">
-                                <div className="bg-white/10 backdrop-blur-md rounded-2xl p-1 shadow-2xl">
-                                    <div className="relative">
-                                        <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-white/70" />
-
-                                        <Input
-                                            type="text"
-                                            placeholder={getSearchPlaceholder()}
-                                            value={
-                                                searchQuery
-                                            }
-                                            onChange={(
-                                                e
-                                            ) =>
-                                                setSearchQuery(
-                                                    e
-                                                        .target
-                                                        .value
-                                                )
-                                            }
-                                            className="pl-12 pr-32 py-6 text-base bg-white/10 border-white/20 text-white placeholder:text-white/50 rounded-xl focus:ring-2 focus:ring-white/50 focus:border-transparent"
-                                        />
-
-                                        {searchQuery && (
-                                            <button
-                                                onClick={
-                                                    clearSearch
-                                                }
-                                                className="absolute right-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white transition p-1"
-                                            >
-                                                <FaTimes />
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* FILTERS */}
-
-                                <div className="flex flex-wrap gap-2 justify-center mt-4">
-                                    {[
-                                        {
-                                            id: "all",
-                                            label: "All Fields",
-                                            icon: FaSearch,
-                                        },
-                                        {
-                                            id: "name",
-                                            label: "Name",
-                                            icon: FaUser,
-                                        },
-                                        {
-                                            id: "email",
-                                            label: "Email",
-                                            icon: FaAt,
-                                        },
-                                        {
-                                            id: "phone",
-                                            label: "Phone",
-                                            icon: FaPhone,
-                                        },
-                                        {
-                                            id: "location",
-                                            label: "Location",
-                                            icon: FaMapMarkerAlt,
-                                        },
-                                    ].map(
-                                        (
-                                            filter
-                                        ) => {
-                                            const Icon =
-                                                filter.icon;
-
-                                            return (
-                                                <button
-                                                    key={
-                                                        filter.id
-                                                    }
-                                                    onClick={() =>
-                                                        setSearchField(
-                                                            filter.id as typeof searchField
-                                                        )
-                                                    }
-                                                    className={`px-4 py-2 rounded-full text-sm transition-all flex items-center gap-2 ${
-                                                        searchField ===
-                                                        filter.id
-                                                            ? "bg-white text-[#25632D] shadow-lg"
-                                                            : "bg-white/10 text-white hover:bg-white/20"
-                                                    }`}
-                                                >
-                                                    <Icon className="text-xs" />
-                                                    {
-                                                        filter.label
-                                                    }
-                                                </button>
-                                            );
-                                        }
-                                    )}
-                                </div>
-                            </div>
-
-                            <motion.div
-                                animate={{
-                                    y: [
-                                        0,
-                                        10,
-                                        0,
-                                    ],
-                                }}
-                                transition={{
-                                    repeat:
-                                        Infinity,
-                                    duration: 2,
-                                }}
-                                className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden md:block"
+                        {searchQuery && (
+                            <button
+                                type="button"
+                                onClick={clearSearch}
+                                aria-label="Clear search"
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white transition p-1"
                             >
-                                <FaChevronDown className="text-white/50 text-2xl" />
-                            </motion.div>
-                        </div>
+                                <FaTimes />
+                            </button>
+                        )}
                     </div>
-                </section>
+                
+
+                
+            </div>
+
+            <motion.div
+                animate={{ y: [0, 10, 0] }}
+                transition={{ repeat: Infinity, duration: 2 }}
+                className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden md:block"
+            >
+              
+            </motion.div>
+        </div>
+    </div>
+</section>
 
                 {/* ==================================================
                     RESULTS
                 ================================================== */}
 
                 {!loading && (
-                    <div className="max-w-6xl mx-auto px-6 pt-8 w-full">
+                    <div className="max-w-7xl mx-auto w-full">
                         <div className="flex justify-between items-center flex-wrap gap-4">
                             <div className="text-sm text-zinc-600 dark:text-zinc-400">
                                 <span className="font-semibold text-[#25632D]">
@@ -1018,71 +909,57 @@ export default function PhotographersPage() {
 
                                                         {/* IMAGE */}
 
-                                                        <div className="relative h-80 overflow-hidden bg-zinc-200">
-                                                            <Image
-                                                                src={
-                                                                    getMediaUrl(
-                                                                        image
-                                                                    )
-                                                                }
-                                                                fill
-                                                                className="object-cover"
-                                                                alt={
-                                                                    photographer.name ||
-                                                                    "Photographer"
-                                                                }
-                                                                unoptimized
-                                                            />
+                                                       <div className="relative h-80 overflow-hidden bg-gray-100">
+    <Image
+        src={getMediaUrl(image)}
+        fill
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 50vw"
+        priority
+        className="object-contain"
+        alt={photographer.name || "Photographer"}
+        unoptimized
+    />
 
-                                                            <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+    {/* Hover overlay */}
+    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
-                                                            {/* STATUS */}
+    {/* STATUS */}
+    <div className="absolute top-4 right-4 z-10">
+        <span
+            className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 backdrop-blur-sm ${
+                !photographer.isBusy && photographer.isOnline
+                    ? "bg-green-500 text-white"
+                    : photographer.isBusy
+                    ? "bg-red-500 text-white"
+                    : "bg-gray-500/90 text-white"
+            }`}
+        >
+            {!photographer.isBusy && photographer.isOnline ? (
+                <>
+                    <FaWifi className="text-xs" />
+                    Available
+                </>
+            ) : photographer.isBusy ? (
+                "Booked"
+            ) : (
+                "Offline"
+            )}
+        </span>
+    </div>
 
-                                                            <div className="absolute top-4 right-4 z-10">
-                                                                <span
-                                                                    className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 backdrop-blur-sm ${
-                                                                        !photographer.isBusy &&
-                                                                        photographer.isOnline
-                                                                            ? "bg-green-500 text-white"
-                                                                            : photographer.isBusy
-                                                                            ? "bg-red-500 text-white"
-                                                                            : "bg-gray-500/90 text-white"
-                                                                    }`}
-                                                                >
-                                                                    {!photographer.isBusy &&
-                                                                    photographer.isOnline ? (
-                                                                        <>
-                                                                            <FaWifi className="text-xs" />
-                                                                            Available
-                                                                        </>
-                                                                    ) : photographer.isBusy ? (
-                                                                        "Booked"
-                                                                    ) : (
-                                                                        "Offline"
-                                                                    )}
-                                                                </span>
-                                                            </div>
+    {/* RATING */}
+    <div className="absolute bottom-4 left-4 z-10 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1">
+        <FaStar className="text-yellow-400 text-sm" />
 
-                                                            {/* RATING */}
+        <span className="text-white text-sm font-semibold">
+            {rating.toFixed(1)}
+        </span>
 
-                                                            <div className="absolute bottom-4 left-4 z-10 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1">
-                                                                <FaStar className="text-yellow-400 text-sm" />
-
-                                                                <span className="text-white text-sm font-semibold">
-                                                                    {rating.toFixed(
-                                                                        1
-                                                                    )}
-                                                                </span>
-
-                                                                <span className="text-white/70 text-xs">
-                                                                    (
-                                                                    {
-                                                                        photographer.totalReviews
-                                                                    }{" "}
-                                                                    reviews)
-                                                                </span>
-                                                            </div>
-                                                        </div>
+        <span className="text-white/70 text-xs">
+            ({photographer.totalReviews} reviews)
+        </span>
+    </div>
+</div>
 
                                                         {/* CARD CONTENT */}
 
@@ -1362,11 +1239,15 @@ export default function PhotographersPage() {
                                                             )
                                                         }
                                                         className={
+
+                                                            
                                                             currentPage ===
                                                             pageNum
                                                                 ? "bg-[#25632D] hover:bg-[#1e5125]"
                                                                 : ""
                                                         }
+
+                                                        
                                                     >
                                                         {pageNum +
                                                             1}
