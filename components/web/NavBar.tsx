@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import {
   FaBars,
   FaTimes,
@@ -8,9 +9,7 @@ import {
   FaEnvelope,
   FaLock,
   FaSignOutAlt,
-  FaCamera,
   FaTachometerAlt,
-  FaUser,
   FaCog,
 } from "react-icons/fa";
 
@@ -38,6 +37,19 @@ import {
 
 import { useAuth } from "@/context/AuthContext";
 
+interface PaymentPartnerLogo {
+  id: string;
+  name: string;
+  logoUrl: string;
+}
+
+const API_URL = (
+  process.env.NEXT_PUBLIC_API_URL ||
+  "https://api.jemigraph.co.tz/api/v0.1"
+).replace(/\/+$/, "");
+
+const PARTNERS_ENDPOINT = `${API_URL}/payments/partners`;
+
 const NavBar = () => {
   const {
     user,
@@ -48,7 +60,115 @@ const NavBar = () => {
 
   const pathname = usePathname();
 
+  const [paymentPartners, setPaymentPartners] = useState<
+    PaymentPartnerLogo[]
+  >([]);
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  /*
+   * ============================================================
+   * FETCH PAYMENT PARTNERS FROM API
+   * ============================================================
+   */
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchPaymentPartners = async () => {
+      try {
+        const response = await axios.get(PARTNERS_ENDPOINT, {
+          timeout: 15000,
+        });
+
+        const result = Array.isArray(response.data)
+          ? response.data
+          : response.data?.data ??
+            response.data?.partners ??
+            response.data?.paymentPartners ??
+            response.data?.content ??
+            [];
+
+        if (!Array.isArray(result) || cancelled) {
+          return;
+        }
+
+        const activePartners: PaymentPartnerLogo[] = result
+          .filter((item: any) => {
+            if (!item) return false;
+
+            if (
+              item.enabled === false ||
+              item.active === false
+            ) {
+              return false;
+            }
+
+            const status = item.status;
+
+            return (
+              status === undefined ||
+              ["1", 1, true, "ACTIVE", "active", "ENABLED", "enabled"].includes(
+                status
+              )
+            );
+          })
+          .map((item: any) => ({
+            id: String(
+              item.id ??
+                item.paymentPartnerId ??
+                item.provider ??
+                item.partnerName ??
+                item.name
+            ),
+            name: String(
+              item.partnerName ??
+                item.displayName ??
+                item.name ??
+                "Payment"
+            ),
+            logoUrl: String(
+              item.logoUrl ??
+                item.logoURL ??
+                item.logo ??
+                item.imageUrl ??
+                ""
+            ),
+          }))
+          .filter(
+            (item: PaymentPartnerLogo) =>
+              item.logoUrl.trim().length > 0
+          )
+          .filter(
+            (
+              item: PaymentPartnerLogo,
+              index: number,
+              list: PaymentPartnerLogo[]
+            ) =>
+              list.findIndex(
+                (partner) => partner.id === item.id
+              ) === index
+          );
+
+        if (!cancelled) {
+          setPaymentPartners(activePartners);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error(
+            "Failed to load payment partners:",
+            error
+          );
+        }
+      }
+    };
+
+    void fetchPaymentPartners();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   /*
    * ============================================================
@@ -67,40 +187,6 @@ const NavBar = () => {
 
   /*
    * ============================================================
-   * HIDE NAVBAR ON DASHBOARD
-   * ============================================================
-   */
-
-  if (pathname.startsWith("/dashboard")) {
-    return null;
-  }
-
-
-  const paymentPartners = [
-    {
-      src: "/logos/mpesa.png",
-      alt: "M-Pesa",
-      width: 100,
-    },
-    {
-      src: "/logos/yas.png",
-      alt: "Yas",
-      width: 110,
-    },
-    {
-      src: "/logos/airtel.png",
-      alt: "Airtel Money",
-      width: 100,
-    },
-    {
-      src: "/logos/crdb.png",
-      alt: "CRDB Bank",
-      width: 130,
-    },
-  ];
-
-  /*
-   * ============================================================
    * USER INFO
    * ============================================================
    */
@@ -115,84 +201,80 @@ const NavBar = () => {
 
   /*
    * ============================================================
+   * HIDE NAVBAR ON DASHBOARD
+   * ============================================================
+   */
+
+  if (pathname.startsWith("/dashboard")) {
+    return null;
+  }
+
+  /*
+   * ============================================================
    * RENDER
    * ============================================================
    */
 
   return (
     <>
-      {/* ====================================================== */}
-      {/* TOP CONTACT BAR                                       */}
-      {/* ====================================================== */}
+      {/* TOP CONTACT BAR */}
 
-      <div className="bg-[#25632D] text-white py-2 hidden sm:block border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-
+      <div className="hidden border-b-1 border-[#25632D] pb-2 bg-white py-2 text-[#25632D] sm:block">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6">
           {/* Contact Info */}
-          <div className="flex gap-5 opacity-80 text-[10px] font-bold tracking-wider">
 
+          <div className="flex gap-5 text-[10px] font-bold tracking-wider opacity-80">
             <a
               href="mailto:info@jemigraph.co.tz"
-              className="flex items-center gap-1.5 hover:text-white transition-colors"
+              className="flex items-center gap-1.5 transition-colors hover:text-white"
             >
-              <FaEnvelope className="text-emerald-400" />
-
+              <FaEnvelope className="text-[#25632D]" />
               info@jemigraph.co.tz
             </a>
 
             <a
               href="tel:+255746560832"
-              className="flex items-center gap-1.5 hover:text-emerald-400 transition-colors"
+              className="flex items-center gap-1.5 transition-colors hover:text-[#25632D]"
             >
-              <FaPhone className="text-emerald-400" />
-
+              <FaPhone className="text-[#25632D]" />
               +255 746 560 832
             </a>
-
           </div>
 
-          {/* Payment Partners */}
-          <div className="flex items-center gap-3">
+          {/* Payment Partners from API */}
 
+          {paymentPartners.length > 0 && (
             <div className="flex items-center gap-2">
-
-              {paymentPartners.map((logo) => (
+              {paymentPartners.map((partner) => (
                 <div
-                  key={logo.alt}
-                  className="bg-white/10 p-0.5 rounded-sm border border-white/10 shadow-sm"
+                  key={partner.id}
+                  title={partner.name}
+                  className="flex h-6 items-center justify-center rounded-sm border border-white/10 bg-white/10 p-0.5 shadow-sm"
                 >
                   <Image
-                    src={logo.src}
-                    width={logo.width}
+                    src={partner.logoUrl}
+                    width={80}
                     height={24}
-                    alt={logo.alt}
+                    alt={partner.name}
                     className="h-5 w-auto object-contain"
+                    unoptimized
                   />
                 </div>
               ))}
-
             </div>
-
-          </div>
-
+          )}
         </div>
       </div>
 
-      {/* ====================================================== */}
-      {/* MAIN NAVIGATION                                       */}
-      {/* ====================================================== */}
+      {/* MAIN NAVIGATION */}
 
-      <nav className="bg-white/95 backdrop-blur-md border-b sticky top-0 z-50">
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-15 flex items-center justify-between">
-
-          {/* ================================================== */}
-          {/* LOGO                                              */}
-          {/* ================================================== */}
+      <nav className="sticky top-0 z-50 border-b bg-white/95 backdrop-blur-md">
+        <div className="mx-auto flex h-[60px] max-w-7xl items-center justify-between px-4 sm:px-6">
+          {/* LOGO */}
 
           <Link
             href="/"
-            className="hover:opacity-80 transition-opacity flex items-center justify-between"
+            className="flex items-center justify-between transition-opacity hover:opacity-80"
           >
             <Image
               src="/logo.png"
@@ -203,26 +285,23 @@ const NavBar = () => {
               unoptimized
             />
 
-            <div className="mx-2 font-bold text-2xl text-[#25632D]">
+            <div className="mx-2 text-2xl font-bold text-[#25632D]">
               jemigraph Tour
             </div>
           </Link>
 
-          {/* ================================================== */}
-          {/* DESKTOP NAVIGATION                                */}
-          {/* ================================================== */}
+          {/* DESKTOP NAVIGATION */}
 
-          <div className="hidden lg:flex items-center gap-8">
-
+          <div className="hidden items-center gap-8 lg:flex">
             {/* PUBLIC NAVIGATION */}
-            <div className="flex items-center gap-7 mr-4">
 
+            <div className="mr-4 flex items-center gap-7">
               {MAIN_NAV_LINKS.map((link) => (
                 <Link
                   key={link.path}
                   href={link.href}
                   className={cn(
-                    "text-[12px] font-bold tracking-[0.1em] uppercase transition-all hover:text-[#25632D]",
+                    "text-[12px] font-bold uppercase tracking-[0.1em] transition-all hover:text-[#25632D]",
                     pathname === link.href
                       ? "text-[#25632D]"
                       : "text-slate-500"
@@ -231,221 +310,130 @@ const NavBar = () => {
                   {link.path}
                 </Link>
               ))}
-
             </div>
 
-            {/* Divider */}
-            <div className="h-8 w-[1px] bg-slate-200 mx-1" />
+            {/* DIVIDER */}
 
-            {/* ================================================== */}
-            {/* AUTH SECTION                                       */}
-            {/* ================================================== */}
+            <div className="mx-1 h-8 w-px bg-slate-200" />
+
+            {/* AUTH SECTION */}
 
             <div className="flex items-center gap-4">
-
-              {/* Loading */}
               {isLoading ? (
-                <div className="w-34 h-9 rounded-md bg-slate-100 animate-pulse" />
+                <div className="h-9 w-[136px] animate-pulse rounded-md bg-slate-100" />
               ) : !isAuthenticated ? (
-                /* ================================================== */
-                /* NON AUTHENTICATED                                  */
-                /* ================================================== */
-
-           <Link
-  href="/auth/login"
-  className="flex items-center gap-2 bg-[#25632D] hover:bg-[#1f5225] text-white px-5 py-2.5 rounded-md font-bold text-[11px] tracking-widest transition-all"
->
-  <FaLock />
-  LOGIN
-</Link>
+                <Link
+                  href="/auth/login"
+                  className="flex items-center gap-2 rounded-md bg-[#25632D] px-5 py-2.5 text-[11px] font-bold tracking-widest text-white transition-all hover:bg-[#1f5225]"
+                >
+                  <FaLock />
+                  LOGIN
+                </Link>
               ) : (
-                /* ================================================== */
-                /* AUTHENTICATED                                      */
-                /* ================================================== */
-
                 <DropdownMenu>
-
                   <DropdownMenuTrigger asChild>
-
                     <button
                       type="button"
-                      className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-2 py-1.5 hover:border-[#25632D] transition-all outline-none"
+                      className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-2 py-1.5 outline-none transition-all hover:border-[#25632D]"
                     >
-
                       <Avatar className="h-8 w-8">
-
                         <AvatarImage
                           src={user?.avatar}
                           alt={user?.name || "User"}
                         />
 
-                        <AvatarFallback className="bg-[#25632D] text-white text-xs font-bold">
+                        <AvatarFallback className="bg-[#25632D] text-xs font-bold text-white">
                           {userInitial}
                         </AvatarFallback>
-
                       </Avatar>
 
-                      <span className="text-xs font-bold text-slate-700 max-w-[100px] truncate">
+                      <span className="max-w-[100px] truncate text-xs font-bold text-slate-700">
                         {userName}
                       </span>
-
                     </button>
-
                   </DropdownMenuTrigger>
 
                   <DropdownMenuContent
                     align="end"
                     className="w-56 bg-amber-50"
                   >
-
-                    {/* USER */}
                     <DropdownMenuLabel>
-
                       <div className="flex flex-col">
-
                         <span className="font-semibold text-slate-800">
                           {user?.name}
                         </span>
 
-                        <span className="text-xs text-slate-500 truncate">
+                        <span className="truncate text-xs text-slate-500">
                           {user?.email}
                         </span>
 
-                        <span className="text-[10px] uppercase text-[#25632D] font-bold mt-1">
+                        <span className="mt-1 text-[10px] font-bold uppercase text-[#25632D]">
                           {user?.role}
                         </span>
-
                       </div>
-
                     </DropdownMenuLabel>
 
                     <DropdownMenuSeparator />
 
-                    {/* PROFILE */}
                     <DropdownMenuItem asChild>
-
-                      <Link
-                        href="/profile"
-                        className="flex items-center gap-2 cursor-pointer"
-                      >
-                        <FaUser />
-
-                        Profile
-                      </Link>
-
-                    </DropdownMenuItem>
-
-                    {/* DASHBOARD */}
-                    <DropdownMenuItem asChild>
-
                       <Link
                         href="/dashboard"
-                        className="flex items-center gap-2 cursor-pointer"
+                        className="flex cursor-pointer items-center gap-2"
                       >
                         <FaTachometerAlt />
-
                         Dashboard
                       </Link>
-
                     </DropdownMenuItem>
-
-                    {/* PHOTOGRAPHER */}
-                    {user?.role === "PHOTOGRAPHER" && (
-                      <DropdownMenuItem asChild>
-
-                        <Link
-                          href="/dashboard/photographer"
-                          className="flex items-center gap-2 cursor-pointer"
-                        >
-                          <FaCamera />
-
-                          Photographer
-                        </Link>
-
-                      </DropdownMenuItem>
-                    )}
-
-                    {/* ADMIN */}
-                    {user?.role === "ADMIN" && (
-                      <DropdownMenuItem asChild>
-
-                        <Link
-                          href="/admin"
-                          className="flex items-center gap-2 cursor-pointer"
-                        >
-                          <FaCog />
-
-                          Admin Panel
-                        </Link>
-
-                      </DropdownMenuItem>
-                    )}
 
                     <DropdownMenuSeparator />
 
-                    {/* LOGOUT */}
                     <DropdownMenuItem
                       onClick={handleLogout}
-                      className="text-red-600 focus:text-red-600 cursor-pointer"
+                      className="cursor-pointer text-red-600 focus:text-red-600"
                     >
                       <FaSignOutAlt className="mr-2" />
-
                       Logout
                     </DropdownMenuItem>
-
                   </DropdownMenuContent>
-
                 </DropdownMenu>
               )}
-
             </div>
-
           </div>
 
+          {/* MOBILE MENU TOGGLE */}
 
           <button
             type="button"
             aria-label="Toggle navigation menu"
-            className="lg:hidden p-2 text-[#25632D]"
+            aria-expanded={mobileMenuOpen}
+            className="p-2 text-[#25632D] lg:hidden"
             onClick={() =>
-              setMobileMenuOpen(!mobileMenuOpen)
+              setMobileMenuOpen((previous) => !previous)
             }
           >
-
             {mobileMenuOpen ? (
               <FaTimes size={26} />
             ) : (
               <FaBars size={26} />
             )}
-
           </button>
-
         </div>
-
       </nav>
 
-      {/* ====================================================== */}
-      {/* MOBILE MENU                                           */}
-      {/* ====================================================== */}
+      {/* MOBILE MENU */}
 
       {mobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 top-20 bg-white z-40 p-6 shadow-xl animate-in slide-in-from-right duration-300 overflow-y-auto">
-
+        <div className="fixed inset-0 top-[60px] z-40 animate-in slide-in-from-right overflow-y-auto bg-white p-6 duration-300 lg:hidden">
           <div className="flex flex-col gap-4">
-
-            {/* ================================================= */}
-            {/* PUBLIC NAV LINKS                                 */}
-            {/* ================================================= */}
+            {/* PUBLIC NAV LINKS */}
 
             {MAIN_NAV_LINKS.map((link) => (
               <Link
                 key={link.path}
                 href={link.href}
-                onClick={() =>
-                  setMobileMenuOpen(false)
-                }
+                onClick={() => setMobileMenuOpen(false)}
                 className={cn(
-                  "text-[14px] font-bold tracking-[0.1em] uppercase transition-all hover:text-emerald-700 py-2",
+                  "py-2 text-[14px] font-bold uppercase tracking-[0.1em] transition-all hover:text-emerald-700",
                   pathname === link.href
                     ? "text-emerald-700"
                     : "text-slate-500"
@@ -455,140 +443,90 @@ const NavBar = () => {
               </Link>
             ))}
 
-            <div className="h-px bg-slate-100 my-2" />
-
-          
-     
+            <div className="my-2 h-px bg-slate-100" />
 
             {isLoading ? (
-              <div className="h-12 rounded-2xl bg-white animate-pulse" />
+              <div className="h-12 animate-pulse rounded-2xl bg-white" />
             ) : isAuthenticated ? (
               <>
-
                 {/* USER INFO */}
-                <div className="flex items-center gap-3 p-3 rounded-2xl bg-white border border-slate-100">
 
+                <div className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-white p-3">
                   <Avatar className="h-10 w-10">
-
                     <AvatarImage
                       src={user?.avatar}
                       alt={user?.name || "User"}
                     />
 
-                    <AvatarFallback className="bg-[#25632D] text-white font-bold">
+                    <AvatarFallback className="bg-[#25632D] font-bold text-white">
                       {userInitial}
                     </AvatarFallback>
-
                   </Avatar>
 
                   <div className="min-w-0">
-
-                    <p className="text-sm font-bold text-slate-800 truncate">
+                    <p className="truncate text-sm font-bold text-slate-800">
                       {user?.name}
                     </p>
 
-                    <p className="text-xs text-slate-500 truncate">
+                    <p className="truncate text-xs text-slate-500">
                       {user?.email}
                     </p>
-
                   </div>
-
                 </div>
 
                 {/* DASHBOARD */}
+
                 <Link
                   href="/dashboard"
-                  onClick={() =>
-                    setMobileMenuOpen(false)
-                  }
-                  className="flex items-center justify-center gap-2 bg-[#25632D] text-white px-6 py-3 rounded-2xl font-bold text-[12px] tracking-widest"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-center gap-2 rounded-2xl bg-[#25632D] px-6 py-3 text-[12px] font-bold tracking-widest text-white"
                 >
                   <FaTachometerAlt />
-
                   Dashboard
                 </Link>
 
-                {/* PROFILE */}
-                <Link
-                  href="/profile"
-                  onClick={() =>
-                    setMobileMenuOpen(false)
-                  }
-                  className="flex items-center justify-center gap-2 bg-slate-100 text-slate-700 px-6 py-3 rounded-2xl font-bold text-[12px] tracking-widest"
-                >
-                  <FaUser />
+                {/* ADMIN PANEL */}
 
-                  Profile
-                </Link>
-
-                {/* PHOTOGRAPHER */}
-                {user?.role === "PHOTOGRAPHER" && (
-                  <Link
-                    href="/dashboard/photographer"
-                    onClick={() =>
-                      setMobileMenuOpen(false)
-                    }
-                    className="flex items-center justify-center gap-2 bg-emerald-50 text-[#25632D] border border-emerald-200 px-6 py-3 rounded-2xl font-bold text-[12px] tracking-widest"
-                  >
-                    <FaCamera />
-
-                    Photographer
-                  </Link>
-                )}
-
-                {/* ADMIN */}
                 {user?.role === "ADMIN" && (
                   <Link
                     href="/admin"
-                    onClick={() =>
-                      setMobileMenuOpen(false)
-                    }
-                    className="flex items-center justify-center gap-2 bg-slate-900 text-white px-6 py-3 rounded-2xl font-bold text-[12px] tracking-widest"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-6 py-3 text-[12px] font-bold tracking-widest text-white"
                   >
                     <FaCog />
-
                     Admin Panel
                   </Link>
                 )}
 
                 {/* LOGOUT */}
+
                 <button
                   type="button"
                   onClick={() => {
                     setMobileMenuOpen(false);
-                    handleLogout();
+                    void handleLogout();
                   }}
-                  className="flex items-center justify-center gap-2 bg-rose-50 text-rose-600 border border-rose-200 px-6 py-3 rounded-2xl font-bold text-[12px] tracking-widest"
+                  className="flex items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-6 py-3 text-[12px] font-bold tracking-widest text-rose-600"
                 >
                   <FaSignOutAlt />
-
                   Logout
                 </button>
-
               </>
             ) : (
-              /* ================================================= */
-              /* NON AUTHENTICATED                                */
-              /* ================================================= */
+              /* NON AUTHENTICATED */
 
               <Link
                 href="/auth/login"
-                onClick={() =>
-                  setMobileMenuOpen(false)
-                }
-                className="flex items-center justify-center gap-2 bg-[#25632D] text-white px-6 py-3 rounded font-bold text-[12px] tracking-widest"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-center gap-2 rounded bg-[#25632D] px-6 py-3 text-[12px] font-bold tracking-widest text-white"
               >
                 <FaLock />
-
                 LOGIN
               </Link>
             )}
-
           </div>
-
         </div>
       )}
-
     </>
   );
 };

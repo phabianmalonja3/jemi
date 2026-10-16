@@ -29,6 +29,7 @@ import Footer from "@/components/web/Footer";
 import LoadingSpinner from "@/components/web/LoadingSpinner";
 import PaymentModal from "@/components/web/PaymentModal";
 import TestMonies from "@/components/web/TestMonies";
+import { PaymentPartner } from "@/types/payments";
 
 // ============================================================
 // GSAP
@@ -127,6 +128,8 @@ export default function Home() {
         const response = await axios.get<SubscriptionPlan[]>(
           `${API_URL}/subscription-plans`
         );
+       
+       
 
         setPlans(response.data);
       } catch (error) {
@@ -429,21 +432,7 @@ export default function Home() {
 
               {/* ------------------------------------------------
                   BADGE
-              ------------------------------------------------ */}
-
-              <div className="hero-badge">
-
-                <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 backdrop-blur-md">
-
-                  <FaCamera className="text-sm text-emerald-400" />
-
-                  <span className="text-sm font-medium tracking-wide text-white">
-                    Professional Photography
-                  </span>
-
-                </div>
-
-              </div>
+             
 
               {/* ------------------------------------------------
                   TITLE
@@ -493,7 +482,7 @@ export default function Home() {
                     }}
                   >
 
-                    <Button className="h-12 w-full rounded-full bg-gradient-to-r from-emerald-600 to-green-500 px-8 text-white shadow-xl shadow-emerald-950/40 transition-all duration-300 hover:from-emerald-500 hover:to-green-400 sm:w-auto md:h-14 md:px-10">
+                    <Button className="h-12 w-full rounded-full  [#25632D] px-8 text-white shadow-xl shadow-emerald-950/40 transition-all duration-300 hover:from-emerald-500 hover:to-green-400 sm:w-auto md:h-14 md:px-10">
 
                       See Our Professional
                       Photographers
