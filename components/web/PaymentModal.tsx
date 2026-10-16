@@ -767,10 +767,7 @@ export default function PaymentModal({
               className="flex w-full items-center justify-between gap-2 text-left text-sm font-semibold text-amber-900"
               aria-expanded={showDebugDetails}
             >
-              <span className="flex items-center gap-2">
-                <Bug className="h-4 w-4" />
-                Backend Debug Details
-              </span>
+             
 
               <span>{showDebugDetails ? "−" : "+"}</span>
             </button>
