@@ -219,7 +219,7 @@ const NavBar = () => {
     <>
       {/* TOP CONTACT BAR */}
 
-      <div className="hidden border-b-1 border-[#25632D] pb-2 bg-white py-2 text-[#25632D] sm:block">
+      <div className="hidden border-b-2 border-[#25632D] pb-2 bg-white py-2 text-[#25632D] sm:block">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6">
           {/* Contact Info */}
 
