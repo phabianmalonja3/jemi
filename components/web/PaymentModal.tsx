@@ -809,7 +809,7 @@ export default function PaymentModal({
 
         {/* PAYMENT STATUS */}
 
-        {transactionId && (
+        {transactionId && (    
           <div
             role="status"
             aria-live="polite"
@@ -837,7 +837,7 @@ export default function PaymentModal({
               <div className="min-w-0 flex-1">
                 <p className="font-semibold">
                   {isSuccess
-                    ? "Payment successful"
+                    ? "Payment Recieved you can login to Your Account at jemigrapher Application ."
                     : isFailed
                     ? "Payment failed"
                     : isTimeout

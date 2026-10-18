@@ -7,7 +7,8 @@ import {
   Filter, CheckCircle, XCircle, AlertCircle, Loader2,
   ChevronLeft, ChevronRight, Ban,
   Copy,
-  Check
+  Check,
+  UserCheck
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -15,6 +16,7 @@ import { toast } from "sonner";
 import axios from "axios";
 import { User, PaginatedResponse, UserFilters, normalizeTanzaniaPhone } from "@/types";
 import LoadingSpinner from "@/components/web/LoadingSpinner";
+import Link from "next/link";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v0.1";
 
@@ -329,6 +331,14 @@ const handleCopyPhone = async (phone: string) => {
             <UserPlus size={18} />
             Add New User
           </button>
+
+          <Link 
+    href="/dashboard/admin/users/uncomplete-profiles"
+    className="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2.5 rounded-md font-semibold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-amber-500/20 active:scale-95"
+  >
+    <UserCheck size={18} />
+    Uncomplete Profiles
+  </Link>
         </div>
       </div>
 
