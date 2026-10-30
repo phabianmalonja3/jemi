@@ -55,7 +55,7 @@ export default function UserManagementPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [filterRole, setFilterRole] = useState<"ALL" | "ADMIN" | "PHOTOGRAPHER">("ALL");
+  const [filterRole, setFilterRole] = useState<"ALL" | "ADMIN" | "PHOTOGRAPHER" | "CLIENT">("ALL");
   const [filterStatus, setFilterStatus] = useState<"ALL" | "ACTIVE" | "BLOCKED">("ALL");
   
   const [copiedPhone, setCopiedPhone] = useState<string | null>(null);
@@ -365,6 +365,7 @@ const handleCopyPhone = async (phone: string) => {
               <option value="ALL">All Roles</option>
               <option value="ADMIN">Admin</option>
               <option value="PHOTOGRAPHER">Photographer</option>
+              <option value="CLIENT">CUSTOMERS</option>
             </select>
             <Filter className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={14} />
           </div>
