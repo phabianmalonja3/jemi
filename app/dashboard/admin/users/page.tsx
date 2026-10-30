@@ -606,6 +606,8 @@ const handleCopyPhone = async (phone: string) => {
         <option value={10}>10</option>
         <option value={20}>20</option>
         <option value={50}>50</option>
+        <option value={75}>75</option>
+        <option value={100}>100</option>
       </select>
 
       <span>per page</span>
