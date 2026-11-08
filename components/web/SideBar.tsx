@@ -32,7 +32,8 @@ import {
   Star,
   Monitor,
   ServerIcon,
-  Radio
+  Radio,
+  ClipboardList
 } from "lucide-react";
 import { FaAppStore, FaGooglePlay } from "react-icons/fa";
 import { usePathname, useRouter } from "next/navigation";
@@ -52,6 +53,7 @@ const ADMIN_LINKS = [
   { icon: UserCheck, label: "Subscribers", href: "/dashboard/admin/subscribers" },
   { icon: Star, label: "Reviews", href: "/dashboard/admin/reviews" },
   { icon: Bell, label: "Notifications", href: "/dashboard/admin/notifications" },
+{ icon: ClipboardList, label: "Booking Details", href: "/dashboard/admin/bookings-details" },
   { icon: Monitor, label: "Sessions", href: "/dashboard/admin/sessions" },
   { icon: ServerIcon, label: "Server Health", href: "/dashboard/admin/server" },
 
