@@ -55,7 +55,7 @@ export default function UserManagementPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [filterRole, setFilterRole] = useState<"ALL" | "ADMIN" | "PHOTOGRAPHER" | "CLIENT">("ALL");
+  const [filterRole, setFilterRole] = useState<"ALL" | "ADMIN" | "PHOTOGRAPHER" |"SALES" | "CLIENT">("ALL");
   const [filterStatus, setFilterStatus] = useState<"ALL" | "ACTIVE" | "BLOCKED">("ALL");
   
   const [copiedPhone, setCopiedPhone] = useState<string | null>(null);
@@ -185,7 +185,7 @@ const handleCopyPhone = async (phone: string) => {
         return false;
       }
 
-      await apiClient.post("/auth/register", userData);
+      await apiClient.post("/admin/add-user", userData);
       await fetchUsers(0, pagination.size);
       toast.success("User created successfully!");
       return true;
@@ -366,6 +366,7 @@ const handleCopyPhone = async (phone: string) => {
               <option value="ADMIN">Admin</option>
               <option value="PHOTOGRAPHER">Photographer</option>
               <option value="CLIENT">CUSTOMERS</option>
+              <option value="SALES">Sales</option>
             </select>
             <Filter className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={14} />
           </div>
@@ -715,26 +716,26 @@ function UserModal({
   isEditMode: boolean;
 }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({ 
-    name: "", 
-    email: "", 
-    role: "PHOTOGRAPHER" as "ADMIN" | "PHOTOGRAPHER", 
-    password: "" 
-  });
+  const [formData, setFormData] = useState({
+  name: "",
+  email: "",
+  role: "SALES" as "ADMIN" | "SALES",
+  password: ""
+});
   const [showPassword, setShowPassword] = useState(false);
 
-  useEffect(() => {
-    if (isOpen) {
-      setFormData({
-        name: user?.name || "",
-        email: user?.email || "",
-        role: user?.role || "PHOTOGRAPHER",
-        password: ""
-      });
-      setShowPassword(false);
-    }
-  }, [isOpen, user]);
+useEffect(() => {
+  if (isOpen) {
+    setFormData({
+      name: user?.name || "",
+      email: user?.email || "",
+      role: user?.role === "ADMIN" ? "ADMIN" : "SALES",
+      password: ""
+    });
 
+    setShowPassword(false);
+  }
+}, [isOpen, user]);
   const generatePassword = () => {
     const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
     let retVal = "";
@@ -866,27 +867,31 @@ function UserModal({
                 </div>
               )}
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700">System Role</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {["PHOTOGRAPHER", "ADMIN"].map((role) => (
-                    <button 
-                      key={role} 
-                      type="button" 
-                      onClick={() => setFormData({...formData, role: role as "ADMIN" | "PHOTOGRAPHER"})}
-                      className={cn(
-                        "py-2.5 rounded-lg text-xs font-semibold transition-all border",
-                        formData.role === role 
-                          ? "bg-emerald-600 border-emerald-600 text-white shadow-sm" 
-                          : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
-                      )}
-                    >
-                      {role}
-                    </button>
-                  ))}
-                </div>
-              </div>
+             <div className="space-y-1.5">
+  <label className="text-xs font-semibold text-slate-700">
+    System Role
+  </label>
 
+  <div className="grid grid-cols-2 gap-3">
+    {(["ADMIN", "SALES"] as const).map((role) => (
+      <button
+        key={role}
+        type="button"
+        onClick={() =>
+          setFormData({ ...formData, role })
+        }
+        className={cn(
+          "py-3 rounded-lg text-sm font-bold transition-all border",
+          formData.role === role
+            ? "bg-emerald-600 border-emerald-600 text-white shadow-sm"
+            : "bg-white border-slate-200 text-slate-600 hover:border-emerald-400"
+        )}
+      >
+        {role === "ADMIN" ? "Administrator" : "Sales Staff"}
+      </button>
+    ))}
+  </div>
+</div>
               <div className="flex gap-3 pt-4">
                 <button 
                   type="button" 

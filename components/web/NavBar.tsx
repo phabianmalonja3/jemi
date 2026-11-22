@@ -205,9 +205,10 @@ const NavBar = () => {
    * ============================================================
    */
 
-  if (pathname.startsWith("/dashboard")) {
+  if (pathname.startsWith("/dashboard") || pathname.startsWith("/sales")) {
     return null;
   }
+ 
 
   /*
    * ============================================================

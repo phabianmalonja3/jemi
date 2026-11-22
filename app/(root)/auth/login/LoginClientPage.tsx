@@ -28,65 +28,85 @@ function LoginClientPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+  
 
-        if (isLoading) return;
+const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-        setError("");
+    if (isLoading) return;
 
-        // =========================
-        // VALIDATION
-        // =========================
+    setError("");
 
-        if (!loginEmail.trim() || !password.trim()) {
-            setError("Please fill in all fields");
-            return;
-        }
+    if (!loginEmail.trim() || !password.trim()) {
+        setError("Please fill in all fields");
+        return;
+    }
 
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        if (!emailRegex.test(loginEmail.trim())) {
-            setError("Please enter a valid email address");
-            return;
-        }
+    if (!emailRegex.test(loginEmail.trim())) {
+        setError("Please enter a valid email address");
+        return;
+    }
 
-        setIsLoading(true);
+    setIsLoading(true);
 
-        try {
-            const res = await login(
-                loginEmail.trim(),
-                password
-            );
+    try {
+        const res = await login(
+            loginEmail.trim(),
+            password
+        );
 
-            if (res.success) {
-                toast.success("Login successful! Please verify OTP.");
+        console.log("Login response:", res);
 
-                // Refresh server components
-                router.refresh();
-
-                // Nenda kwenye ukurasa wa OTP badala ya dashboard
-                router.push(`/auth/otp?email=${encodeURIComponent(loginEmail.trim())}`);
-            } else {
-                const message =
-                    res.message ||
-                    "Invalid email or password";
-
-                setError(message);
-                toast.error(message);
-            }
-        } catch (err) {
-            console.error("Login error:", err);
-
+        if (!res.success) {
             const message =
-                "An unexpected error occurred. Please try again later.";
+                res.message || "Invalid email or password";
 
             setError(message);
             toast.error(message);
-        } finally {
-            setIsLoading(false);
+            return;
         }
-    };
+
+        // Get authenticated user role
+        const role = res.user?.role?.toUpperCase();
+
+        console.log("User role:", role);
+
+        // Validate allowed roles
+        if (role !== "ADMIN" && role !== "SALES") {
+            const message =
+                "You are not authorized to access this system.";
+
+            setError(message);
+            toast.error(message);
+            return;
+        }
+
+        toast.success("Login successful!");
+
+        // Redirect according to role
+        if (role === "ADMIN") {
+            window.location.replace("/dashboard");
+        } else if (role === "SALES") {
+            window.location.replace("/sales/dashboard");
+        }
+
+    } catch (err) {
+        console.error("Login error:", err);
+
+        const message =
+            "An unexpected error occurred. Please try again later.";
+
+        setError(message);
+        toast.error(message);
+
+    } finally {
+        setIsLoading(false);
+    }
+};
+
+
 
     return (
         <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-white to-emerald-50/30 flex items-center justify-center px-4 py-8">
@@ -97,168 +117,9 @@ function LoginClientPage() {
 
             <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
 
-                {/* Emerald Orb */}
+             
 
-                <motion.div
-                    animate={{
-                        x: [0, 100, 0],
-                        y: [0, 50, 0],
-                        scale: [1, 1.2, 1],
-                    }}
-                    transition={{
-                        duration: 20,
-                        repeat: Infinity,
-                        repeatType: "reverse",
-                        ease: "easeInOut",
-                    }}
-                    className="absolute top-20 -left-20 w-96 h-96 bg-emerald-200/40 rounded-full blur-3xl"
-                />
-
-                {/* Blue Orb */}
-
-                <motion.div
-                    animate={{
-                        x: [0, -100, 0],
-                        y: [0, 80, 0],
-                        scale: [1, 1.3, 1],
-                    }}
-                    transition={{
-                        duration: 25,
-                        repeat: Infinity,
-                        repeatType: "reverse",
-                        ease: "easeInOut",
-                    }}
-                    className="absolute bottom-20 -right-20 w-96 h-96 bg-blue-200/30 rounded-full blur-3xl"
-                />
-
-                {/* Center Orb */}
-
-                <motion.div
-                    animate={{
-                        x: [0, 150, 0],
-                        y: [0, -50, 0],
-                        scale: [1, 1.1, 1],
-                    }}
-                    transition={{
-                        duration: 18,
-                        repeat: Infinity,
-                        repeatType: "reverse",
-                        ease: "easeInOut",
-                    }}
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-100/20 rounded-full blur-3xl"
-                />
-
-                {/* Floating Particles */}
-
-                {[...Array(20)].map((_, i) => {
-                    const x = 10 + (i * 7) % 80;
-                    const y = 15 + (i * 11) % 70;
-                    const size = 3 + (i % 6);
-                    const delay = (i * 0.3) % 5;
-
-                    return (
-                        <motion.div
-                            key={i}
-                            initial={{
-                                scale: 0,
-                                opacity: 0,
-                            }}
-                            animate={{
-                                y: [
-                                    "-40px",
-                                    "0px",
-                                    "40px",
-                                    "0px",
-                                ],
-                                x: [
-                                    "25px",
-                                    "-25px",
-                                    "20px",
-                                    "0px",
-                                ],
-                                scale: [0, 1, 1, 0],
-                                opacity: [
-                                    0,
-                                    0.9,
-                                    0.9,
-                                    0,
-                                ],
-                            }}
-                            transition={{
-                                duration: 6 + (i % 4),
-                                repeat: Infinity,
-                                delay,
-                                ease: "easeInOut",
-                            }}
-                            className="absolute rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 shadow-lg"
-                            style={{
-                                left: `${x}%`,
-                                top: `${y}%`,
-                                width: `${size}px`,
-                                height: `${size}px`,
-                            }}
-                        />
-                    );
-                })}
-
-                {/* Grid Pattern */}
-
-                <svg
-                    className="absolute inset-0 w-full h-full opacity-[0.03]"
-                    xmlns="http://www.w3.org/2000/svg"
-                >
-                    <defs>
-                        <pattern
-                            id="login-grid"
-                            width="40"
-                            height="40"
-                            patternUnits="userSpaceOnUse"
-                        >
-                            <path
-                                d="M 40 0 L 0 0 0 40"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="0.5"
-                            />
-                        </pattern>
-                    </defs>
-
-                    <rect
-                        width="100%"
-                        height="100%"
-                        fill="url(#login-grid)"
-                        className="text-slate-900"
-                    />
-                </svg>
-
-                {/* Top Animated Line */}
-
-                <motion.div
-                    animate={{
-                        x: ["0%", "100%", "0%"],
-                    }}
-                    transition={{
-                        duration: 15,
-                        repeat: Infinity,
-                        ease: "linear",
-                    }}
-                    className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-emerald-500 to-transparent"
-                />
-
-                {/* Bottom Animated Line */}
-
-                <motion.div
-                    animate={{
-                        x: ["100%", "0%", "100%"],
-                    }}
-                    transition={{
-                        duration: 15,
-                        repeat: Infinity,
-                        ease: "linear",
-                        delay: 7.5,
-                    }}
-                    className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent"
-                />
+               
             </div>
 
             {/* =====================================================
