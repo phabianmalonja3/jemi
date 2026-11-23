@@ -378,7 +378,7 @@ const NavBar = () => {
 
                     <DropdownMenuItem asChild>
                       <Link
-                        href="/dashboard"
+                        href={user?.role === "ADMIN" ? "/dashboard" : "/sales/dashboard"}
                         className="flex cursor-pointer items-center gap-2"
                       >
                         <FaTachometerAlt />
@@ -476,15 +476,14 @@ const NavBar = () => {
                 </div>
 
                 {/* DASHBOARD */}
-
-                <Link
-                  href="/dashboard"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-center gap-2 rounded-2xl bg-[#25632D] px-6 py-3 text-[12px] font-bold tracking-widest text-white"
-                >
-                  <FaTachometerAlt />
-                  Dashboard
-                </Link>
+<Link
+  href={user?.role === "ADMIN" ? "/dashboard" : "/sales/dashboard"}
+  onClick={() => setMobileMenuOpen(false)}
+  className="flex items-center justify-center gap-2 rounded-2xl bg-[#25632D] px-6 py-3 text-[12px] font-bold tracking-widest text-white"
+>
+  <FaTachometerAlt />
+  Dashboard
+</Link>
 
                 {/* ADMIN PANEL */}
 

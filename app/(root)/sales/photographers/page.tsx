@@ -15,6 +15,7 @@ import {
   MapPin,
   DotsThreeVertical,
 } from "@phosphor-icons/react";
+import Link from "next/link";
 
 const stats = [
   {
@@ -261,9 +262,12 @@ export default function PhotographersPage() {
             </p>
           </div>
 
-          <button className="text-sm font-bold text-[#25632D] hover:underline">
-            View All Photographers
-          </button>
+         <Link
+  href="/sales/photographers/photographer-list"
+  className="text-sm font-bold text-[#25632D] hover:underline"
+>
+  View All Photographers
+</Link>
         </div>
 
         <div className="overflow-x-auto">
